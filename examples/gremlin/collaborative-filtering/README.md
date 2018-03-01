@@ -13,8 +13,9 @@ Also assumes you have a client on EC2 that can reach the Amazon Neptune Cluster
 
 ## Step 1 (Load Data)
 
-```
+Edge File
 
+```
 curl -X POST \
     -H 'Content-Type: application/json' \
     http://neptune-cluster:8182/loader -d '
@@ -27,7 +28,36 @@ curl -X POST \
       "failOnError" : "FALSE"
     }'
 
+```
+Customer Vertex File
 
+```
+curl -X POST \
+    -H 'Content-Type: application/json' \
+    http://neptune-cluster:8182/loader -d '
+    { 
+      "source" : "s3://neptune-data-ml/vertex-customers-sm.csv", 
+      "accessKey" : "", 
+      "secretKey" : "",
+      "format" : "csv", 
+      "region" : "us-east-1", 
+      "failOnError" : "FALSE"
+    }'
+```
+Products Vertex File
+
+```
+curl -X POST \
+    -H 'Content-Type: application/json' \
+    http://neptune-cluster:8182/loader -d '
+    { 
+      "source" : "s3://neptune-data-ml/vertex-products-sm.csv", 
+      "accessKey" : "", 
+      "secretKey" : "",
+      "format" : "csv", 
+      "region" : "us-east-1", 
+      "failOnError" : "FALSE"
+    }'
 ```
 
 
