@@ -11,9 +11,9 @@ The cloudformation template will assume there is an already established Amazon N
 Also assumes you have a client on EC2 that can reach the Amazon Neptune Cluster
 
 
-## Step 1 (Load Data)
+## Step 1 (Load Data Sample data)
 
-Edge File
+Edges ( ~id, ~from, ~to, ~label, PurchaseDate:Date) 
 
 ```
 curl -X POST \
@@ -29,7 +29,8 @@ curl -X POST \
     }'
 
 ```
-Customer Vertex File
+Customers Vertices (~id, Login:String, FirstName:String, LastName:String, Gender:String, State:String, City:String, Address:String, ZIP:String
+)
 
 ```
 curl -X POST \
@@ -44,7 +45,7 @@ curl -X POST \
       "failOnError" : "FALSE"
     }'
 ```
-Products Vertex File
+Products Vertices (~id, ProductDescription:String, Price:String, SKU:String)
 
 ```
 curl -X POST \
@@ -52,6 +53,23 @@ curl -X POST \
     http://neptune-cluster:8182/loader -d '
     { 
       "source" : "s3://neptune-data-ml/vertex-products-sm.csv", 
+      "accessKey" : "", 
+      "secretKey" : "",
+      "format" : "csv", 
+      "region" : "us-east-1", 
+      "failOnError" : "FALSE"
+    }'
+
+```
+
+Alternatively, you could load all of the files loading the entire directory
+
+```
+curl -X POST \
+    -H 'Content-Type: application/json' \
+    http://neptune-cluster:8182/loader -d '
+    { 
+      "source" : "s3://neptune-data-ml/", 
       "accessKey" : "", 
       "secretKey" : "",
       "format" : "csv", 
