@@ -10,6 +10,10 @@ The cloudformation template will assume there is an already established Amazon N
 
 Also assumes you have a client on EC2 that can reach the Amazon Neptune Cluster
 
+## Use Case
+
+![cloudformation](images/image1.jpg)
+
 
 ## Step 1 (Load Data Sample data)
 
