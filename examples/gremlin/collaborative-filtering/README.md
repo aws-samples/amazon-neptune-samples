@@ -62,7 +62,7 @@ curl -X POST \
 
 ```
 
-Alternatively, you could load all of the files loading the entire directory
+Alternatively, you could load all of the files by loading the entire directory
 
 ```
 curl -X POST \
