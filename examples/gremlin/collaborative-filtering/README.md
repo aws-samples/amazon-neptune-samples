@@ -105,32 +105,32 @@ g.V().has("Login","mlilie1@hc360.com")
 
 ```
 
-*** What was purchased ? ***
+**What was purchased ?**
 ```
 g.V().has("Login","mlilie1@hc360.com").as('customer').out('purchase')
 
 ```
 
-*** Who else bought this ? ***
+**Who else bought this ?**
 ```
 g.V().has("Login","mlilie1@hc360.com").out('purchase').in('purchase').dedup().values('Login')
 
 ```
 
-*** Who else purchased this (exclude yourself) ***
+**Who else purchased this (exclude yourself)**
 ```
 g.V().has("Login","mlilie1@hc360.com").as('TargetCustomer').out('purchase').in('purchase').where(neq('TargetCustomer')).dedup().values('Login')
 
 ```
 
 
-*** Other products these people have bought? ***
+**Other products these people have bought?**
 ```
 g.V().has("Login","mlilie1@hc360.com").as('TargetCustomer').out('purchase').in('purchase').where(neq('TargetCustomer')).out('purchase').dedup().values('ProductDescription')
 
 ```
 
-*** products to recommend to BaseCustomer that BaseCustomer hasn't purchased. ***
+**products to recommend to BaseCustomer that BaseCustomer hasn't purchased.**
 ```
 g.V().has("Login","mlilie1@hc360.com").as('TargetCustomer').out('purchase').aggregate('self').in('purchase').where(neq('TargetCustomer')).out('purchase').where(without('self')).dedup().values('ProductDescription')
 
