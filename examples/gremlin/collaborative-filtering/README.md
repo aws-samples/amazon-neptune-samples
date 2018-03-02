@@ -21,7 +21,7 @@ example we'll traverse customer purchases and based on similiar purchase history
 
 ## Step 1 (Load Data Sample data)
 
-Edges ( ~id, ~from, ~to, ~label, PurchaseDate:Date) 
+**Edges** ( ~id, ~from, ~to, ~label, PurchaseDate:Date) 
 
 ```
 curl -X POST \
@@ -37,7 +37,7 @@ curl -X POST \
     }'
 
 ```
-Customers Vertices (~id, Login:String, FirstName:String, LastName:String, Gender:String, State:String, City:String, Address:String, ZIP:String
+**Customers Vertices** (~id, Login:String, FirstName:String, LastName:String, Gender:String, State:String, City:String, Address:String, ZIP:String
 )
 
 ```
@@ -53,7 +53,7 @@ curl -X POST \
       "failOnError" : "FALSE"
     }'
 ```
-Products Vertices (~id, ProductDescription:String, Price:String, SKU:String)
+**Products Vertices** (~id, ProductDescription:String, Price:String, SKU:String)
 
 ```
 curl -X POST \
