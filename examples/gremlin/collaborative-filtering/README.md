@@ -123,7 +123,6 @@ g.V().has("Login","mlilie1@hc360.com").as('TargetCustomer').out('purchase').in('
 
 ```
 
-
 **Other products these people have bought?**
 ```
 g.V().has("Login","mlilie1@hc360.com").as('TargetCustomer').out('purchase').in('purchase').where(neq('TargetCustomer')).out('purchase').dedup().values('ProductDescription')
