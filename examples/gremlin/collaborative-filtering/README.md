@@ -129,7 +129,7 @@ g.V().has("Login","mlilie1@hc360.com").as('TargetCustomer').out('purchase').in('
 
 ```
 
-**products to recommend to BaseCustomer that BaseCustomer hasn't purchased.**
+**Products to recommend to BaseCustomer that BaseCustomer hasn't purchased.**
 ```
 g.V().has("Login","mlilie1@hc360.com").as('TargetCustomer').out('purchase').aggregate('self').in('purchase').where(neq('TargetCustomer')).out('purchase').where(without('self')).dedup().values('ProductDescription')
 
