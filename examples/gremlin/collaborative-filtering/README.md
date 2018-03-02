@@ -12,6 +12,10 @@ Also assumes you have a client on EC2 that can reach the Amazon Neptune Cluster
 
 ## Use Case
 
+Build a recommendation engine based a collaborative filtering technique. This includes leveraging similiar relationships across vertices to infer what a new relationship might be. In this 
+example we'll traverse customer purchases and based on similiar purchase history, we'll recommend new products for customers. 
+
+
 ![cloudformation](images/image1.jpg)
 
 
