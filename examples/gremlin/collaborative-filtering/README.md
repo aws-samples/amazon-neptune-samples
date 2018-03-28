@@ -79,7 +79,7 @@ curl -X POST \
 ## Sample Queries
 
 
-**query for a particular vertex (gamer)**
+**Query for a particular vertex (gamer)**
 
 ```
 gremlin> g.V().hasId('Luke').valueMap()
@@ -93,7 +93,7 @@ gremlin> g.V().has('GamerAlias','skywalker123')
 
 ```
 
-**sample some of the edges (limit 5)**
+**Sample some of the edges (limit 5)**
 ```
 gremlin> g.E().limit(5)
 ==>e[e25][Luke-likes->SuperMarioOdyssey]
@@ -103,7 +103,7 @@ gremlin> g.E().limit(5)
 ==>e[e9][Mike-likes->GranTurismoSport]
 ```
 
-**sample some of the vertices (limit 4)**
+**Sample some of the vertices (limit 4)**
 ```
 gremlin> g.V().limit(4)
 ==>v[SuperMarioOdyssey]
@@ -111,8 +111,6 @@ gremlin> g.V().limit(4)
 ==>v[Emma]
 ==>v[MarioKart8]
 ```
-
-
 
 **What games does skywalker123 like?**
 ```
@@ -128,7 +126,7 @@ gremlin> g.V().has('GamerAlias','skywalker123').as('gamer').out('likes')
 
 ```
 
-**Who else likes the same games? **
+**Who else likes the same games?**
 ```
 gremlin> g.V().has('GamerAlias','skywalker123').out('likes').in('likes').dedup().values('GamerAlias')
 ==>forchinet
@@ -147,7 +145,7 @@ gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').i
 
 ```
 
-**What are other games similiar games like ? **
+**What are other games titles likes by gamers who have commonality?**
 ```
 gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').in('likes').where(neq('TargetGamer')).out('likes').dedup().values('GameTitle')
 ==>ARMs
@@ -164,7 +162,7 @@ gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').i
 
 ```
 
-**Which games might make sense to recommend to a specific gamer that they don't already like? **
+**Which games might make sense to recommend to a specific gamer that they don't already like?**
 ```
 gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').aggregate('self').in('likes').where(neq('TargetGamer')).out('likes').where(without('self')).dedup().values('GameTitle')
 ==>Nioh
