@@ -23,14 +23,16 @@ The purposes of this tutorial is to illustrate functionality not scale, so we'll
 
 ## Step 1 (Load Data Sample data)
 
-**Edges** ( ~id, ~from, ~to, ~label, PurchaseDate:Date) 
+
+**Game & Player Vertices** (~id,GamerAlias:String,ReleaseDate:Date,GameGenre:String,ESRBRating:String,Developer:String,Platform:String,GameTitle:String )
 
 ```
+
 curl -X POST \
     -H 'Content-Type: application/json' \
-    http://neptune-cluster:8182/loader -d '
+    http://trainingdb.c4niqbvxvuf6.us-east-1-beta.rds.amazonaws.com:8182/loader -d '
     { 
-      "source" : "s3://neptune-data-ml/edges-purchases-sm.csv", 
+      "source" : "s3://neptune-data-ml/recommendation/vertex.txt", 
       "accessKey" : "", 
       "secretKey" : "",
       "format" : "csv", 
@@ -39,30 +41,15 @@ curl -X POST \
     }'
 
 ```
-**Customers Vertices** (~id, Login:String, FirstName:String, LastName:String, Gender:String, State:String, City:String, Address:String, ZIP:String
-)
+
+**Edges** (~id, ~from, ~to, ~label, weight:Double) 
 
 ```
 curl -X POST \
     -H 'Content-Type: application/json' \
-    http://neptune-cluster:8182/loader -d '
+    http://trainingdb.c4niqbvxvuf6.us-east-1-beta.rds.amazonaws.com:8182/loader -d '
     { 
-      "source" : "s3://neptune-data-ml/vertex-customers-sm.csv", 
-      "accessKey" : "", 
-      "secretKey" : "",
-      "format" : "csv", 
-      "region" : "us-east-1", 
-      "failOnError" : "FALSE"
-    }'
-```
-**Products Vertices** (~id, ProductDescription:String, Price:String, SKU:String)
-
-```
-curl -X POST \
-    -H 'Content-Type: application/json' \
-    http://neptune-cluster:8182/loader -d '
-    { 
-      "source" : "s3://neptune-data-ml/vertex-products-sm.csv", 
+      "source" : "s3://neptune-data-ml/recommendation/edges.txt", 
       "accessKey" : "", 
       "secretKey" : "",
       "format" : "csv", 
@@ -71,6 +58,7 @@ curl -X POST \
     }'
 
 ```
+
 
 Alternatively, you could load all of the files by loading the entire directory
 
@@ -79,7 +67,7 @@ curl -X POST \
     -H 'Content-Type: application/json' \
     http://neptune-cluster:8182/loader -d '
     { 
-      "source" : "s3://neptune-data-ml/", 
+      "source" : "s3://neptune-data-ml/recommendation/", 
       "accessKey" : "", 
       "secretKey" : "",
       "format" : "csv", 
@@ -88,52 +76,86 @@ curl -X POST \
     }'
 ```
 
-
 ## Sample Queries
 
 
+**query a particular vertex (gamer)**
+
 ```
-g.V().has('AccountID','561588488401')
+gremlin> g.V().hasId('Luke').valueMap()
+==>{GamerAlias=[skywalker123]}
+
+gremlin> g.V().has("GamerAlias","skywalker123").valueMap()
+==>{GamerAlias=[skywalker123]}
+
+gremlin> g.V().has('GamerAlias','skywalker123')
+==>v[Luke]
 
 ```
 
+**What games does skywalker123 like?**
 ```
-g.V().has("FirstName","Leroi")
+gremlin> g.V().has('GamerAlias','skywalker123').as('gamer').out('likes')
+==>v[ARMS]
+==>v[HorizonZeroDawn]
+==>v[GranTurismoSport]
+==>v[Ratchet&Clank]
+==>v[Fifa18]
+==>v[GravityRush]
+==>v[SuperMarioOdyssey]
+==>v[MarioKart8]
 
 ```
 
+**Who else likes the same games? **
 ```
-g.V().has("Login","mlilie1@hc360.com")
+gremlin> g.V().has('GamerAlias','skywalker123').out('likes').in('likes').dedup().values('GamerAlias')
+==>forchinet
+==>skywalker123
+==>bringit32
+==>smiles007
 
 ```
 
-**What was purchased ?**
+**Who else likes these games (exclude yourself)**
 ```
-g.V().has("Login","mlilie1@hc360.com").as('customer').out('purchase')
+gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').in('likes').where(neq('TargetGamer')).dedup().values('GamerAlias')
+==>forchinet
+==>bringit32
+==>smiles007
 
 ```
 
-**Who else bought this ?**
+**What are other games similiar games like ? **
 ```
-g.V().has("Login","mlilie1@hc360.com").out('purchase').in('purchase').dedup().values('Login')
+gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').in('likes').where(neq('TargetGamer')).out('likes').dedup().values('GameTitle')
+==>ARMs
+==>HorizonZeroDawn
+==>GranTurismoSport
+==>Nioh
+==>TombRaider
+==>CallOfDutyBO4
+==>SuperMarioOdyssey
+==>MarioKart8
+==>Ratchet&Clank
+==>GravityRush
+==>Knack
 
 ```
 
-**Who else purchased this (exclude yourself)**
+**Which games might make sense to recommend to a specific gamer that they don't already like? **
 ```
-g.V().has("Login","mlilie1@hc360.com").as('TargetCustomer').out('purchase').in('purchase').where(neq('TargetCustomer')).dedup().values('Login')
+gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').aggregate('self').in('likes').where(neq('TargetGamer')).out('likes').where(without('self')).dedup().values('GameTitle')
+==>Nioh
+==>TombRaider
+==>CallOfDutyBO4
+==>Knack
 
 ```
 
-**Other products these people have bought?**
+**Drop data**
 ```
-g.V().has("Login","mlilie1@hc360.com").as('TargetCustomer').out('purchase').in('purchase').where(neq('TargetCustomer')).out('purchase').dedup().values('ProductDescription')
-
-```
-
-**Products to recommend to BaseCustomer that BaseCustomer hasn't purchased.**
-```
-g.V().has("Login","mlilie1@hc360.com").as('TargetCustomer').out('purchase').aggregate('self').in('purchase').where(neq('TargetCustomer')).out('purchase').where(without('self')).dedup().values('ProductDescription')
+g.V().drop().iterate()
 
 ```
 
@@ -146,11 +168,4 @@ Licensed under the Apache License, Version 2.0 (the "License"). You may not use 
 [http://aws.amazon.com/apache2.0/](http://aws.amazon.com/apache2.0/)
 
 or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
-
-
-
-
-
-
-
 
