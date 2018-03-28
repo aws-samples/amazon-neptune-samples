@@ -79,7 +79,7 @@ curl -X POST \
 ## Sample Queries
 
 
-**query a particular vertex (gamer)**
+**query for a particular vertex (gamer)**
 
 ```
 gremlin> g.V().hasId('Luke').valueMap()
@@ -92,6 +92,27 @@ gremlin> g.V().has('GamerAlias','skywalker123')
 ==>v[Luke]
 
 ```
+
+**sample some of the edges (limit 5)**
+```
+gremlin> g.E().limit(5)
+==>e[e25][Luke-likes->SuperMarioOdyssey]
+==>e[e26][Mike-likes->SuperMarioOdyssey]
+==>e[e8][Mike-likes->CallOfDutyBO4]
+==>e[e1][Luke-likes->HorizonZeroDawn]
+==>e[e9][Mike-likes->GranTurismoSport]
+```
+
+**sample some of the vertices (limit 4)**
+```
+gremlin> g.V().limit(4)
+==>v[SuperMarioOdyssey]
+==>v[Luke]
+==>v[Emma]
+==>v[MarioKart8]
+```
+
+
 
 **What games does skywalker123 like?**
 ```
