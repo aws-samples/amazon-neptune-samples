@@ -3,7 +3,7 @@
 ## Prerequisite
 
 This tutorial assumes you already have your environment setup. To setup a new environment, create an Amazon Neptune Cluster. You can also run this cloudformation template [link TBD] to setup 
-the additional resources (i.e Gremlin console).
+the additional resources (i.e Gremlin console, Graphexp, etc.).
 
 Also - See the following links on how to create an Amazon Neptune Cluster for Gremlin:  
 
@@ -14,7 +14,7 @@ Also - See the following links on how to create an Amazon Neptune Cluster for Gr
 
 ## Use Case
 
-In this tutorial, we'll traverse console game preferences among a small set of gamers. We will explore commonality, preferences and potential game recommendations. These queries are for the purposes of learning gremlin and Amazon Neptune. 
+In this tutorial, we'll traverse console game preferences among a small set of gamers and games. We'll explore commonality, preferences and make potential game recommendations. These queries are for the purposes of learning gremlin and Amazon Neptune. 
 
 
 ![cloudformation](images/image1.jpg)
@@ -70,7 +70,7 @@ curl -X POST \
 ```
 
 **Tip**
-Upon executing each curl command. Amazon Neptune will return a loadId associated with each request. You can query
+Upon executing each curl command. Amazon Neptune will return a loadId associated with each request. You can check the status of your load with the following command:
 ```
 curl http://your-neptune-endpoint:8182/loader?loadId=[loadId value]
 ```
@@ -172,7 +172,7 @@ gremlin> g.V().hasLabel('person')
 ==>v[Mike]
 ```
 
-**Return counts of games grouped by their genre**
+**Return counts of games grouped by game genre**
 ```
 gremlin> g.V().hasLabel('game').groupCount().by("GameGenre")
 ==>{Shooter=2, Action=3, Adventure=5, Racing=2, Sports=1}
@@ -208,14 +208,14 @@ gremlin> g.V().has('GamerAlias','skywalker123').as('gamer').out('likes')
 ==>v[MarioKart8]
 ```
 
-**What games does skywalker123 like using weight (greater than)**
+**What games does skywalker123 like using weight (greater than)?**
 ```
 gremlin> g.V().has('GamerAlias','skywalker123').outE("likes").has('weight', P.gt(0.7f))
 ==>e[e17][Luke-likes->Mario+Rabbids]
 ==>e[e3][Luke-likes->Ratchet&Clank]
 ```
 
-**What games does skywalker123 like using weight (less than)**
+**What games does skywalker123 like using weight (less than)?**
 ```
 gremlin> g.V().has('GamerAlias','skywalker123').outE("likes").has('weight', P.lt(0.5f))
 ==>e[e1][Luke-likes->HorizonZeroDawn]
@@ -234,7 +234,7 @@ gremlin> g.V().has('GamerAlias','skywalker123').out('likes').in('likes').dedup()
 ==>smiles007
 ```
 
-**Who else likes these games (exclude yourself)**
+**Who else likes these games (exclude yourself)?**
 ```
 gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').in('likes').where(neq('TargetGamer')).dedup().values('GamerAlias')
 ==>forchinet
@@ -242,7 +242,7 @@ gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').i
 ==>smiles007
 ```
 
-**What are other game titles do other gamers like who have commonality?**
+**What are other game titles do other gamers like, who have commonality?**
 ```
 gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').in('likes').where(neq('TargetGamer')).out('likes').dedup().values('GameTitle')
 ==>ARMs
