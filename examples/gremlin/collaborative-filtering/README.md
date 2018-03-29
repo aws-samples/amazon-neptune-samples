@@ -1,11 +1,11 @@
-# This example is a gremlin tutorial and shows how to query date using gremlin and make recommendations collaborative filtering with a gaming dataset
+# This example is a gremlin tutorial that shows how to explore the graph with sample queries. It also shows how to make recommendations using collaborative filtering with a gaming dataset.
 
 ## Prerequisite
 
-This tutorial assumes you already have your environment setup. To setup a new environment, create an Amazon Neptune Cluster and you can run this cloudformation template [link TBD] to setup 
+This tutorial assumes you already have your environment setup. To setup a new environment, create an Amazon Neptune Cluster. You can also run this cloudformation template [link TBD] to setup 
 the additional resources.
 
-See the following links for how to create an Amazon Neptune Cluster for Gremlin:  
+Also - See the following links for how to create an Amazon Neptune Cluster for Gremlin:  
 
 * https://docs.aws.amazon.com/neptune/latest/userguide/get-started-CreateInstance-Console.html
 * https://docs.aws.amazon.com/neptune/latest/userguide/bulk-load.html
@@ -14,7 +14,7 @@ See the following links for how to create an Amazon Neptune Cluster for Gremlin:
 
 ## Use Case
 
-In this tutorial, we'll traverse console game preferences among a small set of gamers. We'll explore commonality, preferences and potential game recommendations. These queries are for the purposes of learning gremlin and Amazon Neptune. 
+In this tutorial, we'll traverse console game preferences among a small set of gamers. We will explore commonality, preferences and potential game recommendations. These queries are for the purposes of learning gremlin and Amazon Neptune. 
 
 
 ![cloudformation](images/image1.jpg)
@@ -70,7 +70,7 @@ curl -X POST \
 ```
 
 **Tip**
-Upon executing each above curl command. Amazon Neptune will return a loadId associated with each request. You can query
+Upon executing each curl command. Amazon Neptune will return a loadId associated with each request. You can query
 ```
 curl http://your-neptune-endpoint:8182/loader?loadId=[loadId value]
 ```
@@ -163,7 +163,7 @@ gremlin> g.V().hasLabel('game')
 ==>v[MarioKart8]
 ```
 
-**Return only the vertices that are people**
+**Return only the vertices that are gamers**
 ```
 gremlin> g.V().hasLabel('person')
 ==>v[Luke]
@@ -194,7 +194,6 @@ gremlin> g.V().hasLabel('game').groupCount().by("Platform")
 gremlin> g.V().hasLabel('game').has('GameTitle','MarioKart8').inE('likes').values('weight').mean()
 ==>0.6333333333333334
 ```
-
 
 **What games does skywalker123 like?**
 ```
@@ -243,7 +242,7 @@ gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').i
 ==>smiles007
 ```
 
-**What are other games titles likes by gamers who have commonality?**
+**What are other game titles do other gamers like who have commonality?**
 ```
 gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').in('likes').where(neq('TargetGamer')).out('likes').dedup().values('GameTitle')
 ==>ARMs
@@ -268,7 +267,7 @@ gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').a
 ==>Knack
 ```
 
-For more recommendation example queries or other gremlin reciepes see: http://tinkerpop.apache.org/docs/current/recipes/#recommendation
+For more recommendation example queries or other gremlin recipes you can also visit: http://tinkerpop.apache.org/docs/current/recipes/#recommendation
 
 
 **Drop data**
