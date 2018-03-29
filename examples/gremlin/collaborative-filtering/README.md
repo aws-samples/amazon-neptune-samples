@@ -29,7 +29,7 @@ The purposes of this tutorial is to illustrate functionality not scale, so we'll
 ```
 curl -X POST \
     -H 'Content-Type: application/json' \
-    http://trainingdb.c4niqbvxvuf6.us-east-1-beta.rds.amazonaws.com:8182/loader -d '
+    http://your-neptune-endpoint:8182/loader -d '
     { 
       "source" : "s3://neptune-data-ml/recommendation/vertex.txt", 
       "accessKey" : "", 
@@ -44,7 +44,7 @@ curl -X POST \
 ```
 curl -X POST \
     -H 'Content-Type: application/json' \
-    http://trainingdb.c4niqbvxvuf6.us-east-1-beta.rds.amazonaws.com:8182/loader -d '
+    http://your-neptune-endpoint:8182/loader -d '
     { 
       "source" : "s3://neptune-data-ml/recommendation/edges.txt", 
       "accessKey" : "", 
@@ -55,11 +55,11 @@ curl -X POST \
     }'
 ```
 
-Alternatively, you could load all of the files by loading the entire directory
+**Tip** Alternatively, you could load all of the files by loading the entire directory
 ```
 curl -X POST \
     -H 'Content-Type: application/json' \
-    http://neptune-cluster:8182/loader -d '
+    http://your-neptune-endpoint:8182/loader -d '
     { 
       "source" : "s3://neptune-data-ml/recommendation/", 
       "accessKey" : "", 
@@ -69,6 +69,14 @@ curl -X POST \
       "failOnError" : "FALSE"
     }'
 ```
+
+**Tip**
+Upon executing each above curl command. Amazon Neptune will return a loadId associated with each request. You can query
+```
+curl http://your-neptune-endpoint:8182/loader?loadId=[loadId value]
+```
+
+For more information about loading data into Amazon Neptune visit: https://docs.aws.amazon.com/neptune/latest/userguide/bulk-load.html
 
 ## Sample Queries
 
