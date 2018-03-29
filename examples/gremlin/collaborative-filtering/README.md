@@ -120,6 +120,26 @@ gremlin> g.V().group().by().by(inE().count())
 gremlin> g.V().group().by().by(outE().count())
 ==>{v[HorizonZeroDawn]=0, v[Luke]=8, v[ARMS]=0, v[Ratchet&Clank]=0, v[SuperMarioOdyssey]=0, v[GravityRush]=0, v[CallOfDutyBO4]=0, v[MarioKart8]=0, v[Fifa18]=0, v[Nioh]=0, v[Mike]=8, v[Knack]=0, v[Lina]=6, v[TombRaider]=0, v[GranTurismoSport]=0, v[Emma]=2}
 ```
+**Count the out-degree centrality of outgoing edges from each vertex by order of degee**
+```
+gremlin> g.V().project("v","degree").by().by(bothE().count()).order().by(select("degree"), decr)
+==>{v=v[Luke], degree=8}
+==>{v=v[Mike], degree=8}
+==>{v=v[Lina], degree=6}
+==>{v=v[SuperMarioOdyssey], degree=3}
+==>{v=v[MarioKart8], degree=3}
+==>{v=v[Ratchet&Clank], degree=3}
+==>{v=v[Emma], degree=2}
+==>{v=v[HorizonZeroDawn], degree=2}
+==>{v=v[GranTurismoSport], degree=2}
+==>{v=v[ARMS], degree=2}
+==>{v=v[GravityRush], degree=2}
+==>{v=v[TombRaider], degree=2}
+==>{v=v[Knack], degree=2}
+==>{v=v[Fifa18], degree=1}
+==>{v=v[Nioh], degree=1}
+==>{v=v[CallOfDutyBO4], degree=1}
+```
 
 **What games does skywalker123 like?**
 ```
