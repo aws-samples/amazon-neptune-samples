@@ -27,7 +27,6 @@ The purposes of this tutorial is to illustrate functionality not scale, so we'll
 **Game & Player Vertices** (~id,GamerAlias:String,ReleaseDate:Date,GameGenre:String,ESRBRating:String,Developer:String,Platform:String,GameTitle:String )
 
 ``
-
 curl -X POST \
     -H 'Content-Type: application/json' \
     http://trainingdb.c4niqbvxvuf6.us-east-1-beta.rds.amazonaws.com:8182/loader -d '
@@ -39,10 +38,9 @@ curl -X POST \
       "region" : "us-east-1", 
       "failOnError" : "FALSE"
     }'
-
 ```
-**Edges** (~id, ~from, ~to, ~label, weight:Double) 
 
+**Edges** (~id, ~from, ~to, ~label, weight:Double) 
 ```
 curl -X POST \
     -H 'Content-Type: application/json' \
@@ -55,10 +53,9 @@ curl -X POST \
       "region" : "us-east-1", 
       "failOnError" : "FALSE"
     }'
-
 ```
-Alternatively, you could load all of the files by loading the entire directory
 
+Alternatively, you could load all of the files by loading the entire directory
 ```
 curl -X POST \
     -H 'Content-Type: application/json' \
@@ -112,13 +109,16 @@ gremlin> g.V().limit(4)
 **Count the in-degree centrality of incoming edges to each vertex**
 ```
 gremlin> g.V().group().by().by(inE().count())
+
 ==>{v[HorizonZeroDawn]=2, v[Luke]=0, v[ARMS]=2, v[Ratchet&Clank]=3, v[SuperMarioOdyssey]=3, v[GravityRush]=2, v[CallOfDutyBO4]=1, v[MarioKart8]=3, v[Fifa18]=1, v[Nioh]=1, v[Mike]=0, v[Knack]=2, v[Lina]=0, v[TombRaider]=2, v[GranTurismoSport]=2, v[Emma]=0}
 ```
 
 **Count the out-degree centrality of outgoing edges from each vertex**
 ```
 gremlin> g.V().group().by().by(outE().count())
+
 ==>{v[HorizonZeroDawn]=0, v[Luke]=8, v[ARMS]=0, v[Ratchet&Clank]=0, v[SuperMarioOdyssey]=0, v[GravityRush]=0, v[CallOfDutyBO4]=0, v[MarioKart8]=0, v[Fifa18]=0, v[Nioh]=0, v[Mike]=8, v[Knack]=0, v[Lina]=6, v[TombRaider]=0, v[GranTurismoSport]=0, v[Emma]=2}
+
 ```
 **Count the out-degree centrality of outgoing edges from each vertex by order of degee**
 ```
@@ -142,6 +142,7 @@ gremlin> g.V().project("v","degree").by().by(bothE().count()).order().by(select(
 ```
 
 **What games does skywalker123 like?**
+
 ```
 gremlin> g.V().has('GamerAlias','skywalker123').as('gamer').out('likes')
 ==>v[ARMS]
@@ -156,6 +157,7 @@ gremlin> g.V().has('GamerAlias','skywalker123').as('gamer').out('likes')
 ```
 
 **Who else likes the same games?**
+
 ```
 gremlin> g.V().has('GamerAlias','skywalker123').out('likes').in('likes').dedup().values('GamerAlias')
 ==>forchinet
