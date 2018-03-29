@@ -1,4 +1,4 @@
-# This is a gremlin tutorial that shows how to make recommendations using collaborative filtering and sample queries to explore the dataset
+# This example is a gremlin tutorial and shows how to query date using gremlin and make recommendations collaborative filtering with a gaming dataset
 
 ## Prerequisite
 
