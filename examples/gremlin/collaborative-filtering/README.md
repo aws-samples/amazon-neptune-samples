@@ -116,14 +116,12 @@ gremlin> g.V().limit(4)
 **Count the in-degree centrality of incoming edges to each vertex**
 ```
 gremlin> g.V().group().by().by(inE().count())
-
 ==>{v[HorizonZeroDawn]=2, v[Luke]=0, v[ARMS]=2, v[Ratchet&Clank]=3, v[SuperMarioOdyssey]=3, v[GravityRush]=2, v[CallOfDutyBO4]=1, v[MarioKart8]=3, v[Fifa18]=1, v[Nioh]=1, v[Mike]=0, v[Knack]=2, v[Lina]=0, v[TombRaider]=2, v[GranTurismoSport]=2, v[Emma]=0}
 ```
 
 **Count the out-degree centrality of outgoing edges from each vertex**
 ```
 gremlin> g.V().group().by().by(outE().count())
-
 ==>{v[HorizonZeroDawn]=0, v[Luke]=8, v[ARMS]=0, v[Ratchet&Clank]=0, v[SuperMarioOdyssey]=0, v[GravityRush]=0, v[CallOfDutyBO4]=0, v[MarioKart8]=0, v[Fifa18]=0, v[Nioh]=0, v[Mike]=8, v[Knack]=0, v[Lina]=6, v[TombRaider]=0, v[GranTurismoSport]=0, v[Emma]=2}
 
 ```
@@ -205,6 +203,23 @@ gremlin> g.V().has('GamerAlias','skywalker123').as('gamer').out('likes')
 ==>v[MarioKart8]
 ```
 
+**What games does skywalker123 like using weight (greater than)**
+```
+gremlin> g.V().has('GamerAlias','skywalker123').outE("likes").has('weight', P.gt(0.7f))
+==>e[e17][Luke-likes->Mario+Rabbids]
+==>e[e3][Luke-likes->Ratchet&Clank]
+```
+
+**What games does skywalker123 like using weight (less than)**
+```
+gremlin> g.V().has('GamerAlias','skywalker123').outE("likes").has('weight', P.lt(0.5f))
+==>e[e1][Luke-likes->HorizonZeroDawn]
+==>e[e2][Luke-likes->GranTurismoSport]
+==>e[e4][Luke-likes->Fifa18]
+==>e[e5][Luke-likes->GravityRush]
+==>e[e21][Luke-likes->MarioKart8]
+```
+
 **Who else likes the same games?**
 ```
 gremlin> g.V().has('GamerAlias','skywalker123').out('likes').in('likes').dedup().values('GamerAlias')
@@ -220,7 +235,6 @@ gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').i
 ==>forchinet
 ==>bringit32
 ==>smiles007
-
 ```
 
 **What are other games titles likes by gamers who have commonality?**
@@ -237,7 +251,7 @@ gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').i
 ==>Ratchet&Clank
 ==>GravityRush
 ==>Knack
-`
+```
 
 **Which games might make sense to recommend to a specific gamer that they don't already like?**
 ```
