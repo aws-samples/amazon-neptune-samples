@@ -1,4 +1,4 @@
-# This example is a gremlin tutorial that shows how to explore the graph with sample queries. It also shows how to make recommendations using collaborative filtering with a gaming dataset.
+# This example is a gremlin tutorial that shows how to explore the graph with sample queries. It also shows how to make recommendations using collaborative filtering. 
 
 ## Prerequisite
 
