@@ -1,4 +1,4 @@
-# This example shows how to load a collaborative filtering data set on Amazon Neptune
+# This example is a gremlin tutorial and shows how to query date using gremlin and make recommendations collaborative filtering with a gaming dataset
 
 ## Prerequisite
 
