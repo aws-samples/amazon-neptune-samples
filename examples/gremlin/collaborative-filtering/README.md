@@ -2,21 +2,19 @@
 
 ## Prerequisite
 
-The cloudformation template will assume there is an already established Amazon Neptune Cluster. See the following links for how to create an Amazon Neptune Cluster for Gremlin:  
+This tutorial assumes you already have your environment setup. To setup a new environment, create an Amazon Neptune Cluster and you can run this cloudformation template [link TBD] to setup 
+the additional resources.
+
+See the following links for how to create an Amazon Neptune Cluster for Gremlin:  
 
 * https://docs.aws.amazon.com/neptune/latest/userguide/get-started-CreateInstance-Console.html
 * https://docs.aws.amazon.com/neptune/latest/userguide/bulk-load.html
 * https://docs.aws.amazon.com/neptune/latest/userguide/bulk-load-tutorial-format-gremlin.html
 
-Also assumes you have a client on EC2 that can reach the Amazon Neptune Cluster
 
 ## Use Case
 
-Build a recommendation engine based a collaborative filtering technique. This includes leveraging similiar relationships across vertices to infer what a new relationship might be. In this 
-example we'll traverse customer purchases and based on similiar purchase history, we'll recommend new products for customers. 
-
-
-The purposes of this tutorial is to illustrate functionality and provide sample gremlin queries. We are leveraging a small data set to conceptualize.
+In this tutorial, we'll traverse console game preferences among a small set of gamers. We'll explore commonality, preferences and potential game recommendations. These queries are for the purposes of learning gremlin and Amazon Neptune. 
 
 
 ![cloudformation](images/image1.jpg)
