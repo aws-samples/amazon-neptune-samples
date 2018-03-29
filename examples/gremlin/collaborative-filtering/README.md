@@ -24,7 +24,7 @@ The purposes of this tutorial is to illustrate functionality not scale, so we'll
 ## Step 1 (Load Data Sample data)
 
 
-**Game & Player Vertices** (~id,GamerAlias:String,ReleaseDate:Date,GameGenre:String,ESRBRating:String,Developer:String,Platform:String,GameTitle:String )
+**Game & Player Vertices** (~id,~label,GamerAlias:String,ReleaseDate:Date,GameGenre:String,ESRBRating:String,Developer:String,Platform:String,GameTitle:String)
 
 ```
 curl -X POST \
@@ -148,6 +148,50 @@ gremlin> g.V().project("v","degree").by().by(bothE().count()).order().by(select(
 ==>{v=v[CallOfDutyBO4], degree=1}
 ```
 
+**Return only the vertices that are games**
+```
+gremlin> g.V().hasLabel('game')
+==>v[Mario+Rabbids]
+==>v[ARMS]
+==>v[HorizonZeroDawn]
+==>v[GranTurismoSport]
+==>v[Ratchet&Clank]
+==>v[Fifa18]
+==>v[GravityRush]
+==>v[Nioh]
+==>v[TombRaider]
+==>v[CallOfDutyBO4]
+==>v[Knack]
+==>v[SuperMarioOdyssey]
+==>v[MarioKart8]
+```
+
+**Return only the vertices that are people**
+```
+gremlin> g.V().hasLabel('person')
+==>v[Luke]
+==>v[Emma]
+==>v[Lina]
+==>v[Mike]
+```
+
+**Return counts of games grouped by their genre**
+```
+gremlin> g.V().hasLabel('game').groupCount().by("GameGenre")
+==>{Shooter=2, Action=3, Adventure=5, Racing=2, Sports=1}
+```
+**Return counts of games grouped by developer**
+```
+gremlin> g.V().hasLabel('game').groupCount().by("Developer")
+==>{Activision=1, Nintendo=3, Square Enix=1, Guerrilla Games=1, Sony Interactive Entertainment=2, Insomniac Games=1, Electronic Arts=1, Project Siren=1, Ubisoft=1, Team Ninja=1}
+```
+
+**Return counts of games grouped by Platform**
+```
+gremlin> g.V().hasLabel('game').groupCount().by("Platform")
+==>{PS4=9, Switch=4}
+```
+
 **What games does skywalker123 like?**
 ```
 gremlin> g.V().has('GamerAlias','skywalker123').as('gamer').out('likes')
@@ -193,7 +237,7 @@ gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').i
 ==>Ratchet&Clank
 ==>GravityRush
 ==>Knack
-```
+`
 
 **Which games might make sense to recommend to a specific gamer that they don't already like?**
 ```
@@ -206,7 +250,7 @@ gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').a
 
 **Drop data**
 ```
-g.V().drop().iterate()
+gremlin> g.V().drop().iterate()
 
 ```
 
