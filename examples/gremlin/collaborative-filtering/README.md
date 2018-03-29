@@ -84,7 +84,6 @@ gremlin> g.V().has("GamerAlias","skywalker123").valueMap()
 
 gremlin> g.V().has('GamerAlias','skywalker123')
 ==>v[Luke]
-
 ```
 
 **Sample some of the edges (limit 5)**
@@ -142,7 +141,6 @@ gremlin> g.V().project("v","degree").by().by(bothE().count()).order().by(select(
 ```
 
 **What games does skywalker123 like?**
-
 ```
 gremlin> g.V().has('GamerAlias','skywalker123').as('gamer').out('likes')
 ==>v[ARMS]
@@ -153,18 +151,15 @@ gremlin> g.V().has('GamerAlias','skywalker123').as('gamer').out('likes')
 ==>v[GravityRush]
 ==>v[SuperMarioOdyssey]
 ==>v[MarioKart8]
-
 ```
 
 **Who else likes the same games?**
-
 ```
 gremlin> g.V().has('GamerAlias','skywalker123').out('likes').in('likes').dedup().values('GamerAlias')
 ==>forchinet
 ==>skywalker123
 ==>bringit32
 ==>smiles007
-
 ```
 
 **Who else likes these games (exclude yourself)**
@@ -190,7 +185,6 @@ gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').i
 ==>Ratchet&Clank
 ==>GravityRush
 ==>Knack
-
 ```
 
 **Which games might make sense to recommend to a specific gamer that they don't already like?**
@@ -200,7 +194,6 @@ gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').a
 ==>TombRaider
 ==>CallOfDutyBO4
 ==>Knack
-
 ```
 
 **Drop data**
