@@ -26,7 +26,7 @@ The purposes of this tutorial is to illustrate functionality not scale, so we'll
 
 **Game & Player Vertices** (~id,GamerAlias:String,ReleaseDate:Date,GameGenre:String,ESRBRating:String,Developer:String,Platform:String,GameTitle:String )
 
-``
+```
 curl -X POST \
     -H 'Content-Type: application/json' \
     http://trainingdb.c4niqbvxvuf6.us-east-1-beta.rds.amazonaws.com:8182/loader -d '
