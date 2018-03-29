@@ -268,6 +268,9 @@ gremlin> g.V().has('GamerAlias','skywalker123').as('TargetGamer').out('likes').a
 ==>Knack
 ```
 
+For more recommendation example queries or other gremlin reciepes see: http://tinkerpop.apache.org/docs/current/recipes/#recommendation
+
+
 **Drop data**
 ```
 gremlin> g.V().drop().iterate()
