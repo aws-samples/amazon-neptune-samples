@@ -189,6 +189,13 @@ gremlin> g.V().hasLabel('game').groupCount().by("Platform")
 ==>{PS4=9, Switch=4}
 ```
 
+// What is the average weighted rating of mario kart8
+```
+gremlin> g.V().hasLabel('game').has('GameTitle','MarioKart8').inE('likes').values('weight').mean()
+==>0.6333333333333334
+```
+
+
 **What games does skywalker123 like?**
 ```
 gremlin> g.V().has('GamerAlias','skywalker123').as('gamer').out('likes')
