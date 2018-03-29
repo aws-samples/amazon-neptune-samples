@@ -3,9 +3,9 @@
 ## Prerequisite
 
 This tutorial assumes you already have your environment setup. To setup a new environment, create an Amazon Neptune Cluster. You can also run this cloudformation template [link TBD] to setup 
-the additional resources.
+the additional resources (i.e Gremlin console).
 
-Also - See the following links for how to create an Amazon Neptune Cluster for Gremlin:  
+Also - See the following links on how to create an Amazon Neptune Cluster for Gremlin:  
 
 * https://docs.aws.amazon.com/neptune/latest/userguide/get-started-CreateInstance-Console.html
 * https://docs.aws.amazon.com/neptune/latest/userguide/bulk-load.html
