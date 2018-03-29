@@ -26,7 +26,7 @@ The purposes of this tutorial is to illustrate functionality not scale, so we'll
 
 **Game & Player Vertices** (~id,GamerAlias:String,ReleaseDate:Date,GameGenre:String,ESRBRating:String,Developer:String,Platform:String,GameTitle:String )
 
-```
+``
 
 curl -X POST \
     -H 'Content-Type: application/json' \
@@ -41,7 +41,6 @@ curl -X POST \
     }'
 
 ```
-
 **Edges** (~id, ~from, ~to, ~label, weight:Double) 
 
 ```
@@ -58,8 +57,6 @@ curl -X POST \
     }'
 
 ```
-
-
 Alternatively, you could load all of the files by loading the entire directory
 
 ```
@@ -110,6 +107,12 @@ gremlin> g.V().limit(4)
 ==>v[Luke]
 ==>v[Emma]
 ==>v[MarioKart8]
+```
+
+**Count the in-degree centrality of incoming edges to each vertex**
+```
+gremlin> g.V().group().by().by(inE().count())
+==>{v[HorizonZeroDawn]=2, v[Luke]=0, v[ARMS]=2, v[Ratchet&Clank]=3, v[SuperMarioOdyssey]=3, v[GravityRush]=2, v[CallOfDutyBO4]=1, v[MarioKart8]=3, v[Fifa18]=1, v[Nioh]=1, v[Mike]=0, v[Knack]=2, v[Lina]=0, v[TombRaider]=2, v[GranTurismoSport]=2, v[Emma]=0}
 ```
 
 **What games does skywalker123 like?**
