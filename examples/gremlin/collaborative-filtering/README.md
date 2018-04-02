@@ -2,7 +2,7 @@
 
 ## Prerequisite
 
-This tutorial assumes you already have your environment setup. To setup a new environment, create an Amazon Neptune Cluster. You can also run this cloudformation template [link TBD] to setup 
+This tutorial assumes you already have your environment setup. To setup a new environment, create an Amazon Neptune Cluster. You can also run the sample cloudformation template (https://github.com/awslabs/amazon-neptune-tools/tree/gremlin-example/cloudformation-templates/gremlin) to setup 
 the additional resources (i.e Gremlin console, Graphexp, etc.).
 
 Also - See the following links on how to create an Amazon Neptune Cluster for Gremlin:  
@@ -54,7 +54,7 @@ curl -X POST \
     }'
 ```
 
-**Tip** Alternatively, you could load all of the files by loading the entire directory
+**Tip.** Alternatively, you could load all of the files by loading the entire directory
 ```
 curl -X POST \
     -H 'Content-Type: application/json' \
@@ -69,7 +69,7 @@ curl -X POST \
     }'
 ```
 
-**Tip**
+**Tip.**
 Upon executing each curl command. Amazon Neptune will return a loadId associated with each request. You can check the status of your load with the following command:
 ```
 curl http://your-neptune-endpoint:8182/loader?loadId=[loadId value]
