@@ -153,26 +153,29 @@ def load_region_offer_to_neptune(aws_region_code, region_offer_dict: dict, graph
     ondemand_dict = region_offer_dict['terms']['OnDemand']
     reserved_dict = region_offer_dict['terms']['Reserved']
     for product_key in products_dict.keys():
-        if products_dict[product_key]['productFamily'] == 'Compute Instance':
-            # Processing Product Vertex
-            print("\n\nProcessing SKU:", product_key, end='')
-            product_vertex_id = add_product_vertex("product", products_dict[product_key]['attributes'], graph_traversal)
-            add_edge_product_to_service(product_vertex_id, 'Amazon Elastic Compute Cloud (EC2)', graph_traversal)
+        try:
+            if products_dict[product_key]['productFamily'] == 'Compute Instance':
+                # Processing Product Vertex
+                print("\n\nProcessing SKU:", product_key, end='')
+                product_vertex_id = add_product_vertex("product", products_dict[product_key]['attributes'], graph_traversal)
+                add_edge_product_to_service(product_vertex_id, 'Amazon Elastic Compute Cloud (EC2)', graph_traversal)
 
-            # Process On-Demand Pricing
-            product_ondemand_price_dict = fetch_ondemand_pricing(product_key, ondemand_dict)
-            if product_ondemand_price_dict is not None:
-                on_demand_price_vertex = create_price_vertex(product_ondemand_price_dict, 'on-demand-price', graph_traversal)
-                create_edge_region_price(aws_region_code, on_demand_price_vertex.id, graph_traversal)
-                create_edge_price_product(on_demand_price_vertex.id, product_vertex_id, graph_traversal)
+                # Process On-Demand Pricing
+                product_ondemand_price_dict = fetch_ondemand_pricing(product_key, ondemand_dict)
+                if product_ondemand_price_dict is not None:
+                    on_demand_price_vertex = create_price_vertex(product_ondemand_price_dict, 'on-demand-price', graph_traversal)
+                    create_edge_region_price(aws_region_code, on_demand_price_vertex.id, graph_traversal)
+                    create_edge_price_product(on_demand_price_vertex.id, product_vertex_id, graph_traversal)
 
-            # Process Reserved Pricing
-            product_reserved_price_list = get_product_reserved_pricing(product_key, reserved_dict)
-            if len(product_reserved_price_list) > 0:
-                for reserved_price_offer in product_reserved_price_list:
-                    reserved_price_vertex = create_price_vertex(reserved_price_offer, 'reserved_price', graph_traversal)
-                    create_edge_region_price(aws_region_code, reserved_price_vertex.id, graph_traversal)
-                    create_edge_price_product(reserved_price_vertex.id, product_vertex_id, graph_traversal)
+                # Process Reserved Pricing
+                product_reserved_price_list = get_product_reserved_pricing(product_key, reserved_dict)
+                if len(product_reserved_price_list) > 0:
+                    for reserved_price_offer in product_reserved_price_list:
+                        reserved_price_vertex = create_price_vertex(reserved_price_offer, 'reserved_price', graph_traversal)
+                        create_edge_region_price(aws_region_code, reserved_price_vertex.id, graph_traversal)
+                        create_edge_price_product(reserved_price_vertex.id, product_vertex_id, graph_traversal)
+        except KeyError:
+            continue
     print('Completed Processing products in Region:', aws_region_code), '\n\n'
 
 
