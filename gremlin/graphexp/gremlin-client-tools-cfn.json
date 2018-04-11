@@ -1,0 +1,180 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "Sample Amazon Neptune CloudFormation: Creates New VPC, EC2 for Graphexp & Tinkerpop, SGs for Lab environment ",
+ 
+  "Parameters" : {
+    "EC2InstanceType" : {
+      "Description" : "EC2 instance type",
+      "Type" : "String",
+      "Default" : "m5.large",
+      "AllowedValues" : [  "t2.micro", "t2.xlarge", "m5.large", "m5.2xlarge", "m5.4xlarge" ],
+      "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+
+      "KeyName": {
+      "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the EC2 instance",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "Default" : "Neptune",
+      "MinLength" : "1",
+      "ConstraintDescription" : "must be the name of an existing EC2 KeyPair."
+    },
+
+      "NeptuneEndpoint": {
+      "Description" : "Enter Neptune Endpoint",
+      "Type" : "String",
+      "Default" : "",
+      "ConstraintDescription" : "must be the name of an existing EC2 KeyPair."
+    },
+
+      "NeptuneSecurityGroupId": {
+      "Description" : "Enter Neptune Security Group Id",
+      "Type" : "String",
+      "Default" : "sg-...",
+      "ConstraintDescription" : "must be the name of an existing EC2 KeyPair."
+    },
+
+      "SSHLocation" : {
+      "Description" : "The IP address range that can be used to SSH to the EC2 instance",
+      "Type": "String",
+      "Default": "0.0.0.0/0",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
+    },
+
+    "GraphexpAccess" : {
+    "Description" : "The IP address range that can be used to access hosted Graphexp",
+    "Type": "String",
+    "Default": "0.0.0.0/0",
+    "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+    "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
+  }
+  },
+  "Mappings" : {
+    "RegionMap" : {
+      "us-east-1"        : {"AMI" : "ami-6869aa05"}
+    }
+  },
+
+  "Resources" : {
+
+    "EC2InstanceSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+       "GroupDescription" : "EC2-Graphexp SG",
+        "SecurityGroupIngress" : [
+          {"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : { "Ref" : "SSHLocation"} },
+          {"IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : { "Ref" : "GraphexpAccess"} },
+          {"IpProtocol" : "tcp", "FromPort" : "8193", "ToPort" : "8193", "CidrIp" : "0.0.0.0/0" }
+        ]
+      }
+    },
+    "SGBaseIngress": {
+              "Type": "AWS::EC2::SecurityGroupIngress",
+              "Properties": {
+                  "GroupId": {
+                      "Ref": "NeptuneSecurityGroupId"
+                  },
+                  "IpProtocol": "tcp",
+                  "FromPort": "8182",
+                  "ToPort": "8182",
+                  "SourceSecurityGroupName": {
+                      "Ref": "EC2InstanceSecurityGroup"
+                    }
+              }
+  },
+
+    "EC2Instance": {
+      "Type" : "AWS::EC2::Instance",
+      "Metadata" : {
+
+      "AWS::CloudFormation::Init" : {
+      "configSets": {
+        "default": [ "enablerepos", "configuration", "update-jdk", "setup-apache" ]
+      },
+      "enablerepos": {
+        "commands": {
+          "001": { "command": "yum-config-manager --enable epel" }
+        }
+      },
+      "configuration": {
+        "packages" : {
+           "yum" : {
+             "gcc"       : [],
+             "make"      : [],
+             "httpd24"   : [],
+             "java-1.8.0-openjdk.x86_64"  : []
+               }
+            }
+          },
+          "update-jdk": {
+            "commands": {
+              "002": { "command": "sudo alternatives --set java /usr/lib/jvm/jre-1.8.0-openjdk.x86_64/bin/java\n",
+                       "command": "sudo alternatives --remove java /usr/lib/jvm/jre-1.7.0-openjdk.x86_64/bin/java\n"
+                     }
+            }
+          },
+          "setup-apache": {
+            "commands": {
+              "003": { "command": "sudo service httpd start\n",
+                       "command": "sudo chkconfig httpd on\n"
+                     }
+            }
+          },
+        }
+      },
+
+      "Properties": {
+        "ImageId" : { "Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "AMI" ]},
+        "SecurityGroups" : [ { "Ref" : "EC2InstanceSecurityGroup" } ],
+        "InstanceType"   : { "Ref" : "EC2InstanceType" },
+        "KeyName"        : { "Ref" : "KeyName" },
+        "Tags"           : [ { "Key" : "Application", "Value" : "neptune-workshop" } ],
+        "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+          "#!/bin/bash -xe\n",
+          "yum update -y aws-cfn-bootstrap\n",
+
+          "# Install the files and packages from the metadata\n",
+          "/opt/aws/bin/cfn-init -v ",
+          "         --stack ", { "Ref" : "AWS::StackName" },
+          "         --resource EC2Instance ",
+          "         --region ", { "Ref" : "AWS::Region" }, "\n",
+          "# Signal the status of cfn-init\n",
+          "/opt/aws/bin/cfn-signal -e $? ",
+          "         --stack ", { "Ref" : "AWS::StackName" },
+          "         --resource EC2Instance ",
+          "         --region ", { "Ref" : "AWS::Region" }, "\n",
+
+          "# Update Config\n",
+          " cd /home/ec2-user/ \n",
+          " mkdir scripts \n ",
+          " cd scripts \n",
+          " wget https://s3.amazonaws.com/neptune-labs/scripts/update-config.sh \n",
+          " sh update-config.sh ", { "Ref" : "NeptuneEndpoint" }, "\n",
+
+          "# Start Apache\n",
+          "sudo service httpd start\n",
+          "sudo chkconfig httpd on\n"
+          ]]}}
+        },
+        "CreationPolicy" : {
+          "ResourceSignal" : {
+            "Timeout" : "PT15M"
+          }
+        }
+    }
+  },
+  "Outputs" : {
+    "EC2IP" : {
+      "Description" : "Instance IP",
+      "Value" : { "Fn::GetAtt" : [ "EC2Instance", "PublicIp" ]}
+    },
+    "AppSG" : {
+      "Description" : "Application SecurityGroup Id ",
+      "Value" :  { "Ref" : "EC2InstanceSecurityGroup" }
+    },
+    "NeptuneEndpoint" : {
+      "Description" : "Neptune DB Endpoint ",
+      "Value" :  { "Ref" : "NeptuneEndpoint" }
+    },
+    }
+}
