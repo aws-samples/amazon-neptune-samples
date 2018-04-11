@@ -163,7 +163,7 @@ def load_region_offer_to_neptune(aws_region_code, region_offer_dict: dict, graph
                 # Process On-Demand Pricing
                 product_ondemand_price_dict = fetch_ondemand_pricing(product_key, ondemand_dict)
                 if product_ondemand_price_dict is not None:
-                    on_demand_price_vertex = create_price_vertex(product_ondemand_price_dict, 'on-demand-price', graph_traversal)
+                    on_demand_price_vertex = create_price_vertex(product_ondemand_price_dict, 'on_demand_price', graph_traversal)
                     create_edge_region_price(aws_region_code, on_demand_price_vertex.id, graph_traversal)
                     create_edge_price_product(on_demand_price_vertex.id, product_vertex_id, graph_traversal)
 
@@ -217,22 +217,6 @@ def load_ec2_pricing_data_to_neptune(graph_traversal: GraphTraversalSource):
                 print("Data Loading for EC2 Instance Pricing Completed for region:" + region + 'in:' + time_taken + "\n")
                 print('################################################################################################')
     print('Completed --- Loading EC2 Instance Prices to Neptune')
-
-# if __name__ == '__main__':
-#     # Neptune Connection
-#     neptune_endpoint = '34.229.104.116'
-#     neptune_port = 8182
-#
-#     graph = Graph()
-#     g = graph.traversal().withRemote(
-#         DriverRemoteConnection('ws://' + neptune_endpoint + ':' + str(neptune_port) + '/gremlin', 'g'))
-#
-#     print("Data Loading Started\n")
-#     start_time = timer()
-#     load_ec2_pricing_data_to_neptune(g)
-#     end_time = timer()
-#     time_taken = str(datetime.timedelta(seconds=end_time - start_time))
-#     print("Data Loading Completed in:" + time_taken + "\n")
 
 
 
