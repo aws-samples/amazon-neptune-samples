@@ -2,10 +2,14 @@ from aws_services import load_aws_services_to_neptune
 from aws_regions import load_aws_regions_to_neptune
 from aws_ec2_instance_prices import load_ec2_pricing_data_to_neptune
 
+
 from socket import gaierror
+import gremlin_interface
 from gremlin_python.structure.graph import Graph
 from gremlin_python.process.graph_traversal import GraphTraversalSource
 from gremlin_python.driver.driver_remote_connection import DriverRemoteConnection
+
+import sys
 
 from timeit import default_timer as timer
 import datetime
@@ -39,29 +43,24 @@ def load_data(graph_traversal: GraphTraversalSource):
 
 
 if __name__ == '__main__':
-    print("Enter Neptune Connection Details")
-    neptune_endpoint = input("Neptune Endpoint (IP or URL):")
+    # Verify args
+    if len(sys.argv) != 3:
+        print ('Usage: python main.py <neptune-endpoint> <neptune-port>')
+        sys.exit(1)
 
-    # Get Neptune Port
-    while(True):
-        neptune_port = input("Neptune Port (if default port 8182, press Enter):")
-        if neptune_port == '':
-            neptune_port = 8182
-            break
-        else:
-            try:
-                neptune_port = int(neptune_port)
-                break
-            except ValueError:
-                print("Please enter a valid port number. If default port 8182, just press Enter.")
-                continue
+    neptune_endpoint = sys.argv[1]
+
+    try:
+        neptune_port = int(sys.argv[2])
+    except ValueError:
+        print("Please enter a valid port number e.g. 8182")
+        sys.exit(1)
 
     # Create a connection to Neptune
     graph = Graph()
     try:
-        print("Connecting to Neptune Server")
-        g = graph.traversal().withRemote(DriverRemoteConnection('ws://' + neptune_endpoint + ':' + str(neptune_port) + '/gremlin', 'g'))
-        print("Successfully connected to Neptune Server\n")
+        g = gremlin_interface.get_gremlin_connection(neptune_endpoint, neptune_port)
         load_data(g)
     except gaierror:
         print("Could not establish connection with the Neptune Server. Invalid Connection Parameters")
+        sys.exit(1)

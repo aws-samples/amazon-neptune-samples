@@ -2,31 +2,55 @@ import bs4 as bs
 from urllib.request import urlopen
 from gremlin_python.process.traversal import Cardinality
 from gremlin_python.process.graph_traversal import GraphTraversalSource
+import gremlin_interface
+from enum_vertex_edge_labels import VertexEdgeLabels
 
 
 def create_service_region_edges(table_header: list, service_row: list, graph_traversal: GraphTraversalSource):
     for item_num in range(1, len(service_row)):
         if service_row[item_num] == '\uf00c' or service_row[item_num] == '✓':
-            # add edge between aws-service and aws-region
-            number_of_edges = len(
-                graph_traversal.V().hasLabel('aws_region').has('descriptive_name', table_header[item_num]).outE().as_('e')\
-                    .inV().hasLabel('aws_service').has('name', service_row[0]).select('e').toList())
+            # print('Trying to map AWS-Service:', service_row[0], 'to AWS-Region:', table_header[item_num],end='')
+            # Fetch Vertex ID's and create Edge only if AWS_Region Exists
+            aws_region_vertex_list = gremlin_interface.fetch_vertex_list(graph_traversal,
+                                                                        VertexEdgeLabels.vertex_label_aws_region.value,
+                                                                        {'descriptive_name': table_header[item_num]})
+            if len(aws_region_vertex_list) == 1:
+                print('Mapping AWS-Service:', service_row[0], 'to AWS-Region:', table_header[item_num])
+                aws_region_vertex_id = aws_region_vertex_list[0]
 
-            # Add Edge if it does not exist and if Region Vertex exists
-            if number_of_edges == 0 and len(graph_traversal.V().hasLabel('aws_region').has('descriptive_name', table_header[item_num]).toList()) !=0:
-                print("Creating Edge between AWS-Region and AWS-Service:",
-                      table_header[item_num], "--OFFERS_SERVICE-->", service_row[0])
+                aws_service_vertex_id = gremlin_interface.fetch_vertex_list(graph_traversal,
+                                                                       VertexEdgeLabels.vertex_label_aws_service.value,
+                                                                       {'name': service_row[0]})[0]
 
-                service_vertex = graph_traversal.V().hasLabel('aws_service').has('name', service_row[0])
-                graph_traversal.V().hasLabel('aws_region').has('descriptive_name', table_header[item_num])\
-                    .addE('OFFERS_SERVICE').to(service_vertex).next()
+                # Fetch Edge List
+                edge_list = gremlin_interface.fetch_edge_list(graph_traversal,
+                                                             aws_service_vertex_id,
+                                                             aws_service_vertex_id,
+                                                             VertexEdgeLabels.edge_label_awsRegion_to_awsService.value)
+
+                # Add Edge From AWS-Region to AWS-Service if edge does not exist
+                if len(edge_list) == 0 and aws_region_vertex_id != '':
+                    gremlin_interface.add_edge(graph_traversal,
+                                               aws_region_vertex_id,
+                                               aws_service_vertex_id,
+                                               VertexEdgeLabels.edge_label_awsRegion_to_awsService.value)
+                # print('--> committed')
+            else:
+                # print('--> not-committed')
+                continue
 
 
-def create_aws_service_vertex(service_name: str, graph_traversal: GraphTraversalSource):
-    if len(graph_traversal.V().hasLabel('aws_service').has('name', service_name).toList()) == 0:
-        graph_traversal.addV('aws_service') \
-            .property(Cardinality.single, 'name', service_name)\
-            .next()
+def create_aws_service_vertex(service_name, graph_traversal):
+    # Fetch AWS-Service Vertex list
+    vertex_list = gremlin_interface.fetch_vertex_list(graph_traversal,
+                                                     VertexEdgeLabels.vertex_label_aws_service.value,
+                                                     {'name': service_name})
+    if len(vertex_list) == 0:
+        aws_service_vertex_id = gremlin_interface.add_vertex(graph_traversal,
+                                                             VertexEdgeLabels.vertex_label_aws_service.value)
+        gremlin_interface.add_update_vertex_properties(graph_traversal,
+                                                       aws_service_vertex_id,
+                                                       {'name': service_name})
 
 
 def create_aws_services_vertex_edges(header_row: list, current_row: list, graph_traversal: GraphTraversalSource):
@@ -34,17 +58,11 @@ def create_aws_services_vertex_edges(header_row: list, current_row: list, graph_
     create_service_region_edges(header_row, current_row, graph_traversal)
 
 
-def clean_service_row(service_row: list):
-    for item in service_row:
-        # Removing White Spaces
-        service_row[service_row.index(item)] = item.strip()
-        service_row = list(filter('\xa0'.__ne__, service_row))  # remove '\xa0'
-    return service_row
-
-
 def clean_header_row(header_item_row: list):
     for item in header_item_row:
-        header_item_row[header_item_row.index(item)] = item.strip()
+        # remove * from names
+        # remove whitespaces
+        header_item_row[header_item_row.index(item)] = item.replace('*', '').strip()
     return header_item_row
 
 
@@ -86,6 +104,6 @@ def create_aws_service_region_mapping(graph_traversal: GraphTraversalSource):
 
 
 def load_aws_services_to_neptune(graph_traversal: GraphTraversalSource):
-    print("Start --- Loading AWS Services to Neptune\n")
+    print("Start --- Loading AWS Services and mapping to AWS-Regions to Neptune")
     create_aws_service_region_mapping(graph_traversal)
-    print("Completed --- Loading AWS Services to Neptune\n")
+    print("Completed --- Loading AWS Services and mapping to AWS-Regions to Neptune\n")
