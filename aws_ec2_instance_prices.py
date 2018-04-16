@@ -40,7 +40,7 @@ def add_product_priceTerm_and_edge(graph_traversal, offer_type, aws_region_code,
 
         # Create Edge From Offer_Term Vertex to Product Vertex
         product_sku = product_offers_dict[product_ondemand_offer]['sku']
-        charges_edge_attr = {'sku', product_sku}
+        charges_edge_attr = {'sku': product_sku}
 
         # Adding Recurring Fees to Price_Edge Attribute
         price_code = product_sku + '.' + offerTermCode + '.' + recurring_fee_rate_code
@@ -79,10 +79,10 @@ def add_product_priceTerm_and_edge(graph_traversal, offer_type, aws_region_code,
                                                                    offer_term_vertex,
                                                                    VertexEdgeLabels.edge_label_awsRegion_to_offerTerm.value)
         if len(region_offer_edge_list) == 0:
-            region_offer_edge = gremlin_interface.add_edge(graph_traversal,
-                                                           aws_region_vertex,
-                                                           offer_term_vertex,
-                                                           VertexEdgeLabels.edge_label_awsRegion_to_offerTerm.value)
+            gremlin_interface.add_edge(graph_traversal,
+                                       aws_region_vertex,
+                                       offer_term_vertex,
+                                       VertexEdgeLabels.edge_label_awsRegion_to_offerTerm.value)
 
 
 # Creates Product Vertex or return Product Vertex that exists
