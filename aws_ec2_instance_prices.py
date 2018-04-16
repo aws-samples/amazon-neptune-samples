@@ -46,7 +46,6 @@ def add_product_priceTerm_and_edge(graph_traversal, offer_type, aws_region_code,
         recurring_fee_price_dict = product_offers_dict[product_ondemand_offer]['priceDimensions'][price_code]
         offer_price_vertex_attr['recurring_fee_usd'] = recurring_fee_price_dict['pricePerUnit']['USD']
         offer_price_vertex_attr['recurring_fee_unit'] = recurring_fee_price_dict['unit']
-        offer_price_vertex_attr['recurring_fee_description'] = recurring_fee_price_dict['description']
 
         # Add UpFront Fee to Price_Edge Attribute
         price_code = product_sku + '.' + offerTermCode + '.' + upfront_fee_rate_code
@@ -54,7 +53,6 @@ def add_product_priceTerm_and_edge(graph_traversal, offer_type, aws_region_code,
         if upfront_fee_price_dict is not None:
             offer_price_vertex_attr['upfront_fee_usd'] = recurring_fee_price_dict['pricePerUnit']['USD']
             offer_price_vertex_attr['upfront_fee_unit'] = recurring_fee_price_dict['unit']
-            offer_price_vertex_attr['upfront_fee_description'] = recurring_fee_price_dict['description']
             
         offer_price_vertex_list = gremlin_interface.fetch_vertex_list(graph_traversal,
                                                                 VertexEdgeLabels.vertex_label_offer_price.value,
