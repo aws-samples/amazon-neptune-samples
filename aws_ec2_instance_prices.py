@@ -114,7 +114,7 @@ def load_region_offer_to_neptune(aws_region_code, region_offer_dict: dict, graph
     product_counter = 0
     for product_key in products_dict.keys():
         product_counter = product_counter + 1
-        if product_counter%5 == 0 or product_counter == len(products_dict.keys()):
+        if product_counter%10 == 0 or product_counter == len(products_dict.keys()):
             print('Processing product', product_counter,'of', len(products_dict.keys()),'\r')
         try:
             if products_dict[product_key]['productFamily'] == 'Compute Instance':
