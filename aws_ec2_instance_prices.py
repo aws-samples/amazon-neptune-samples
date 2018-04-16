@@ -146,19 +146,19 @@ def load_region_offer_to_neptune(aws_region_code, region_offer_dict: dict, graph
                                                aws_service_vertex,
                                                VertexEdgeLabels.edge_label_product_to_awsService.value)
 
-            # load OnDemand prices for Product
-            if ondemand_dict is not None:
-                product_ondemand_offer_dict = ondemand_dict.pop(product_key, None)
-                if product_ondemand_offer_dict is not None:
-                    add_product_priceTerm_and_edge(graph_traversal, 'OnDemand', aws_region_code,
-                                                    product_vertex, product_ondemand_offer_dict)
+                # load OnDemand prices for Product
+                if ondemand_dict is not None:
+                    product_ondemand_offer_dict = ondemand_dict.pop(product_key, None)
+                    if product_ondemand_offer_dict is not None:
+                        add_product_priceTerm_and_edge(graph_traversal, 'OnDemand', aws_region_code,
+                                                        product_vertex, product_ondemand_offer_dict)
 
-            # load Reserved prices for Product
-            if reserved_dict is not None:
-                product_reserved_offer_dict = reserved_dict.pop(product_key, None)
-                if product_reserved_offer_dict is not None:
-                    add_product_priceTerm_and_edge(graph_traversal, 'Reserved', aws_region_code,
-                                                    product_vertex, product_reserved_offer_dict)
+                # load Reserved prices for Product
+                if reserved_dict is not None:
+                    product_reserved_offer_dict = reserved_dict.pop(product_key, None)
+                    if product_reserved_offer_dict is not None:
+                        add_product_priceTerm_and_edge(graph_traversal, 'Reserved', aws_region_code,
+                                                        product_vertex, product_reserved_offer_dict)
 
         except KeyError:
             print("SKU:", product_key, "in region:", aws_region_code, "does not have 'productFamily attribute")
@@ -202,3 +202,9 @@ def load_ec2_pricing_data_to_neptune(graph_traversal: GraphTraversalSource):
                 time_taken = str(datetime.timedelta(seconds=end_time - start_time))
                 print("Data Loading for EC2 Instance Pricing Completed for region:" + region + 'in:' + time_taken + "\n")
     print('Completed --- Loading EC2 Instance Prices to Neptune\n')
+
+if __name__=='__main__':
+    g = gremlin_interface.get_gremlin_connection('34.229.104.116', '8182')
+    with open('/Users/adethyv/Desktop/Neptune-Blog/Price-API/ec2-ap-northeast-3.json', 'r') as json_file:
+        region_product_dict = json.loads(json_file.read())
+    load_region_offer_to_neptune('ap-northeast-3',region_product_dict, g)
