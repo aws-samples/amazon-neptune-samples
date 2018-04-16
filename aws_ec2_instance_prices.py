@@ -40,7 +40,7 @@ def add_product_priceTerm_and_edge(graph_traversal, offer_type, aws_region_code,
 
         # Create Offer-Price Vertex
         product_sku = product_offers_dict[product_ondemand_offer]['sku']
-        offer_price_vertex_attr = {'sku': product_sku}
+        offer_price_vertex_attr = {}
         # Adding Recurring Fees to Price_Edge Attribute
         price_code = product_sku + '.' + offerTermCode + '.' + recurring_fee_rate_code
         recurring_fee_price_dict = product_offers_dict[product_ondemand_offer]['priceDimensions'][price_code]
