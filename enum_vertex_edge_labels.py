@@ -6,12 +6,14 @@ class VertexEdgeLabels(Enum):
     vertex_label_country = 'country'
     vertex_label_aws_region = 'aws_region'
     vertex_label_aws_service = 'aws_service'
-    vertex_label_aws_product = 'product'
+    vertex_label_offer_price = 'offer_price'
     vertex_label_offer_term = 'offer_term'
-    
+    vertex_label_aws_product = 'product'
+
     edge_label_country_to_continent = 'is_located_in_continent'
     edge_label_awsRegion_to_country = 'is_located_in_country'
     edge_label_awsRegion_to_awsService = 'offers_service'
-    edge_label_awsRegion_to_offerTerm = 'for_term'
-    edge_label_offerTerm_to_product = 'charges'
+    edge_label_awsRegion_to_offerPrice = 'charges'
+    edge_label_offerPrice_to_offer_term = 'for_term'
+    edge_label_offerTerm_to_product = 'for_product'
     edge_label_product_to_awsService = 'is_product_of'

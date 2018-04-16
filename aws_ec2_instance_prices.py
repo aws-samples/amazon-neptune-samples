@@ -25,7 +25,7 @@ def add_product_priceTerm_and_edge(graph_traversal, offer_type, aws_region_code,
         # Add any termAttributes to offer_vertex_attributes
         offer_vertex_attributes.update(product_offers_dict[product_ondemand_offer]['termAttributes'])
 
-        # Create Offer Term Vertex
+        # Create Offer-Term Vertex
         offer_vertex_list = gremlin_interface.fetch_vertex_list(graph_traversal,
                                                                 VertexEdgeLabels.vertex_label_offer_term.value,
                                                                 {'offer_term_code':offerTermCode})
@@ -38,51 +38,59 @@ def add_product_priceTerm_and_edge(graph_traversal, offer_type, aws_region_code,
         else:
             offer_term_vertex = offer_vertex_list[0]
 
-        # Create Edge From Offer_Term Vertex to Product Vertex
+        # Create Offer-Price Vertex
         product_sku = product_offers_dict[product_ondemand_offer]['sku']
-        charges_edge_attr = {'sku': product_sku}
-
+        offer_price_vertex_attr = {'sku': product_sku}
         # Adding Recurring Fees to Price_Edge Attribute
         price_code = product_sku + '.' + offerTermCode + '.' + recurring_fee_rate_code
         recurring_fee_price_dict = product_offers_dict[product_ondemand_offer]['priceDimensions'][price_code]
-        charges_edge_attr['recurring_fee_usd'] = recurring_fee_price_dict['pricePerUnit']['USD']
-        charges_edge_attr['recurring_fee_unit'] = recurring_fee_price_dict['unit']
-        charges_edge_attr['recurring_fee_description'] = recurring_fee_price_dict['description']
+        offer_price_vertex_attr['recurring_fee_usd'] = recurring_fee_price_dict['pricePerUnit']['USD']
+        offer_price_vertex_attr['recurring_fee_unit'] = recurring_fee_price_dict['unit']
+        offer_price_vertex_attr['recurring_fee_description'] = recurring_fee_price_dict['description']
 
         # Add UpFront Fee to Price_Edge Attribute
         price_code = product_sku + '.' + offerTermCode + '.' + upfront_fee_rate_code
         upfront_fee_price_dict = product_offers_dict[product_ondemand_offer]['priceDimensions'].pop(price_code, None)
         if upfront_fee_price_dict is not None:
-            charges_edge_attr['upfront_fee_usd'] = recurring_fee_price_dict['pricePerUnit']['USD']
-            charges_edge_attr['upfront_fee_unit'] = recurring_fee_price_dict['unit']
-            charges_edge_attr['upfront_fee_description'] = recurring_fee_price_dict['description']
+            offer_price_vertex_attr['upfront_fee_usd'] = recurring_fee_price_dict['pricePerUnit']['USD']
+            offer_price_vertex_attr['upfront_fee_unit'] = recurring_fee_price_dict['unit']
+            offer_price_vertex_attr['upfront_fee_description'] = recurring_fee_price_dict['description']
+            
+        offer_price_vertex_list = gremlin_interface.fetch_vertex_list(graph_traversal,
+                                                                VertexEdgeLabels.vertex_label_offer_price.value,
+                                                                offer_price_vertex_attr)
+        if len(offer_price_vertex_list) == 0:
+            offer_price_vertex = gremlin_interface.add_vertex(graph_traversal,
+                                                              VertexEdgeLabels.vertex_label_offer_price.value)
+            gremlin_interface.add_update_vertex_properties(graph_traversal, offer_price_vertex, offer_price_vertex_attr)
 
-        offer_product_edge_list = gremlin_interface.fetch_edge_list(graph_traversal,
-                                                                    offer_term_vertex,
-                                                                    product_vertex,
-                                                                    VertexEdgeLabels.edge_label_offerTerm_to_product.value,
-                                                                    charges_edge_attr)
-
-        if len(offer_product_edge_list) == 0:
-            offer_product_edge = gremlin_interface.add_edge(graph_traversal,
-                                                            offer_term_vertex,
-                                                            product_vertex,
-                                                            VertexEdgeLabels.edge_label_offerTerm_to_product.value)
-            gremlin_interface.add_update_edge_properties(graph_traversal, offer_product_edge, charges_edge_attr)
-
-        # Create Edge From AWS-Region Vertex to Offer-Term Vertex
+        # Add Edge from AWS-Region to Offer-Price
         aws_region_vertex = gremlin_interface.fetch_vertex_list(graph_traversal,
                                                                 VertexEdgeLabels.vertex_label_aws_region.value,
                                                                 {'code': aws_region_code})[0]
-        region_offer_edge_list = gremlin_interface.fetch_edge_list(graph_traversal,
+        region_price_edge_list = gremlin_interface.fetch_edge_list(graph_traversal,
                                                                    aws_region_vertex,
-                                                                   offer_term_vertex,
-                                                                   VertexEdgeLabels.edge_label_awsRegion_to_offerTerm.value)
-        if len(region_offer_edge_list) == 0:
-            gremlin_interface.add_edge(graph_traversal,
-                                       aws_region_vertex,
-                                       offer_term_vertex,
-                                       VertexEdgeLabels.edge_label_awsRegion_to_offerTerm.value)
+                                                                   offer_price_vertex,
+                                                                   VertexEdgeLabels.edge_label_awsRegion_to_offerPrice.value)
+        if len(region_price_edge_list) == 0:
+            gremlin_interface.add_edge(graph_traversal, aws_region_vertex, offer_price_vertex,
+                                       VertexEdgeLabels.edge_label_awsRegion_to_offerPrice.value)
+
+        # Add Edge From Offer-Price to Offer-Term
+        price_term_edge_list = gremlin_interface.fetch_edge_list(graph_traversal,
+                                                                 offer_price_vertex, offer_term_vertex,
+                                                                 VertexEdgeLabels.edge_label_offerPrice_to_offer_term.value)
+        if len(price_term_edge_list) == 0:
+            gremlin_interface.add_edge(graph_traversal, offer_price_vertex, offer_term_vertex,
+                                       VertexEdgeLabels.edge_label_offerPrice_to_offer_term.value)
+
+        # Add Edge from Offer-Term to Product
+        term_product_edge_list = gremlin_interface.fetch_edge_list(graph_traversal,
+                                                                   offer_term_vertex, product_vertex,
+                                                                   VertexEdgeLabels.edge_label_offerTerm_to_product.value)
+        if len(term_product_edge_list) == 0:
+            gremlin_interface.add_edge(graph_traversal, offer_term_vertex, product_vertex,
+                                       VertexEdgeLabels.edge_label_offerTerm_to_product.value)
 
 
 # Creates Product Vertex or return Product Vertex that exists
