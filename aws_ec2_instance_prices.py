@@ -70,7 +70,7 @@ def add_product_priceTerm_and_edge(graph_traversal, offer_type, aws_region_code,
                                                             VertexEdgeLabels.edge_label_offerTerm_to_product.value)
             gremlin_interface.add_update_edge_properties(graph_traversal, offer_product_edge, charges_edge_attr)
 
-        # Create Edge From AWS Region to Offer-Term
+        # Create Edge From AWS-Region Vertex to Offer-Term Vertex
         aws_region_vertex = gremlin_interface.fetch_vertex_list(graph_traversal,
                                                                 VertexEdgeLabels.vertex_label_aws_region.value,
                                                                 {'code': aws_region_code})[0]
@@ -82,7 +82,7 @@ def add_product_priceTerm_and_edge(graph_traversal, offer_type, aws_region_code,
             region_offer_edge = gremlin_interface.add_edge(graph_traversal,
                                                            aws_region_vertex,
                                                            offer_term_vertex,
-                                                           VertexEdgeLabels.edge_label_priceTerm_to_product.value)
+                                                           VertexEdgeLabels.edge_label_awsRegion_to_offerTerm.value)
 
 
 # Creates Product Vertex or return Product Vertex that exists
