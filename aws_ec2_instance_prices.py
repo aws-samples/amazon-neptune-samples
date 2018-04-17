@@ -56,6 +56,8 @@ def add_product_priceTerm_and_edge(graph_traversal, offer_type, aws_region_code,
             gremlin_interface.add_update_vertex_properties(graph_traversal,
                                                            offer_term_vertex,
                                                            offer_term_vertex_attributes)
+        elif offer_term_vertex == 1:
+            offer_term_vertex = offer_term_vertex_list[0]
 
         # Create Edge from AWS-Region to Offer-Term
         aws_region_vertex = gremlin_interface.fetch_vertex_list(graph_traversal,
