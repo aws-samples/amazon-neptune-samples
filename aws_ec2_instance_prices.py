@@ -30,8 +30,8 @@ def add_product_priceTerm_and_edge(graph_traversal, offer_type, aws_region_code,
         price_code = product_sku + '.' + offerTermCode + '.' + upfront_fee_rate_code
         upfront_fee_price_dict = product_offers_dict[product_ondemand_offer]['priceDimensions'].pop(price_code, None)
         if upfront_fee_price_dict is not None:
-            offer_term_vertex_attributes['upfront_fee_usd'] = recurring_fee_price_dict['pricePerUnit']['USD']
-            offer_term_vertex_attributes['upfront_fee_unit'] = recurring_fee_price_dict['unit']
+            offer_term_vertex_attributes['upfront_fee_usd'] = upfront_fee_price_dict['pricePerUnit']['USD']
+            offer_term_vertex_attributes['upfront_fee_unit'] = upfront_fee_price_dict['unit']
         else:
             offer_term_vertex_attributes['upfront_fee_usd'] = '0.00'
             offer_term_vertex_attributes['upfront_fee_unit'] = 'Quantity'
