@@ -7,6 +7,9 @@ Samples and documentation for using the Amazon Neptune graph database service
 #### Collaborative Filtering 
 This is an [example](gremlin/collaborative-filtering/README.md) of using Gremlin and making recommendations using collaborative filtering. It includes examples of loading data and Gremlin traversals.
 
+#### AWS Services Price Graph
+This is an [example](gremlin/aws-price-services-graph/README.md) of using Gremlin to build a graph of AWS service prices.
+
 ### SPARQL
 **Coming soon!**
 
