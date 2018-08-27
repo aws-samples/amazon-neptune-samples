@@ -1,0 +1,18 @@
+~id,~label,GamerAlias:String,ReleaseDate:Date,GameGenre:String,ESRBRating:String,Developer:String,Platform:String,GameTitle:String 
+Luke,person,skywalker123
+Emma,person,smiles007
+Lina,person,bringit32
+Mike,person,forchinet       
+HorizonZeroDawn,game,,2017-02-28,Adventure,E,Guerrilla Games,PS4,HorizonZeroDawn
+GranTurismoSport,game,,2017-10-17,Racing,E,Sony Interactive Entertainment,PS4,GranTurismoSport
+Ratchet&Clank,game,,2016-02-17,Adventure,T,Insomniac Games,PS4,Ratchet&Clank
+Fifa18,game,,2017-09-29,Sports,E,Electronic Arts,PS4,Fifa18
+GravityRush,game,,2012-02-09,Shooter,E,Project Siren, PS4,GravityRush
+Nioh,game,,2017-02-07,Action,T,Team Ninja,PS4,Nioh
+TombRaider,game,,2016-10-11,Action,T,Square Enix,PS4,TombRaider
+CallOfDutyBO4,game,,2018-10-12,Shooter,M,Activision,PS4,CallOfDutyBO4
+Knack,game,,2013-11-15,Adventure,E,Sony Interactive Entertainment,PS4,Knack
+SuperMarioOdyssey,game,,2017-10-27,Adventure,E,Nintendo,Switch,SuperMarioOdyssey
+MarioKart8,game,,2017-4-28,Racing,E,Nintendo,Switch,MarioKart8
+ARMS,game,,2017-06-16,Action,E,Nintendo,Switch,ARMs
+Mario+Rabbids,game,,2017-08-29,Adventure,E,Ubisoft,Switch,Mario+Rabbids

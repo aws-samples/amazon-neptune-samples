@@ -6,11 +6,14 @@ This example is a gremlin tutorial that shows how to explore the graph with samp
 
 This tutorial assumes you already have your environment setup. To setup a new environment, create an Amazon Neptune Cluster. 
 
-See the following links on how to create an Amazon Neptune Cluster for Gremlin:  
+See the following links on how to create an Amazon Neptune Cluster for Gremlin and setup IAM authentication:  
 
 * https://docs.aws.amazon.com/neptune/latest/userguide/get-started-CreateInstance-Console.html
+* https://docs.aws.amazon.com/neptune/latest/userguide/bulk-load-tutorial-IAM.html
 * https://docs.aws.amazon.com/neptune/latest/userguide/bulk-load.html
 * https://docs.aws.amazon.com/neptune/latest/userguide/bulk-load-tutorial-format-gremlin.html
+
+You will also need to load the data [files](data/) into an S3 bucket. 
 
 
 ## Use Case
@@ -31,9 +34,8 @@ curl -X POST \
     -H 'Content-Type: application/json' \
     http://your-neptune-endpoint:8182/loader -d '
     { 
-      "source" : "s3://neptune-data-ml/recommendation/vertex.txt", 
-      "accessKey" : "", 
-      "secretKey" : "",
+      "source" : "s3://your-s3-bucket/vertex.txt", 
+      "iamRoleArn" : "arn:aws:iam::account-id:role/role-name",
       "format" : "csv", 
       "region" : "us-east-1", 
       "failOnError" : "FALSE"
@@ -46,9 +48,8 @@ curl -X POST \
     -H 'Content-Type: application/json' \
     http://your-neptune-endpoint:8182/loader -d '
     { 
-      "source" : "s3://neptune-data-ml/recommendation/edges.txt", 
-      "accessKey" : "", 
-      "secretKey" : "",
+      "source" : "s3://your-s3-bucket/recommendation/edges.txt", 
+      "iamRoleArn" : "arn:aws:iam::account-id:role/role-name",
       "format" : "csv", 
       "region" : "us-east-1", 
       "failOnError" : "FALSE"
@@ -61,9 +62,8 @@ curl -X POST \
     -H 'Content-Type: application/json' \
     http://your-neptune-endpoint:8182/loader -d '
     { 
-      "source" : "s3://neptune-data-ml/recommendation/", 
-      "accessKey" : "", 
-      "secretKey" : "",
+      "source" : "s3://your-s3-bucket/", 
+      "iamRoleArn" : "arn:aws:iam::account-id:role/role-name",
       "format" : "csv", 
       "region" : "us-east-1", 
       "failOnError" : "FALSE"
