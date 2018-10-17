@@ -1,0 +1,48 @@
+{
+  "VertexTypes": [
+    {
+      "name": "T1",
+      "columns": {
+        "T1-P1": {"dataType":"String","composit":true}
+      },
+      "row": 100000
+    },
+    {
+      "name": "T2",
+      "columns": {
+        "T2-P1": {"dataType":"String","composit":true},
+        "T2-P2": {"dataType":"Integer","composit":true}
+      },
+      "row": 100000
+    },
+    {
+      "name": "T3",
+      "columns": {
+        "T3-P1": {"dataType":"String","composit":true},
+        "T3-P2": {"dataType":"String","composit":true}
+      },
+      "row": 100000
+    }
+
+  ],
+  "EdgeTypes": [
+    {
+      "name": "E1",
+      "columns": {
+        "E1-P1": {"dataType":"Integer","composit":true}
+      },
+      "relations": [
+        {"left": "T1", "right": "T2", "row": 100000 }
+      ]
+    },
+    {
+      "name": "E2",
+      "columns": {
+        "E2-P1": {"dataType":"Date","composit":true}
+      },
+      "relations": [
+        {"left": "T2", "right": "T3", "row":200000 }
+      ]
+    }
+  ]
+}
