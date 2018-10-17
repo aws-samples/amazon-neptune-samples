@@ -51,8 +51,8 @@ Clone the `twitter-like-app` repo on the EC2 instance and run `mvn package`.
 
 ```
 sudo yum install git
-git clone https://github.com/EjazSayyed/twitter-like-app.git
-cd twitter-like-app/
+git clone https://github.com/aws-samples/amazon-neptune-samples.git
+cd gremlin/twitter-like-app/
 mvn package
 ```
 
