@@ -12,7 +12,7 @@ When the reader has completed this Code Pattern, they will understand how to:
 
 ## Flow
 
-1. The user clones this GitHub repo (twitter-like-app)
+1. The user clones this GitHub repo (amazon-neptune-samples)
 2. The user generates Twitter sample data using Neptune java utility in this repo (graph data would be available in Amazon S3)
 3. The user loads this data into Amazon Neptune using Amazon Neptune Bulk Loader utility
 4. The user makes search queries and update the graph using Apache Tinkerpop Gremlin client
