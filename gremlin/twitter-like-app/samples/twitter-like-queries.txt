@@ -24,9 +24,6 @@ g.V().has('name', 'Indiana Jones').in('Follows').as('a').out('Retweets').in('Twe
 8. Find Indiana Jones' tweets that his followers retweeted
 g.V().has('name', 'Indiana Jones').in('Follows').out('Retweets').as('a').in('Tweets').has('name', 'Indiana Jones').select('a').by('text').dedup()
 
-9. Find Indiana Jones' followers who retweeted his tweets and the retweeted tweets
-g.V().has('name', 'Indiana Jones').in('Follows').has('name',not(within('Indiana Jones'))).as('follower').out('Retweets').as('retweet').in('Tweets').has('name', 'Indiana Jones').sideEffect{println \"${it.path().get('follower').value('name')} retweeted ===> ${it.path().get('retweet').value('text')}\" }
-
 10.Add a new user
 g.addV('User').property('name','John Doe')
 
