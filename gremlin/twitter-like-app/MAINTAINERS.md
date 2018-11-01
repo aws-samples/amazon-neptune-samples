@@ -1,7 +1,6 @@
 # Maintainers Guide
 
-This guide is intended for maintainers - anybody with commit access to one or
-more Code Pattern repositories.
+This guide is intended for maintainers.
 
 ## Methodology
 
@@ -16,9 +15,7 @@ repositories.
 ## Merge approval
 
 The project maintainers use LGTM (Looks Good To Me) in comments on the pull
-request to indicate acceptance prior to merging. A change requires LGTMs from
-two project maintainers. If the code is written by a maintainer, the change
-only requires one additional LGTM.
+request to indicate acceptance prior to merging. 
 
 ## Reviewing Pull Requests
 
