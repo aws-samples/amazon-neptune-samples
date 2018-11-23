@@ -203,6 +203,8 @@ aws s3api put-bucket-website --bucket <bucket-name> --website-configuration '{
 The visualize-graph.html file that we have as a part of this GitHub repository has to be updated to reflect the API Gateway Endpoint that we created in the steps above.
 
 Execute below commands to replace value of `API_GATEWAY_ENDPOINT` placeholder by real API Gateway Endpoint.
+You can obtain the value of `API_GATEWAY_ENDPOINT` from AWS Management Console by navigating to API Gateway -> APIs -> Select the API Name -> Stages. Copy the value of `Invoke URL` field as `API_GATEWAY_ENDPOINT` value as replace it in the below commands.
+You can also construct this URL using `https://<rest-api-id>.execute-api.<aws-region-code>.amazonaws.com/<stage-name>`.
 
 NOTE: While executing the below commands make sure to use escape character "\\" in URLs.
 
