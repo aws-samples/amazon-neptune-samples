@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "gremlin": "3.2.9"
+  }
+}
