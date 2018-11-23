@@ -107,7 +107,9 @@ Below is the command to attach the policy provided by AWS to the above role.
 aws iam attach-role-policy --role-name lambda-vpc-access-role --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaENIManagementAccess
 ```
 
-We will now create the AWS Lambda function using the deployment package and IAM role created in previous steps.
+We will now create the AWS Lambda function using the deployment package and IAM role created in previous steps.<BR>
+
+NOTE: Use `subnet-ids` from the VPC in which Amazon Neptune cluster is provisioned.
 
 ```
 aws lambda create-function --function-name <lambda-function-name> \
