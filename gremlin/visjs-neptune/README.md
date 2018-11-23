@@ -69,9 +69,9 @@ sudo yum install git
 
 sudo yum install npm
 
-git clone https://github.com/EjazSayyed/vis-js-neptune.git
+git clone https://github.com/aws-samples/amazon-neptune-samples.git
 
-cd vis-js-neptune
+cd gremlin/visjs-neptune
 
 npm install
 
