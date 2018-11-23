@@ -193,7 +193,7 @@ aws s3api put-bucket-website --bucket <bucket-name> --website-configuration '{
         "Suffix": "visualize-graph.html"
     },
     "ErrorDocument": {
-        "Key": "error.html"
+        "Key": "visualization-error.html"
     }
 }'
 ```
@@ -226,7 +226,7 @@ Once you have replace the value of placeholder `API_GATEWAY_ENDPOINT` in visuali
 
 ```
 --upload the html document with public read access
-aws s3 cp ./  s3://<bucket-name> --recursive --exclude "*" --include "*.html" --acl public-read
+aws s3 cp ./  s3://<bucket-name> --recursive --exclude "*" --include "vis*.html" --acl public-read
 ```
 
 And, you are all set!
