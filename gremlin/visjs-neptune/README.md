@@ -5,8 +5,7 @@ Amazon Neptune is a fast, reliable, fully-managed graph database service availab
 With Amazon Neptune you can use open and popular graph query languages such as Apache TinkerPop Gremlin for property graph databases or SPARQL for W3C RDF model graph databases.
 
 ## Primer
-Currently, Amazon Neptune does not provide visualization service from the AWS console.
-Customers can leverage our partner solutions mentioned below to perform visualization of data in Amazon Neptune.
+Currently, customers can leverage our partner solutions mentioned below to perform visualization of data in Amazon Neptune.
 Some of our partners in this area are - 
 1. Tom Sawyer Perspectives by TomSawyer Softwares
 2. Keylines by Cambridge Intelligence
