@@ -117,6 +117,7 @@ aws lambda create-function --function-name <lambda-function-name> \
 --timeout 120 --memory-size 256 --publish \
 --vpc-config SubnetIds=<subnet-ids>,SecurityGroupIds=<sec-group-id> \
 --zip-file fileb://lambdapackage.zip
+--environment Variables={NEPTUNE_CLUSTER_ENDPOINT=<your-neptune-cluster-endpoint>,NEPTUNE_PORT=<your-neptune-db-port>}
 ```
 
 We recommend you to go through the AWS Lambda function source code at this point to understand how to query data using `Gremlin` APIs and how to parse and reformat the data to send it over to the clients.
