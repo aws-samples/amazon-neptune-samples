@@ -16,9 +16,6 @@ This is an [example](gremlin/collaborative-filtering/README.md) of using Gremlin
 #### Visualize data in Amazon Neptune using VIS.js library
 This [GitHub lab](gremlin/visjs-neptune) will take you through hands-on excercise of visualizing graph data in Amazon Neptune using VIS.js library. Amazon Neptune is a fast, reliable, fully-managed graph database service available from AWS. With Amazon Neptune you can use open source and popular graph query languages such as Apache TinkerPop Gremlin for property graph databases or SPARQL for W3C RDF model graph databases.
 
-### ETL Process for Transforming and Loading Data Into Amazon Neptune
-The following [lab](gremlin/etl-from-relational-model) uses the open [IMDB dataset](https://www.imdb.com/interfaces/). This is a small subset of the full IMDB.com application. With this dataset, we want to develop an application that allows for us to find whether or not an actor or actress is no more than [six degrees separated from the actor Kevin Bacon](https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon).  In this example, AWS Glue and Amazon Athena are used to discover and transform the relational model used by IMDB into a graph model that can be loaded into Amazon Neptune.  This pattern can be used to transform other relational models into graph models for similar purposes.
-
 ### SPARQL
 **Coming soon!**
 
