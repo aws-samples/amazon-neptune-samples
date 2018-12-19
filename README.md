@@ -22,6 +22,11 @@ The following [lab](gremlin/etl-from-relational-model) uses the open [IMDB datas
 ### SPARQL
 **Coming soon!**
 
+### Related samples
+
+#### Serverless Application with AWS AppSync and Amazon Neptune
+You may also be interested in this [example serverless application](https://github.com/aws-samples/aws-appsync-calorie-tracker-workshop) that uses AWS AppSync GraphQL and Amazon Neptune. 
+
 ## License Summary
 
 This sample code is made available under a modified MIT license. See the LICENSE file.
