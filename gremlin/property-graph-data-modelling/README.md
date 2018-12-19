@@ -32,7 +32,7 @@ Once we have a candidate application graph model, there are a couple of addition
 
 We'll design our model and queries in an executable fashion, using small sample datasets to cover each use case, and unit tests to validate our queries. These unit tests provide a "bedrock of asserted behaviour" that gives us fast feedback as we evolve our model and queries.
 
-## Running the example
+## Running the Example
 
 You can download the examples as Jupyter notebooks or as HTML. Alternatively, you can run the examples inside Amazon Neptune from an Amazon SageMaker Jupyter notebook by launching an AWS CloudFormation stack using one of the links below.
 
