@@ -13,6 +13,13 @@
         <javac.target>1.8</javac.target>
         <uberjar.name>social-app-driver</uberjar.name>
     </properties>
+    
+    <licenses>
+        <license>
+          <name>MIT</name>
+          <url>https://github.com/aws-samples/amazon-neptune-samples/blob/master/LICENSE</url>
+        </license>
+    </licenses>
 
     <dependencies>
 
