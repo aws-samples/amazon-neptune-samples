@@ -15,30 +15,32 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-package com.amazonaws.services.neptune.examples.social.tasks;
+package com.amazonaws.services.neptune.examples.utils;
 
-import java.nio.ByteBuffer;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 
-public class EdgeInfo {
-    private final String fromVertexId;
-    private final String toVertexId;
-    private final String creationDate;
+import java.util.concurrent.TimeUnit;
 
-    public EdgeInfo(String fromVertexId, String toVertexId, String creationDate) {
-        this.fromVertexId = fromVertexId;
-        this.toVertexId = toVertexId;
-        this.creationDate = creationDate;
+public class ActivityTimer implements AutoCloseable {
+
+    private final LambdaLogger logger;
+    private final String description;
+    private final long start = System.nanoTime();
+
+    public ActivityTimer(LambdaLogger logger, String description) {
+        this.logger = logger;
+        this.description = description;
     }
 
-    public ByteBuffer bytes(){
-        return ByteBuffer.wrap(String.format(
-                "%s,%s,%s",
-                fromVertexId,
-                toVertexId,
-                creationDate).getBytes());
+    public long stop(){
+        long end = System.nanoTime();
+        long duration = TimeUnit.NANOSECONDS.toMillis(end - start);
+        logger.log(description + ": " + duration + " ms");
+        return duration;
     }
 
-    public String partitionKey() {
-        return fromVertexId;
+    @Override
+    public void close() {
+        stop();
     }
 }
