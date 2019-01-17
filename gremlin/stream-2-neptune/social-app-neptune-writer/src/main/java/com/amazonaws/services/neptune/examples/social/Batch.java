@@ -42,7 +42,7 @@ public class Batch {
             Metrics metrics,
             LambdaLogger logger) throws IOException {
 
-        try (ActivityTimer batchTimer = new ActivityTimer(logger, "Write batch [" + batchId + "]")) {
+        try (ActivityTimer batchTimer = new ActivityTimer(logger, "TOTAL write batch [" + batchId + "]")) {
 
             AddBatchEdgesQuery query = new AddBatchEdgesQuery(neptuneClient, logger, parameters.conditionalCreate());
 

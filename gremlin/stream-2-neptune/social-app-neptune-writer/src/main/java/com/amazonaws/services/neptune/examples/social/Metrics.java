@@ -17,8 +17,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.amazonaws.services.neptune.examples.social;
 
-import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
-import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatchAsync;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatchAsyncClientBuilder;
 import com.amazonaws.services.cloudwatch.model.Dimension;
 import com.amazonaws.services.cloudwatch.model.MetricDatum;
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest;
@@ -31,7 +31,8 @@ import java.util.List;
 
 public class Metrics {
 
-    private final AmazonCloudWatch cw = AmazonCloudWatchClientBuilder.defaultClient();
+    private final AmazonCloudWatchAsync cw = AmazonCloudWatchAsyncClientBuilder.defaultClient();
+
     private final String clusterId;
     private final LambdaLogger logger;
     private final List<Double> batchSizes = new ArrayList<>();
@@ -49,23 +50,26 @@ public class Metrics {
 
     public void publish() {
 
+        AmazonCloudWatchAsync cwa = AmazonCloudWatchAsyncClientBuilder.defaultClient();
+
         try (ActivityTimer timer = new ActivityTimer(logger, "Publish metrics")) {
-            cw.putMetricData(new PutMetricDataRequest().
-                    withMetricData(new MetricDatum()
-                            .withMetricName("EdgesSubmitted")
-                            .withUnit(StandardUnit.Count)
-                            .withValues(batchSizes)
-                            .withStorageResolution(1)
-                            .withDimensions(new Dimension().withName("clusterId").withValue(clusterId))).
-                    withNamespace("aws-samples/stream-2-neptune"));
+
+            MetricDatum edgesSubmitted = new MetricDatum()
+                    .withMetricName("EdgesSubmitted")
+                    .withUnit(StandardUnit.Count)
+                    .withValues(batchSizes)
+                    .withStorageResolution(1)
+                    .withDimensions(new Dimension().withName("clusterId").withValue(clusterId));
+
+            MetricDatum writeDuration = new MetricDatum()
+                    .withMetricName("WriteDuration")
+                    .withUnit(StandardUnit.Milliseconds)
+                    .withValues(durations)
+                    .withStorageResolution(1)
+                    .withDimensions(new Dimension().withName("clusterId").withValue(clusterId));
 
             cw.putMetricData(new PutMetricDataRequest().
-                    withMetricData(new MetricDatum()
-                            .withMetricName("WriteDuration")
-                            .withUnit(StandardUnit.Milliseconds)
-                            .withValues(durations)
-                            .withStorageResolution(1)
-                            .withDimensions(new Dimension().withName("clusterId").withValue(clusterId))).
+                    withMetricData(edgesSubmitted, writeDuration).
                     withNamespace("aws-samples/stream-2-neptune"));
         }
     }
