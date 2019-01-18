@@ -95,7 +95,7 @@ Once the stack creation has completed, make a note of the *SageMakerNotebook*, *
   7. AWS Lambda reads records from the data stream and invokes a Lambda function with an event that contains stream records. It processes one batch of records at a time from each shard (i.e. with two shards, there will be two concurrent Lambda invocations).
   8. The Lambda function is configured to access resources in the Neptune VPC.
   9. With each invocation, the Lambda function writes a batch of edges to the Neptune cluster endpoint.
-  10. The Lambda fucntion publishes custom throughput and latency metrics to Amazon CloudWatch.
+  10. The Lambda function publishes custom throughput and latency metrics to Amazon CloudWatch.
 
 #### Querying Neptune
 
