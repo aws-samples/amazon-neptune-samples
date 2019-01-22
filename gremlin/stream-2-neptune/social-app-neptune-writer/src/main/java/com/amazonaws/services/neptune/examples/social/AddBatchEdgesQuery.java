@@ -18,72 +18,60 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.amazonaws.services.neptune.examples.social;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import com.amazonaws.services.neptune.examples.utils.ActivityTimer;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.structure.T;
 
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.V;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.unfold;
 
-class BatchAddEdges {
+class AddBatchEdgesQuery {
 
-    private final AtomicReference<GraphTraversal<?, ?>> traversal;
+    private GraphTraversal traversal;
     private final LambdaLogger logger;
     private final boolean conditionalCreate;
 
-    BatchAddEdges(NeptuneClient neptuneClient, LambdaLogger logger, boolean conditionalCreate) {
-        this.traversal = new AtomicReference<>(neptuneClient.newTraversal());
+    AddBatchEdgesQuery(NeptuneClient neptuneClient, LambdaLogger logger, boolean conditionalCreate) {
+        this.traversal = neptuneClient.newTraversal();
         this.logger = logger;
         this.conditionalCreate = conditionalCreate;
-
-        logger.log("Begin batch query");
     }
 
     void addEdge(String fromVertexId, String toVertexId, String creationDate, long insertDateTime) {
 
         String edgeId = conditionalCreate ?
                 String.format("%s-%s-%s", fromVertexId, creationDate, toVertexId) :
-                UUID.randomUUID().toString() ;
-
-        GraphTraversal<?, ?> t = traversal.get();
+                UUID.randomUUID().toString();
 
         if (conditionalCreate) {
-            traversal.set(t.V(fromVertexId).outE("follows").hasId(edgeId).fold().coalesce(
+            traversal = traversal.V(fromVertexId).outE("follows").hasId(edgeId).fold().coalesce(
                     unfold(),
                     V(fromVertexId).addE("follows").to(V(toVertexId)).
                             property(T.id, edgeId).
                             property("creationDate", creationDate).
-                            property("insertDateTime", insertDateTime)
-            ));
+                            property("insertDateTime", insertDateTime));
         } else {
-            traversal.set(t.V(fromVertexId).addE("follows").to(V(toVertexId)).
+            traversal = traversal.V(fromVertexId).addE("follows").to(V(toVertexId)).
                     property(T.id, edgeId).
                     property("creationDate", creationDate).
-                    property("insertDateTime", insertDateTime)
-            );
+                    property("insertDateTime", insertDateTime);
         }
     }
 
     void provokeError() {
         logger.log("Forcing a ConstraintViolationException (and rollback)");
 
-        traversal.set(traversal.get().
+        traversal = traversal.
                 addV("error").property(T.id, "error").
-                addV("error").property(T.id, "error"));
+                addV("error").property(T.id, "error");
     }
 
-    long execute() {
-        GraphTraversal<?, ?> t = traversal.get();
-        long start = System.nanoTime();
-        t.forEachRemaining(
-                e -> logger.log(e.toString())
-        );
-        long end = System.nanoTime();
-        long duration = TimeUnit.NANOSECONDS.toMillis(end - start);
-        logger.log("End batch query (" + duration + " ms)");
-        return duration;
+    long execute(int batchId) {
+        ActivityTimer timer = new ActivityTimer(logger, "Execute query [" + batchId + "]");
+        traversal.forEachRemaining(e -> {
+        });
+        return timer.stop();
     }
 }

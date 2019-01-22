@@ -18,6 +18,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.amazonaws.services.neptune.examples.social;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import com.amazonaws.services.neptune.examples.utils.ActivityTimer;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
@@ -39,10 +40,16 @@ public class NeptuneClient implements AutoCloseable {
     }
 
     private void init() {
-        try {
+        try (ActivityTimer timer = new ActivityTimer(logger, "Create Neptune client")) {
             cluster = Cluster.build()
                     .addContactPoint(endpoint)
                     .port(8182)
+                    .maxInProcessPerConnection(1)
+                    .minInProcessPerConnection(1)
+                    .maxConnectionPoolSize(1)
+                    .minConnectionPoolSize(1)
+                    .maxSimultaneousUsagePerConnection(1)
+                    .minSimultaneousUsagePerConnection(1)
                     .create();
             g = EmptyGraph.instance()
                     .traversal()
@@ -57,15 +64,18 @@ public class NeptuneClient implements AutoCloseable {
         }
     }
 
-    GraphTraversal<?, ?> newTraversal(){
-        return g.inject(0);
+    GraphTraversal<?, ?> newTraversal() {
+        try (ActivityTimer timer = new ActivityTimer(logger, "New traversal")) {
+            return g.inject(0);
+        }
     }
 
     @Override
     public void close() throws Exception {
-        g.close();
-        if (cluster != null && !cluster.isClosed() && !cluster.isClosing()) {
-            cluster.close();
+        try (ActivityTimer timer = new ActivityTimer(logger, "Close Neptune client")) {
+            if (cluster != null && !cluster.isClosed() && !cluster.isClosing()) {
+                cluster.closeAsync();
+            }
         }
     }
 }
