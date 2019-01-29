@@ -6,7 +6,7 @@ The design process here is shown in "slow motion", with each use case triggering
 
 ## Scenario
 
-Let's assume we're about to build an employment history application backed by a graph database. The application will store and amange details regarding people and the roles they have had with different companies.
+Let's assume we're about to build an employment history application backed by a graph database. The application will store and manage details regarding people and the roles they have had with different companies.
 
 We have an initial backlog of use cases:
 
