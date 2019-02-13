@@ -1,0 +1,262 @@
+{
+  "Description": " - Amazon RDS VPC resources inside an existing VPC",
+  "Parameters": {
+    "InfrastructureID": {
+      "Description": "Infrastructure ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50
+    },
+    "RDSPort": {
+      "Description": "RDS database port",
+      "Type": "Number"
+    }
+  },
+  "Resources": {
+    "RDSClientSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-VPC"
+          }
+        },
+        "GroupDescription": "Allow Access",
+        "SecurityGroupIngress": [
+          {
+            "FromPort": "22",
+            "ToPort": "22",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "Description": "SSH from anywhere"
+          },
+          {
+            "FromPort": {"Ref": "RDSPort"},
+            "ToPort": {"Ref": "RDSPort"},
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "Description": "HTTP access"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RDS client security group"
+          }
+        ]
+      }
+    },
+    "RDSSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "DependsOn": [
+        "RDSClientSecurityGroup"
+      ],
+      "Properties": {
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-VPC"
+          }
+        },
+        "GroupDescription": "Allow Access",
+        "SecurityGroupIngress": [
+          {
+            "FromPort": "22",
+            "ToPort": "22",
+            "IpProtocol": "tcp",
+            "SourceSecurityGroupId": {
+              "Ref": "RDSClientSecurityGroup"
+            },
+            "Description": "SSH from RDS client security group"
+          },
+          {
+            "FromPort": {"Ref": "RDSPort"},
+            "ToPort": {"Ref": "RDSPort"},
+            "IpProtocol": "tcp",
+            "SourceSecurityGroupId": {
+              "Ref": "RDSClientSecurityGroup"
+            },
+            "Description": "HTTP access from RDS client security group"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RDS security group"
+          }
+        ]
+      }
+    },
+    "Subnet1": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "172.30.4.0/24",
+        "MapPublicIpOnLaunch": "true",
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-VPC"
+          }
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RDS subnet 1"
+          }
+        ]
+      }
+    },
+    "Subnet2": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "172.30.5.0/24",
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-VPC"
+          }
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RDS subnet 2"
+          }
+        ]
+      }
+    },
+    "Subnet3": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "172.30.6.0/24",
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-VPC"
+          }
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            2,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RDS subnet 3"
+          }
+        ]
+      }
+    },
+    "SubnetRTAssociation1": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "DependsOn": [
+        "Subnet1"
+      ],
+      "Properties": {
+        "RouteTableId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-PublicRouteTable"
+          }
+        },
+        "SubnetId": {
+          "Ref": "Subnet1"
+        }
+      }
+    },
+    "SubnetRTAssociation2": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "DependsOn": [
+        "Subnet2"
+      ],
+      "Properties": {
+        "RouteTableId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-PublicRouteTable"
+          }
+        },
+        "SubnetId": {
+          "Ref": "Subnet2"
+        }
+      }
+    },
+    "SubnetRTAssociation3": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "DependsOn": [
+        "Subnet3"
+      ],
+      "Properties": {
+        "RouteTableId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-PublicRouteTable"
+          }
+        },
+        "SubnetId": {
+          "Ref": "Subnet3"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "RDSSubnetIDs": {
+      "Description": "RDS subnet IDs",
+      "Value": {
+        "Fn::Join": [
+          ",",
+          [
+            {
+              "Ref": "Subnet1"
+            },
+            {
+              "Ref": "Subnet2"
+            },
+            {
+              "Ref": "Subnet3"
+            }
+          ]
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-RDSSubnetIDs"
+        }
+      }
+    },
+    "RDSSecurityGroup": {
+      "Description": "RDS security group",
+      "Value": {
+        "Ref": "RDSSecurityGroup"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-RDSSecurityGroup"
+        }
+      }
+    },
+    "RDSClientSecurityGroup": {
+      "Description": "RDS client security group",
+      "Value": {
+        "Ref": "RDSClientSecurityGroup"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-RDSClientSecurityGroup"
+        }
+      }
+    }
+  }
+}

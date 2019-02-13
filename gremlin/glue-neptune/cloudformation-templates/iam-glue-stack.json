@@ -1,0 +1,53 @@
+{
+  "Description": " - AWS Glue IAM resources",
+  "Parameters": {
+    "InfrastructureID": {
+      "Description": "Infrastructure ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50
+    }
+  },
+  "Resources": {
+    "GlueRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "glue.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/AmazonS3FullAccess",
+          "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
+        ],
+        "RoleName": {
+          "Fn::Sub": "AWSGlueServiceRole_${InfrastructureID}"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "GlueRoleARN": {
+      "Description": "Glue IAM role ARN",
+      "Value": {
+        "Fn::GetAtt": [
+          "GlueRole",
+          "Arn"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-GlueRoleARN"
+        }
+      }
+    }
+  }
+}
