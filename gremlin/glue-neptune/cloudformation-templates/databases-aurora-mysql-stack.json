@@ -1,0 +1,247 @@
+{
+  "Description": " - Amazon Aurora MySQL cluster in VPC",
+  "Parameters": {
+    "DBInstanceType": {
+      "Description": "Aurora MySQL instance type",
+      "Type": "String",
+      "Default": "db.r4.large",
+      "AllowedValues": [
+        "db.t2.small",
+        "db.t2.medium",
+        "db.r3.large",
+        "db.r3.xlarge",
+        "db.r3.2xlarge",
+        "db.r3.4xlarge",
+        "db.r3.8xlarge",
+        "db.r4.large",
+        "db.r4.xlarge",
+        "db.r4.2xlarge",
+        "db.r4.4xlarge",
+        "db.r4.8xlarge",
+        "db.r4.16xlarge"
+      ],
+      "ConstraintDescription": "Must be a valid Aurora MySQL instance type"
+    },
+    "RDSPort": {
+      "Description": "Aurora MySQL database port",
+      "Type": "Number"
+    },
+    "DBUser": {
+      "Description": "Aurora MySQL database master user",
+      "Type": "String"
+    },
+    "DBPassword": {
+      "Description": "Aurora MySQL database master user password",
+      "Type": "String",
+      "MinLength": 8
+    },
+    "IAMAuthEnabled": {
+      "Type": "String",
+      "Default": "false",
+      "AllowedValues": [
+        "true",
+        "false"
+      ],
+      "Description": "Enable IAM auth for Aurora MySQL"
+    },
+    "InfrastructureID": {
+      "Description": "Infrastructure ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50
+    },
+    "ApplicationID": {
+      "Description": "Application ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50
+    }
+  },
+  "Resources": {
+    "RDSDBSubnetGroup": {
+      "Type": "AWS::RDS::DBSubnetGroup",
+      "Properties": {
+        "DBSubnetGroupDescription": "RDS DB subnet group",
+        "SubnetIds": {
+          "Fn::Split": [
+            ",",
+            {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${InfrastructureID}-RDSSubnetIDs"
+              }
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "RDS DB subnet group"
+          }
+        ]
+      }
+    },
+    "AuroraMySQLDBCluster": {
+      "Type": "AWS::RDS::DBCluster",
+      "Properties": {
+        "Engine": "aurora",
+        "DatabaseName": {
+          "Fn::Join": [
+            "",
+            {
+              "Fn::Split": [
+                "-",
+                {
+                  "Ref": "ApplicationID"
+                }
+              ]
+            }
+          ]
+        },
+        "DBSubnetGroupName": {
+          "Ref": "RDSDBSubnetGroup"
+        },
+        "VpcSecurityGroupIds": [
+          {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${InfrastructureID}-DefaultSecurityGroup"
+            }
+          },
+          {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${InfrastructureID}-RDSSecurityGroup"
+            }
+          }
+        ],
+        "MasterUsername": {
+          "Ref": "DBUser"
+        },
+        "MasterUserPassword": {
+          "Ref": "DBPassword"
+        },
+        "DBClusterIdentifier": {
+          "Fn::Sub": "${ApplicationID}-rds"
+        },
+        "Port": {
+          "Ref": "RDSPort"
+        },
+        "EnableIAMDatabaseAuthentication": {
+          "Ref": "IAMAuthEnabled"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Aurora MySQL DB cluster"
+          }
+        ]
+      }
+    },
+    "AuroraMySQLDBInstance": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "DBInstanceClass": {
+          "Ref": "DBInstanceType"
+        },
+        "DBInstanceIdentifier": {
+          "Fn::Sub": "${ApplicationID}-rds-primary"
+        },
+        "DBClusterIdentifier": {
+          "Ref": "AuroraMySQLDBCluster"
+        },
+        "Engine": "aurora",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Aurora MySQL DB instance"
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "AuroraMySQLJDBCURL": {
+      "Description": "Aurora MySQL JDBC URL",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "jdbc:mysql://",
+            {
+              "Fn::GetAtt": [
+                "AuroraMySQLDBCluster",
+                "Endpoint.Address"
+              ]
+            },
+            ":",
+            {
+              "Fn::GetAtt": [
+                "AuroraMySQLDBCluster",
+                "Endpoint.Port"
+              ]
+            },
+            "/",
+            {
+              "Fn::Join": [
+                "",
+                {
+                  "Fn::Split": [
+                    "-",
+                    {
+                      "Ref": "ApplicationID"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-AuroraMySQLJDBCURL"
+        }
+      }
+    },
+    "AuroraMySQLClusterEndpoint": {
+      "Description": "Aurora MySQL primary instance endpoint",
+      "Value": {
+        "Fn::GetAtt": [
+          "AuroraMySQLDBCluster",
+          "Endpoint.Address"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-AuroraMySQLClusterEndpoint"
+        }
+      }
+    },
+    "AuroraMySQLReaderEndpoint": {
+      "Description": "Aurora MySQL reader endpoint",
+      "Value": {
+        "Fn::GetAtt": [
+          "AuroraMySQLDBCluster",
+          "ReadEndpoint.Address"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-AuroraMySQLReaderEndpoint"
+        }
+      }
+    },
+    "AuroraMySQLDBPort": {
+      "Description": "Aurora MySQL port",
+      "Value": {
+        "Fn::GetAtt": [
+          "AuroraMySQLDBCluster",
+          "Endpoint.Port"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-AuroraMySQLDBPort"
+        }
+      }
+    }
+  }
+}

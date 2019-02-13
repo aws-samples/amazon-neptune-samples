@@ -1,0 +1,302 @@
+{
+  "Description": " - Amazon Neptune VPC resources inside an existing VPC",
+  "Parameters": {
+    "InfrastructureID": {
+      "Description": "Infrastructure ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50
+    }
+  },
+  "Resources": {
+    "VPCS3Endpoint": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "RouteTableIds": [
+          {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${InfrastructureID}-PublicRouteTable"
+            }
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".s3"
+            ]
+          ]
+        },
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-VPC"
+          }
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": "*",
+              "Action": [
+                "s3:*"
+              ],
+              "Resource": [
+                "*"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "NeptuneClientSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-VPC"
+          }
+        },
+        "GroupDescription": "Allow Access",
+        "SecurityGroupIngress": [
+          {
+            "FromPort": "22",
+            "ToPort": "22",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "Description": "SSH from anywhere"
+          },
+          {
+            "FromPort": "8182",
+            "ToPort": "8182",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "Description": "HTTP access"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Neptune client security group"
+          }
+        ]
+      }
+    },
+    "NeptuneSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "DependsOn": [
+        "NeptuneClientSecurityGroup"
+      ],
+      "Properties": {
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-VPC"
+          }
+        },
+        "GroupDescription": "Allow Access",
+        "SecurityGroupIngress": [
+          {
+            "FromPort": "22",
+            "ToPort": "22",
+            "IpProtocol": "tcp",
+            "SourceSecurityGroupId": {
+              "Ref": "NeptuneClientSecurityGroup"
+            },
+            "Description": "SSH from Neptune client security group"
+          },
+          {
+            "FromPort": "8182",
+            "ToPort": "8182",
+            "IpProtocol": "tcp",
+            "SourceSecurityGroupId": {
+              "Ref": "NeptuneClientSecurityGroup"
+            },
+            "Description": "HTTP access from Neptune client security group"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Neptune security group"
+          }
+        ]
+      }
+    },
+    "Subnet1": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "172.30.1.0/24",
+        "MapPublicIpOnLaunch": "true",
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-VPC"
+          }
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Neptune subnet 1"
+          }
+        ]
+      }
+    },
+    "Subnet2": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "172.30.2.0/24",
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-VPC"
+          }
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Neptune subnet 2"
+          }
+        ]
+      }
+    },
+    "Subnet3": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "172.30.3.0/24",
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-VPC"
+          }
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            2,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Neptune subnet 3"
+          }
+        ]
+      }
+    },
+    "SubnetRTAssociation1": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "DependsOn": [
+        "Subnet1"
+      ],
+      "Properties": {
+        "RouteTableId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-PublicRouteTable"
+          }
+        },
+        "SubnetId": {
+          "Ref": "Subnet1"
+        }
+      }
+    },
+    "SubnetRTAssociation2": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "DependsOn": [
+        "Subnet2"
+      ],
+      "Properties": {
+        "RouteTableId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-PublicRouteTable"
+          }
+        },
+        "SubnetId": {
+          "Ref": "Subnet2"
+        }
+      }
+    },
+    "SubnetRTAssociation3": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "DependsOn": [
+        "Subnet3"
+      ],
+      "Properties": {
+        "RouteTableId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-PublicRouteTable"
+          }
+        },
+        "SubnetId": {
+          "Ref": "Subnet3"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "NeptuneSubnetIDs": {
+      "Description": "Neptune subnet IDs",
+      "Value": {
+        "Fn::Join": [
+          ",",
+          [
+            {
+              "Ref": "Subnet1"
+            },
+            {
+              "Ref": "Subnet2"
+            },
+            {
+              "Ref": "Subnet3"
+            }
+          ]
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-NeptuneSubnetIDs"
+        }
+      }
+    },
+    "NeptuneSecurityGroup": {
+      "Description": "Neptune security group",
+      "Value": {
+        "Ref": "NeptuneSecurityGroup"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-NeptuneSecurityGroup"
+        }
+      }
+    },
+    "NeptuneClientSecurityGroup": {
+      "Description": "Neptune client security group",
+      "Value": {
+        "Ref": "NeptuneClientSecurityGroup"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-NeptuneClientSecurityGroup"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,458 @@
+{
+  "Description": "Export from MySQL to Amazon Neptune using AWS Glue",
+  "Parameters": {
+    "ApplicationID": {
+      "Description": "Application ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50,
+      "Default": "demo"
+    },
+    "S3ExportPath": {
+      "Description": "S3 output path for exported CSV files (include trailing slash)",
+      "Type": "String",
+      "AllowedPattern": "^s3://.*/$"
+    }
+  },
+  "Resources": {
+    "VPCStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/glue-neptune/vpc-stack.json",
+        "Parameters": {
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          }
+        },
+        "TimeoutInMinutes": "10",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          }
+        ]
+      }
+    },
+    "VPCStackNeptune": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": [
+        "VPCStack"
+      ],
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/glue-neptune/vpc-neptune-stack.json",
+        "Parameters": {
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          }
+        },
+        "TimeoutInMinutes": "10",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          }
+        ]
+      }
+    },
+    "VPCStackRDS": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": [
+        "VPCStack"
+      ],
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/glue-neptune/vpc-rds-stack.json",
+        "Parameters": {
+          "RDSPort": 3306,
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          }
+        },
+        "TimeoutInMinutes": "10",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          }
+        ]
+      }
+    },
+    "VPCStackSageMaker": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": [
+        "VPCStack"
+      ],
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/glue-neptune/vpc-sagemaker-stack.json",
+        "Parameters": {
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          }
+        },
+        "TimeoutInMinutes": "10",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          }
+        ]
+      }
+    },
+    "IAMStackNeptune": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": "VPCStackNeptune",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/glue-neptune/iam-neptune-stack.json",
+        "Parameters": {
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          }
+        },
+        "TimeoutInMinutes": "10",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          }
+        ]
+      }
+    },
+    "IAMStackRDS": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": "VPCStackRDS",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/glue-neptune/iam-rds-stack.json",
+        "Parameters": {
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          }
+        },
+        "TimeoutInMinutes": "10",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          }
+        ]
+      }
+    },
+    "IAMStackGlue": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": "VPCStack",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/glue-neptune/iam-glue-stack.json",
+        "Parameters": {
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          }
+        },
+        "TimeoutInMinutes": "10",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          }
+        ]
+      }
+    },
+    "IAMStackSageMaker": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": "VPCStackSageMaker",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/glue-neptune/iam-sagemaker-stack.json",
+        "Parameters": {
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          }
+        },
+        "TimeoutInMinutes": "10",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          }
+        ]
+      }
+    },
+    "AuroraMySQLStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": [
+        "IAMStackRDS"
+      ],
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/glue-neptune/databases-aurora-mysql-stack.json",
+        "Parameters": {
+          "RDSPort": 3306,
+          "DBUser": "admin",
+          "DBPassword": {
+            "Fn::Sub": "${AWS::StackName}-${ApplicationID}"
+          },
+          "IAMAuthEnabled": "false",
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          },
+          "ApplicationID": {
+            "Ref": "ApplicationID"
+          }
+        },
+        "TimeoutInMinutes": "10",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "ApplicationID",
+            "Value": {
+              "Ref": "ApplicationID"
+            }
+          }
+        ]
+      }
+    },
+    "NeptuneStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": [
+        "IAMStackNeptune"
+      ],
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/glue-neptune/databases-neptune-stack.json",
+        "Parameters": {
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          },
+          "ApplicationID": {
+            "Ref": "ApplicationID"
+          }
+        },
+        "TimeoutInMinutes": "10",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "ApplicationID",
+            "Value": {
+              "Ref": "ApplicationID"
+            }
+          }
+        ]
+      }
+    },
+    "AddIamRoleToNeptuneStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/common/add-iam-role-to-neptune.json",
+        "Parameters": {
+          "DBClusterId": {
+            "Fn::GetAtt": [
+              "NeptuneStack",
+              "Outputs.NeptuneDBClusterID"
+            ]
+          },
+          "NeptuneLoadFromS3IAMRoleArn": {
+            "Fn::GetAtt": [
+              "IAMStackNeptune",
+              "Outputs.NeptuneLoadFromS3RoleARN"
+            ]
+          }
+        },
+        "TimeoutInMinutes": "60",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "ApplicationID",
+            "Value": {
+              "Ref": "ApplicationID"
+            }
+          }
+        ]
+      }
+    },
+    "GlueStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": [
+        "AuroraMySQLStack",
+        "NeptuneStack"
+      ],
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/glue-neptune/glue-stack.json",
+        "Parameters": {
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          },
+          "ApplicationID": {
+            "Ref": "ApplicationID"
+          },
+          "DBUser": "admin",
+          "DBPassword": {
+            "Fn::Sub": "${AWS::StackName}-${ApplicationID}"
+          },
+          "SQLScriptS3BucketName": {
+            "Fn::Sub": "aws-neptune-customer-samples-${AWS::Region}"
+          },
+          "SQLScriptS3Key": "neptune-sagemaker/data/salesdb/salesdb-init.sql",
+          "S3ExportPath": {
+            "Ref": "S3ExportPath"
+          }
+        },
+        "TimeoutInMinutes": "30",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "ApplicationID",
+            "Value": {
+              "Ref": "ApplicationID"
+            }
+          }
+        ]
+      }
+    },
+    "SageMakerStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": [
+        "IAMStackSageMaker",
+        "NeptuneStack"
+      ],
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/glue-neptune/sagemaker-stack.json",
+        "Parameters": {
+          "NeptuneClusterEndpoint": {
+            "Fn::GetAtt": [
+              "NeptuneStack",
+              "Outputs.NeptuneDBClusterEndpoint"
+            ]
+          },
+          "NeptuneReaderEndpoint": {
+            "Fn::GetAtt": [
+              "NeptuneStack",
+              "Outputs.NeptuneDBClusterReadEndpoint"
+            ]
+          },
+          "NeptuneClusterPort": {
+            "Fn::GetAtt": [
+              "NeptuneStack",
+              "Outputs.NeptuneDBClusterPort"
+            ]
+          },
+          "NotebookContentS3Locations": "s3://aws-neptune-customer-samples/neptune-sagemaker/notebooks|glue-neptune/*",
+          "StartupScript": {
+            "Fn::Join": [
+              "",
+              [
+                "echo 'export S3_EXPORT_PATH=",
+                {
+                  "Ref": "S3ExportPath"
+                },
+                "' >> /home/ec2-user/.bashrc\n",
+                "echo 'export GLUE_PREFIX=",
+                {
+                  "Ref": "ApplicationID"
+                },
+                "' >> /home/ec2-user/.bashrc\n"
+              ]
+            ]
+          },
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          },
+          "ApplicationID": {
+            "Ref": "ApplicationID"
+          }
+        },
+        "TimeoutInMinutes": "30",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "ApplicationID",
+            "Value": {
+              "Ref": "ApplicationID"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "NeptuneDBClusterEndpoint": {
+      "Description": "Neptune cluster endpoint",
+      "Value": {
+        "Fn::GetAtt": [
+          "NeptuneStack",
+          "Outputs.NeptuneDBClusterEndpoint"
+        ]
+      }
+    },
+    "NeptuneDBClusterReadEndpoint": {
+      "Description": "Neptune reader endpoint",
+      "Value": {
+        "Fn::GetAtt": [
+          "NeptuneStack",
+          "Outputs.NeptuneDBClusterReadEndpoint"
+        ]
+      }
+    },
+    "NeptuneDBClusterPort": {
+      "Description": "Neptune port",
+      "Value": {
+        "Fn::GetAtt": [
+          "NeptuneStack",
+          "Outputs.NeptuneDBClusterPort"
+        ]
+      }
+    },
+    "AuroraMySQLJDBCURL": {
+      "Description": "Aurora MySQL JDBC URL",
+      "Value": {
+        "Fn::GetAtt": [
+          "AuroraMySQLStack",
+          "Outputs.AuroraMySQLJDBCURL"
+        ]
+      }
+    },
+    "SageMakerNotebook": {
+      "Description": "SageMaker notebook",
+      "Value": {
+        "Fn::GetAtt": [
+          "SageMakerStack",
+          "Outputs.NeptuneNotebook"
+        ]
+      }
+    }
+  }
+}

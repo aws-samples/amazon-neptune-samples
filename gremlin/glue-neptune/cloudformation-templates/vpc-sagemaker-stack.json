@@ -1,0 +1,37 @@
+{
+  "Description": " - Amazon SageMaker VPC resources",
+  "Parameters": {
+    "InfrastructureID": {
+      "Description": "Infrastructure ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50
+    }
+  },
+  "Resources": {
+    "SageMakerSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Allow Access",
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-VPC"
+          }
+        },
+      }
+    }
+  },
+  "Outputs": {
+    "SageMakerSecurityGroup": {
+      "Description": "SageMaker security group",
+      "Value": {
+        "Ref": "SageMakerSecurityGroup"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-SageMakerSecurityGroup"
+        }
+      }
+    }
+  }
+}
