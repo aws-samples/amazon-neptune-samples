@@ -11,6 +11,11 @@ from pyspark.sql.functions import lit
 from pyspark.sql.functions import format_string
 from glue_neptune.GremlinCsvTransforms import GremlinCsvTransforms
 
+'''
+Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+SPDX-License-Identifier: MIT-0
+'''
+
 args = getResolvedOptions(sys.argv, ['JOB_NAME', 'S3_OUTPUT_PATH', 'DATABASE_NAME', 'TABLE_PREFIX'])
 
 sc = SparkContext()

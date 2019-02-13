@@ -9,6 +9,11 @@ from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.job import Job
 
+'''
+Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+SPDX-License-Identifier: MIT-0
+'''
+
 LOCAL_SCRIPT_NAME = 'script.sql'
 
 args = getResolvedOptions(sys.argv, ['BUCKET_NAME', 'KEY', 'CONNECTION_NAME'])

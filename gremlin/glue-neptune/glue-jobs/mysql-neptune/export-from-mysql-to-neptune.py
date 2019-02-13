@@ -20,6 +20,11 @@ from glue_neptune.NeptuneConnectionInfo import NeptuneConnectionInfo
 from glue_neptune.NeptuneGremlinClient import NeptuneGremlinClient
 from glue_neptune.GremlinCsvTransforms import GremlinCsvTransforms
 
+'''
+Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+SPDX-License-Identifier: MIT-0
+'''
+
 args = getResolvedOptions(sys.argv, ['JOB_NAME', 'DATABASE_NAME', 'TABLE_PREFIX', 'NEPTUNE_CONNECTION_NAME'])
 
 sc = SparkContext()
