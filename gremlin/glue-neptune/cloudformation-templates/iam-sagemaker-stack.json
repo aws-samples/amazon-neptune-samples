@@ -56,7 +56,11 @@
           "Arn"
         ]
       },
-      "Export" : { "Name" : {"Fn::Sub": "${InfrastructureID}-SageMakerExecutionRoleARN" }}
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-SageMakerExecutionRoleARN"
+        }
+      }
     }
   }
 }

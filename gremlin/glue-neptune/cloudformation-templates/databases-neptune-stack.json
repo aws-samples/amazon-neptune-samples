@@ -84,7 +84,7 @@
             ",",
             {
               "Fn::ImportValue": {
-                "Fn::Sub": "${InfrastructureID}-NeptuneSubnetIDs"
+                "Fn::Sub": "${InfrastructureID}-PrivateSubnetIDs"
               }
             }
           ]
@@ -307,7 +307,7 @@
       }
     },
     "NeptuneSparqlEndpoint": {
-      "Description": "Sparql endpoint for Neptune",
+      "Description": "SPARQL endpoint for Neptune",
       "Value": {
         "Fn::Join": [
           "",

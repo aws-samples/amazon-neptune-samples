@@ -28,7 +28,7 @@ Install the components using CloudFormation:
 |EU (Frankfurt) |  [<img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png">](https://eu-central-1.console.aws.amazon.com/cloudformation/home?region=eu-central-1#/stacks/create/review?templateURL=https%3A%2F%2Fs3.amazonaws.com%2Faws-neptune-customer-samples%2Fneptune-sagemaker%2Fcloudformation-templates%2Fglue-neptune%2Fglue-neptune-stack.json&stackName=mysql-2-neptune&param_ApplicationID=demo) |
 
 
-Once the stack creation has completed, open the Outputs tab of the *mysql-2-neptune* root stack, and click on the *SageMakerNotebook* URI. This will open an Amazon SageMaker Jupyter notebook. Navigate to the */Neptune/glue-neptune/ directory. From there you can complete each of the migration steps.
+Once the stack creation has completed, open the Outputs tab of the *mysql-2-neptune* root stack, and click on the *SageMakerNotebook* URI. This will open an Amazon SageMaker Jupyter notebook. Navigate to the */Neptune/glue-neptune/* directory. From there you can complete each of the migration steps.
 
 ### Step 1 – Prepare the Environment
 

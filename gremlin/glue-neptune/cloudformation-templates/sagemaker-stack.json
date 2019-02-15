@@ -82,7 +82,7 @@
                 ",",
                 {
                   "Fn::ImportValue": {
-                    "Fn::Sub": "${InfrastructureID}-NeptuneSubnetIDs"
+                    "Fn::Sub": "${InfrastructureID}-PrivateSubnetIDs"
                   }
                 }
               ]
@@ -191,7 +191,7 @@
                       "Ref": "NotebookContentS3Locations"
                     },
                     "' >> /home/ec2-user/.bashrc\n",
-                    "aws s3 sync s3://aws-neptune-customer-samples/neptune-sagemaker/notebooks /home/ec2-user/SageMaker/Neptune --exclude \"*\" --include \"util/*\"\n",
+                    "aws s3 sync s3://ianrob-examples/notebooks /home/ec2-user/SageMaker/Neptune --exclude \"*\" --include \"util/*\"\n",
                     {
                       "Fn::If": [
                         "InstallNotebookContent",
@@ -199,7 +199,7 @@
                           "Fn::Join": [
                             "",
                             [
-                              "aws s3 cp s3://aws-neptune-customer-samples/neptune-sagemaker/scripts/create-sync-notebook-script.sh .\n",
+                              "aws s3 cp s3://ianrob-examples/scripts/create-sync-notebook-script.sh .\n",
                               "chmod a+x create-sync-notebook-script.sh\n",
                               "./create-sync-notebook-script.sh \"",
                               {

@@ -67,7 +67,7 @@
             ",",
             {
               "Fn::ImportValue": {
-                "Fn::Sub": "${InfrastructureID}-RDSSubnetIDs"
+                "Fn::Sub": "${InfrastructureID}-PrivateSubnetIDs"
               }
             }
           ]

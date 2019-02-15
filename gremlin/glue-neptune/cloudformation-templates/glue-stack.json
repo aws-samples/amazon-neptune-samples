@@ -13,6 +13,11 @@
       "AllowedPattern": "[-a-z0-9]+",
       "MaxLength": 50
     },
+    "GlueIAMRole": {
+      "Description": "IAM Role for AWS Glue",
+      "Type": "String",
+      "Default": "AWSGlueServiceRoleDefault"
+    },
     "DBUser": {
       "Description": "Aurora MySQL database master user",
       "Type": "String"
@@ -88,7 +93,7 @@
                     ",",
                     {
                       "Fn::ImportValue": {
-                        "Fn::Sub": "${InfrastructureID}-RDSSubnetIDs"
+                        "Fn::Sub": "${InfrastructureID}-PrivateSubnetIDs"
                       }
                     }
                   ]
@@ -157,7 +162,7 @@
                     ",",
                     {
                       "Fn::ImportValue": {
-                        "Fn::Sub": "${InfrastructureID}-NeptuneSubnetIDs"
+                        "Fn::Sub": "${InfrastructureID}-PrivateSubnetIDs"
                       }
                     }
                   ]
@@ -196,10 +201,8 @@
       "Type": "AWS::Glue::Job",
       "Properties": {
         "Role": {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${InfrastructureID}-GlueRoleARN"
-              }
-            },
+          "Ref": "GlueIAMRole"
+        },
         "DefaultArguments": {
           "--job-language": "python",
           "--job-bookmark-option": "job-bookmark-disable",
@@ -224,7 +227,7 @@
         "Description": "Load Aurora MySQL with salesdb data",
         "Command": {
           "ScriptLocation": {
-            "Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/etl/common/load_mysql.py"
+            "Fn::Sub": "s3://ianrob-examples-${AWS::Region}/etl/common/load_mysql.py"
           },
           "Name": "glueetl"
         },
@@ -241,10 +244,8 @@
       "Type": "AWS::Glue::Crawler",
       "Properties": {
         "Role": {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${InfrastructureID}-GlueRoleARN"
-              }
-            },
+          "Ref": "GlueIAMRole"
+        },
         "Description": "Sales DB crawler",
         "DatabaseName": {
           "Ref": "SalesDatabase"
@@ -271,14 +272,12 @@
       "Type": "AWS::Glue::Job",
       "Properties": {
         "Role": {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${InfrastructureID}-GlueRoleARN"
-              }
-            },
+          "Ref": "GlueIAMRole"
+        },
         "DefaultArguments": {
           "--job-language": "python",
           "--extra-py-files": {
-            "Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/etl/mysql-neptune/glue_neptune.zip"
+            "Fn::Sub": "s3://ianrob-examples-${AWS::Region}/etl/mysql-neptune/glue_neptune.zip"
           },
           "--job-bookmark-option": "job-bookmark-disable",
           "--S3_OUTPUT_PATH": {
@@ -302,7 +301,7 @@
         "Description": "Export CSV data from MySQL to S3",
         "Command": {
           "ScriptLocation": {
-            "Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/etl/mysql-neptune/export-from-mysql-to-s3.py"
+            "Fn::Sub": "s3://ianrob-examples-${AWS::Region}/etl/mysql-neptune/export-from-mysql-to-s3.py"
           },
           "Name": "glueetl"
         },
@@ -319,14 +318,12 @@
       "Type": "AWS::Glue::Job",
       "Properties": {
         "Role": {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${InfrastructureID}-GlueRoleARN"
-              }
-            },
+          "Ref": "GlueIAMRole"
+        },
         "DefaultArguments": {
           "--job-language": "python",
           "--extra-py-files": {
-            "Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/etl/mysql-neptune/glue_neptune.zip"
+            "Fn::Sub": "s3://ianrob-examples-${AWS::Region}/etl/mysql-neptune/glue_neptune.zip"
           },
           "--job-bookmark-option": "job-bookmark-disable",
           "--DATABASE_NAME": {
@@ -353,7 +350,7 @@
         "Description": "Export data from MySQL to Neptune",
         "Command": {
           "ScriptLocation": {
-            "Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/etl/mysql-neptune/export-from-mysql-to-neptune.py"
+            "Fn::Sub": "s3://ianrob-examples-${AWS::Region}/etl/mysql-neptune/export-from-mysql-to-neptune.py"
           },
           "Name": "glueetl"
         },
@@ -370,14 +367,12 @@
       "Type": "AWS::Glue::Job",
       "Properties": {
         "Role": {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${InfrastructureID}-GlueRoleARN"
-              }
-            },
+          "Ref": "GlueIAMRole"
+        },
         "DefaultArguments": {
           "--job-language": "python",
           "--extra-py-files": {
-            "Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/etl/mysql-neptune/glue_neptune.zip"
+            "Fn::Sub": "s3://ianrob-examples-${AWS::Region}/etl/mysql-neptune/glue_neptune.zip"
           },
           "--job-bookmark-option": "job-bookmark-disable",
           "--DATABASE_NAME": {
@@ -404,7 +399,7 @@
         "Description": "Incremental export of data from MySQL to Neptune",
         "Command": {
           "ScriptLocation": {
-            "Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/etl/mysql-neptune/export-from-mysql-to-neptune-incremental.py"
+            "Fn::Sub": "s3://ianrob-examples-${AWS::Region}/etl/mysql-neptune/export-from-mysql-to-neptune-incremental.py"
           },
           "Name": "glueetl"
         },
