@@ -46,6 +46,29 @@ In this notebook we look at an alternative method for exporting data from MySQL 
 
 In this notebook we incrementally export frequently changing orders and order details data from MySQL into Neptune.
 
+## Walkthrough of the Architecture
+
+![Kinesis 2 Neptune Architecture](glue-neptune-architecture.png)
+
+  1. The Amazon Neptune and Amazon Aurora MySQL database clusters are run in three private subnets in three Availability Zones, with each subnet in a different AZ. The architecture employs private subnets as per the [AWS Glue recommendations for data stores](https://docs.aws.amazon.com/glue/latest/dg/populate-add-connection.html). ("Don't put your data store in a public subnet or in a private subnet that doesn't have internet access. Instead, attach it only to private subnets that have internet access through a NAT instance or an Amazon VPC NAT gateway.")
+  
+  2. The private subnets have internet access through [Amazon VPC NAT gateways](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html) located in three public subnets in three AZs. This results in an Availability Zone-independent architecture that allows resources in an AZ to use the NAT gateway in the same AZ. 
+   
+  3. The NAT gateways send traffic to an internet gateway using the NAT gateway's Elastic IP address as the source IP address. 
+  
+  4. The Neptune DB and Aurora MySQL subnet groups each span at least three subnets in three Availability Zones.
+  
+  5. Each Glue job assumes an IAM role that has permission to extract data from the data store (Aurora MySQL) and write to the target (S3 or Neptune). 
+  
+  6. Both Glue and Neptune use an Amazon S3 VPC endpoint to access data in S3: Glue to write data to S3, Neptune to bulk load data from S3. For more details on setting up an IAM role and S3VPC endpoint for Neptune, see the [bulk load tutorial](https://docs.aws.amazon.com/neptune/latest/userguide/bulk-load-tutorial-IAM.html).
+  
+  7. Connection information for Aurora MySQL and Neptune is stored in the Glue data catalog. To enable Glue to access resources inside the VPC, each connection must be provided with VPC-specific configuration information that includes the ID of one of the subnets in which the data store resides, and the ID of a security group with a self-referencing inbound rule for all TCP ports. [This allows Glue to set up an elastic network interfaces to connect securely to resources in your VPC.](https://docs.aws.amazon.com/glue/latest/dg/populate-add-connection.html)
+  
+  8. Glue [uses a crawler to catalog](https://docs.aws.amazon.com/glue/latest/dg/add-crawler.html) the Aurora MySQL tables. These table defintions are used in subsequent Glue jobs to extract data from MySQL.
+  
+  9. For the purposes of the demo, an Amazon SageMaker hosted Jupyter notebook is used to trigger the Glue jobs and the Neptune bulk load.
+
+
 ## License Summary
 
 This sample code is made available under a modified MIT license. See the LICENSE file.
