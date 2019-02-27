@@ -162,14 +162,22 @@
           "Arn"
         ]
       },
-      "Export" : { "Name" : {"Fn::Sub": "${InfrastructureID}-NeptuneLoadFromS3RoleARN" }}
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-NeptuneLoadFromS3RoleARN"
+        }
+      }
     },
     "NeptuneEC2InstanceProfile": {
       "Description": "Neptune EC2 instance profile",
       "Value": {
         "Ref": "NeptuneEC2InstanceProfile"
       },
-      "Export" : { "Name" : {"Fn::Sub": "${InfrastructureID}-NeptuneEC2InstanceProfile" }}
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-NeptuneEC2InstanceProfile"
+        }
+      }
     }
   }
 }

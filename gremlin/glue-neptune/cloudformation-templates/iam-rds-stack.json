@@ -114,7 +114,11 @@
       "Value": {
         "Ref": "RDSEC2InstanceProfile"
       },
-      "Export" : { "Name" : {"Fn::Sub": "${InfrastructureID}-RDSEC2InstanceProfile" }}
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-RDSEC2InstanceProfile"
+        }
+      }
     }
   }
 }
