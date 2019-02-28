@@ -125,7 +125,7 @@ gremlin> g.V().group().by().by(outE().count())
 ==>{v[HorizonZeroDawn]=0, v[Luke]=8, v[ARMS]=0, v[Ratchet&Clank]=0, v[SuperMarioOdyssey]=0, v[GravityRush]=0, v[CallOfDutyBO4]=0, v[MarioKart8]=0, v[Fifa18]=0, v[Nioh]=0, v[Mike]=8, v[Knack]=0, v[Lina]=6, v[TombRaider]=0, v[GranTurismoSport]=0, v[Emma]=2}
 
 ```
-**Count the out-degree centrality of outgoing edges from each vertex by order of degee**
+**Count the out-degree centrality of outgoing edges from each vertex by order of degree**
 ```
 gremlin> g.V().project("v","degree").by().by(bothE().count()).order().by(select("degree"), decr)
 ==>{v=v[Luke], degree=8}
