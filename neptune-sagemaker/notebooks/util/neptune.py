@@ -2,6 +2,7 @@ from __future__  import print_function
 from gremlin_python import statics
 from gremlin_python.structure.graph import Graph
 from gremlin_python.process.graph_traversal import __
+from gremlin_python.process.anonymous_traversal import *
 from gremlin_python.process.strategies import *
 from gremlin_python.driver.driver_remote_connection import DriverRemoteConnection
 from gremlin_python.process.traversal import *
@@ -41,8 +42,7 @@ class Neptune:
     def graphTraversal(self, neptune_endpoint=None, neptune_port=None, show_endpoint=True, connection=None):
         if connection is None:
             connection = self.remoteConnection(neptune_endpoint, neptune_port, show_endpoint)
-        graph = Graph()
-        return graph.traversal().withRemote(connection)
+        return traversal().withRemote(connection)
     
     def clear(self, neptune_endpoint=None, neptune_port=None, batch_size=200, edge_batch_size=None, vertex_batch_size=None):
         print('clearing data...')
