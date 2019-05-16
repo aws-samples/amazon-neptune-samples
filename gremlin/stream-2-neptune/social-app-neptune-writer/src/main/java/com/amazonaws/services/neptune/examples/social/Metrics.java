@@ -31,7 +31,7 @@ import java.util.List;
 
 public class Metrics {
 
-    private final AmazonCloudWatchAsync cw = AmazonCloudWatchAsyncClientBuilder.defaultClient();
+    AmazonCloudWatchAsync cwa = AmazonCloudWatchAsyncClientBuilder.defaultClient();
 
     private final String clusterId;
     private final LambdaLogger logger;
@@ -50,8 +50,6 @@ public class Metrics {
 
     public void publish() {
 
-        AmazonCloudWatchAsync cwa = AmazonCloudWatchAsyncClientBuilder.defaultClient();
-
         try (ActivityTimer timer = new ActivityTimer(logger, "Publish metrics")) {
 
             MetricDatum edgesSubmitted = new MetricDatum()
@@ -68,9 +66,13 @@ public class Metrics {
                     .withStorageResolution(1)
                     .withDimensions(new Dimension().withName("clusterId").withValue(clusterId));
 
-            cw.putMetricData(new PutMetricDataRequest().
-                    withMetricData(edgesSubmitted, writeDuration).
-                    withNamespace("aws-samples/stream-2-neptune"));
+            try {
+                cwa.putMetricData(new PutMetricDataRequest().
+                        withMetricData(edgesSubmitted, writeDuration).
+                        withNamespace("aws-samples/stream-2-neptune"));
+            } catch (Exception e) {
+                logger.log("Swallowed exception: " + e.getLocalizedMessage());
+            }
         }
     }
 }

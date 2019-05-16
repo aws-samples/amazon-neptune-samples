@@ -1,0 +1,577 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Creates Kinesis Stream and Lambda functions for writing to Neptune cluster",
+  "Parameters": {
+    "NeptuneClusterEndpoint": {
+      "Description": "Cluster endpoint of Neptune cluster.",
+      "Type": "String"
+    },
+    "NeptuneClusterPort": {
+      "Description": "OPTIONAL: Port of Neptune cluster (default 8182).",
+      "Type": "String",
+      "Default": "8182"
+    },
+    "NeptuneClusterSubnet1": {
+      "Description": "Id of one of the subnets in which your Neptune cluster is running.",
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "NeptuneClusterSubnet2": {
+      "Description": "Id of one of the subnets in which your Neptune cluster is running.",
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "NeptuneClusterSubnet3": {
+      "Description": "Id of one of the subnets in which your Neptune clusters is running.",
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "NeptuneClientSecurityGroup": {
+      "Description": "A VPC security group with access to your Neptune cluster.",
+      "Type": "String"
+    },
+    "VPC": {
+      "Description": "VPC Id of the existing VPC.",
+      "Type": "AWS::EC2::VPC::Id"
+    },
+    "PercentErrors": {
+      "Description": "Percentage of write requests to the Neptune cluster that will throw a ConstraintViolationException (enter a number between 0-99).",
+      "Type": "Number",
+      "MinValue": 0,
+      "MaxValue": 99,
+      "ConstraintDescription": "Must be an integer between 0 and 99 (inclusive)."
+    },
+    "ShardCount": {
+      "Description": "Number of shards in the Kinesis Data Stream.",
+      "Type": "Number",
+      "Default": 5,
+      "MinValue": 1,
+      "MaxValue": 500,
+      "ConstraintDescription": "Must be an integer between 1 and 500 (inclusive)."
+    },
+    "BatchReadSize": {
+      "Description": "Batch size of reads from Kinesis Data Stream.",
+      "Type": "Number",
+      "Default": 100,
+      "MinValue": 1,
+      "MaxValue": 10000,
+      "ConstraintDescription": "Must be an integer between 1 and 10000 (inclusive)."
+    },
+    "BatchWriteSize": {
+      "Description": "Batch size of writes to Neptune.",
+      "Type": "Number",
+      "Default": 100,
+      "MinValue": 1,
+      "MaxValue": 10000,
+      "ConstraintDescription": "Must be an integer between 1 and 10000 (inclusive)."
+    },
+    "ConditionalCreate": {
+      "Description": "Insert edges using conditional coalesce() idiom.",
+      "Type": "String",
+      "Default": "true",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    "Wait": {
+      "Description": "Pause Lambda processing (true) or continue (false).",
+      "Type": "String",
+      "Default": "false",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    "NeptuneClusterID": {
+      "Description": "Neptune Cluster ID.",
+      "Type": "String"
+    }
+  },
+  "Conditions": {
+    "AddNeptuneClientSecurityGroup": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "NeptuneClientSecurityGroup"
+            },
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "Resources": {
+    "LambdaSelfReferencingSecurityGroup": {
+      "Properties": {
+        "GroupDescription": "Self-referencing security group for Lambda",
+        "VpcId": {
+          "Ref": "VPC"
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
+    },
+    "LambdaSelfReferencingSecurityGroupIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "DependsOn": "LambdaSelfReferencingSecurityGroup",
+      "Properties": {
+        "GroupId": {
+          "Fn::GetAtt": [
+            "LambdaSelfReferencingSecurityGroup",
+            "GroupId"
+          ]
+        },
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "LambdaSelfReferencingSecurityGroup",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "-1"
+      }
+    },
+    "PrivateSubnet1": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "172.30.4.0/24",
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "MapPublicIpOnLaunch": "false",
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName} private subnet (AZ1)"
+            }
+          }
+        ]
+      }
+    },
+    "PrivateSubnet2": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "172.30.5.0/24",
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "MapPublicIpOnLaunch": "false",
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName} private subnet (AZ2)"
+            }
+          }
+        ]
+      }
+    },
+    "PrivateSubnet3": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "172.30.6.0/24",
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "MapPublicIpOnLaunch": "false",
+        "AvailabilityZone": {
+          "Fn::Select": [
+            2,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName} private subnet (AZ3)"
+            }
+          }
+        ]
+      }
+    },
+    "NatGateway1EIP": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": {
+          "Ref": "VPC"
+        }
+      }
+    },
+    "NatGateway2EIP": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": {
+          "Ref": "VPC"
+        }
+      }
+    },
+    "NatGateway3EIP": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": {
+          "Ref": "VPC"
+        }
+      }
+    },
+    "NatGateway1": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "NeptuneClusterSubnet1"
+        },
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "NatGateway1EIP",
+            "AllocationId"
+          ]
+        }
+      }
+    },
+    "NatGateway2": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "NeptuneClusterSubnet2"
+        },
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "NatGateway2EIP",
+            "AllocationId"
+          ]
+        }
+      }
+    },
+    "NatGateway3": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "NeptuneClusterSubnet3"
+        },
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "NatGateway3EIP",
+            "AllocationId"
+          ]
+        }
+      }
+    },
+    "PrivateRouteTable1": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName} private routes (AZ1)"
+            }
+          }
+        ]
+      }
+    },
+    "PrivateRouteTable2": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName} private routes (AZ2)"
+            }
+          }
+        ]
+      }
+    },
+    "PrivateRouteTable3": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName} private routes (AZ3)"
+            }
+          }
+        ]
+      }
+    },
+    "DefaultPrivateRoute1": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRouteTable1"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "NatGateway1"
+        }
+      }
+    },
+    "DefaultPrivateRoute2": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRouteTable2"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "NatGateway2"
+        }
+      }
+    },
+    "DefaultPrivateRoute3": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRouteTable3"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "NatGateway3"
+        }
+      }
+    },
+    "PrivateSubnet1RouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRouteTable1"
+        },
+        "SubnetId": {
+          "Ref": "PrivateSubnet1"
+        }
+      }
+    },
+    "PrivateSubnet2RouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRouteTable2"
+        },
+        "SubnetId": {
+          "Ref": "PrivateSubnet2"
+        }
+      }
+    },
+    "PrivateSubnet3RouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRouteTable3"
+        },
+        "SubnetId": {
+          "Ref": "PrivateSubnet3"
+        }
+      }
+    },
+    "KinesisStream": {
+      "Type": "AWS::Kinesis::Stream",
+      "Properties": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-stream"
+        },
+        "ShardCount": {
+          "Ref": "ShardCount"
+        }
+      }
+    },
+    "LambdaExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "root",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents",
+                    "ec2:CreateNetworkInterface",
+                    "ec2:DescribeNetworkInterfaces",
+                    "ec2:DeleteNetworkInterface",
+                    "kinesis:*",
+                    "cloudwatch:*"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "LambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "com.amazonaws.services.neptune.examples.social.SocialAppNeptuneWriterStreamHandler::handleRequest",
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        },
+        "Code": {
+          "S3Bucket": {
+            "Fn::Join": [
+              "",
+              [
+                "aws-neptune-customer-samples-",
+                {
+                  "Ref": "AWS::Region"
+                }
+              ]
+            ]
+          },
+          "S3Key": "neptune-sagemaker/bin/social-app-neptune-writer-1.0-SNAPSHOT.jar"
+        },
+        "Environment": {
+          "Variables": {
+            "neptune_endpoint": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Ref": "NeptuneClusterEndpoint"
+                  }
+                ]
+              ]
+            },
+            "percent_error": {
+              "Ref": "PercentErrors"
+            },
+            "batch_write_size": {
+              "Ref": "BatchWriteSize"
+            },
+            "conditional_create": {
+              "Ref": "ConditionalCreate"
+            },
+            "cluster_id": {
+              "Ref": "NeptuneClusterID"
+            },
+            "wait": {
+              "Ref": "Wait"
+            }
+          }
+        },
+        "MemorySize": 512,
+        "Runtime": "java8",
+        "Timeout": "120",
+        "ReservedConcurrentExecutions": {
+          "Ref": "ShardCount"
+        },
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Ref": "LambdaSelfReferencingSecurityGroup"
+            }
+          ],
+          "SubnetIds": [
+            {
+              "Ref": "PrivateSubnet1"
+            },
+            {
+              "Ref": "PrivateSubnet2"
+            },
+            {
+              "Ref": "PrivateSubnet3"
+            }
+          ]
+        }
+      }
+    },
+    "LambdaFunctionMapping": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "Properties": {
+        "BatchSize": {
+          "Ref": "BatchReadSize"
+        },
+        "EventSourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:kinesis:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":stream/",
+              {
+                "Ref": "KinesisStream"
+              }
+            ]
+          ]
+        },
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaFunction",
+            "Arn"
+          ]
+        },
+        "StartingPosition": "LATEST"
+      }
+    }
+  },
+  "Outputs": {
+    "StreamName": {
+      "Description": "Kinesis stream name",
+      "Value": {
+        "Ref": "KinesisStream"
+      }
+    },
+    "LambdaName": {
+      "Description": "Lambda function stream name",
+      "Value": {
+        "Ref": "LambdaFunction"
+      }
+    }
+  }
+}

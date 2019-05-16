@@ -298,7 +298,8 @@
       "Type": "AWS::CloudFormation::Stack",
       "DependsOn": [
         "AuroraMySQLStack",
-        "NeptuneStack"
+        "NeptuneStack",
+        "IAMStackGlue"
       ],
       "Properties": {
         "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/glue-neptune/glue-stack.json",
@@ -319,6 +320,12 @@
           "SQLScriptS3Key": "neptune-sagemaker/data/salesdb/salesdb-init.sql",
           "S3ExportPath": {
             "Ref": "S3ExportPath"
+          },
+          "GlueIAMRole": {
+            "Fn::GetAtt": [
+              "IAMStackGlue",
+              "Outputs.GlueRoleARN"
+            ]
           }
         },
         "TimeoutInMinutes": "30",

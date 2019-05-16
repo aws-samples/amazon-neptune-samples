@@ -39,7 +39,6 @@
             <version>1.11.471</version>
         </dependency>
 
-
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-events</artifactId>

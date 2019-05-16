@@ -1,0 +1,66 @@
+{
+  "Description": "Creates CloudWatch dashboard for tracking write throughput and latency",
+  "Parameters": {
+    "NeptuneClusterID": {
+      "Description": "Neptune Cluster ID.",
+      "Type": "String"
+    },
+    "LambdaFunction": {
+      "Description": "Lambda function name.",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "Dashboard": {
+      "Type": "AWS::CloudWatch::Dashboard",
+      "Properties": {
+        "DashboardName": {
+          "Fn::Sub": "stream-2-neptune-${NeptuneClusterID}"
+        },
+        "DashboardBody": {
+          "Fn::Join": [
+            "",
+            [
+              "{ \"widgets\": [ { \"type\": \"metric\", \"x\": 0, \"y\": 0, \"width\": 6, \"height\": 6, \"properties\": { \"metrics\": [ [ \"aws-samples/stream-2-neptune\", \"EdgesSubmitted\", \"clusterId\", \"",
+              {
+                "Ref": "NeptuneClusterID"
+              },
+              "\", { \"stat\": \"Sum\" } ], [ \".\", \"WriteDuration\", \".\", \".\" ], [ \"AWS/Lambda\", \"IteratorAge\", \"FunctionName\", \"",
+              {
+                "Ref": "LambdaFunction"
+              },
+              "\", \"Resource\", \"",
+              {
+                "Ref": "LambdaFunction"
+              },
+              "\", { \"yAxis\": \"right\" } ] ], \"view\": \"timeSeries\", \"stacked\": false, \"region\": \"",
+              {
+                "Ref": "AWS::Region"
+              },
+              "\", \"stat\": \"Average\", \"period\": 1 } } ]}"
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "DashboardURI": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://console.aws.amazon.com/cloudwatch/home?region=",
+            {
+              "Ref": "AWS::Region"
+            },
+            "#dashboards:name=",
+            {
+              "Ref": "Dashboard"
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

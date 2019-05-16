@@ -20,6 +20,7 @@ package com.amazonaws.services.neptune.examples.social;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.neptune.examples.utils.ActivityTimer;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.T;
 
 import java.util.UUID;
@@ -29,12 +30,12 @@ import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.unfold
 
 class AddBatchEdgesQuery {
 
-    private GraphTraversal traversal;
+    private GremlinTraversal traversal;
     private final LambdaLogger logger;
     private final boolean conditionalCreate;
 
     AddBatchEdgesQuery(NeptuneClient neptuneClient, LambdaLogger logger, boolean conditionalCreate) {
-        this.traversal = neptuneClient.newTraversal();
+        this.traversal = new GremlinTraversal(neptuneClient.newTraversal());
         this.logger = logger;
         this.conditionalCreate = conditionalCreate;
     }
@@ -46,32 +47,70 @@ class AddBatchEdgesQuery {
                 UUID.randomUUID().toString();
 
         if (conditionalCreate) {
-            traversal = traversal.V(fromVertexId).outE("follows").hasId(edgeId).fold().coalesce(
+            traversal = new GremlinTraversal(traversal.
+                    V(fromVertexId).outE("follows").hasId(edgeId).fold().coalesce(
                     unfold(),
                     V(fromVertexId).addE("follows").to(V(toVertexId)).
                             property(T.id, edgeId).
                             property("creationDate", creationDate).
-                            property("insertDateTime", insertDateTime));
+                            property("insertDateTime", insertDateTime)));
+
+
         } else {
-            traversal = traversal.V(fromVertexId).addE("follows").to(V(toVertexId)).
+            traversal = new GremlinTraversal(traversal.
+                    V(fromVertexId).addE("follows").to(V(toVertexId)).
                     property(T.id, edgeId).
                     property("creationDate", creationDate).
-                    property("insertDateTime", insertDateTime);
+                    property("insertDateTime", insertDateTime));
         }
     }
 
     void provokeError() {
         logger.log("Forcing a ConstraintViolationException (and rollback)");
 
-        traversal = traversal.
+        traversal = new GremlinTraversal(traversal.
                 addV("error").property(T.id, "error").
-                addV("error").property(T.id, "error");
+                addV("error").property(T.id, "error"));
     }
 
     long execute(int batchId) {
-        ActivityTimer timer = new ActivityTimer(logger, "Execute query [" + batchId + "]");
-        traversal.forEachRemaining(e -> {
-        });
-        return timer.stop();
+        return traversal.execute(logger, batchId);
+    }
+
+    public static class GremlinTraversal {
+
+        private GraphTraversal<?, ?> traversal;
+        private GraphTraversalSource traversalSource;
+
+        GremlinTraversal(GraphTraversalSource traversalSource) {
+            this.traversalSource = traversalSource;
+        }
+
+        GremlinTraversal(GraphTraversal<?, ?> traversal) {
+            this.traversal = traversal;
+        }
+
+        GraphTraversal<?, ?> V(final Object... vertexIds) {
+            if (traversal == null) {
+                return traversalSource.V(vertexIds);
+            } else {
+                return traversal.V(vertexIds);
+            }
+        }
+
+        GraphTraversal<?, ?> addV(final String label) {
+            if (traversal == null) {
+                return traversalSource.addV(label);
+            } else {
+                return traversal.addV(label);
+            }
+        }
+
+        long execute(LambdaLogger logger, int batchId) {
+            ActivityTimer timer = new ActivityTimer(logger, "Execute query [" + batchId + "]");
+            traversal.forEachRemaining(e -> {
+            });
+            return timer.stop();
+        }
     }
 }
