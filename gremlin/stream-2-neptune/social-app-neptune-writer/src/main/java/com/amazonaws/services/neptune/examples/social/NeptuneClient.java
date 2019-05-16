@@ -21,9 +21,8 @@ import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.neptune.examples.utils.ActivityTimer;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
+import org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-import org.apache.tinkerpop.gremlin.structure.util.empty.EmptyGraph;
 
 public class NeptuneClient implements AutoCloseable {
     private final String endpoint;
@@ -51,7 +50,8 @@ public class NeptuneClient implements AutoCloseable {
                     .maxSimultaneousUsagePerConnection(1)
                     .minSimultaneousUsagePerConnection(1)
                     .create();
-            g = EmptyGraph.instance()
+
+            g = AnonymousTraversalSource
                     .traversal()
                     .withRemote(DriverRemoteConnection.using(cluster));
 
@@ -64,9 +64,9 @@ public class NeptuneClient implements AutoCloseable {
         }
     }
 
-    GraphTraversal<?, ?> newTraversal() {
+    GraphTraversalSource newTraversal() {
         try (ActivityTimer timer = new ActivityTimer(logger, "New traversal")) {
-            return g.inject(0);
+            return g;
         }
     }
 

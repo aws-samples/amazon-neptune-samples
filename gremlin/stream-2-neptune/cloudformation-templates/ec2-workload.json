@@ -1,0 +1,347 @@
+{
+  "Description": "EC2 instance hosting application workload",
+  "Mappings": {
+    "RegionMap": {
+      "us-east-1": {
+        "AMI": "ami-14c5486b"
+      },
+      "us-east-2": {
+        "AMI": "ami-922914f7"
+      },
+      "us-west-2": {
+        "AMI": "ami-e251209a"
+      },
+      "eu-west-1": {
+        "AMI": "ami-ca0135b3"
+      },
+      "eu-west-2": {
+        "AMI": "ami-f976839e"
+      },
+      "eu-central-1": {
+        "AMI": "ami-9a91b371"
+      },
+      "us-west-1": {
+        "AMI": "ami-25110f45"
+      },
+      "ap-southeast-2": {
+        "AMI": "ami-423bec20"
+      },
+      "ap-southeast-1": {
+        "AMI": "ami-de90a5a2"
+      },
+      "ap-south-1": {
+        "AMI": "ami-76d6f519"
+      },
+      "ap-northeast-1": {
+        "AMI": "ami-92df37ed"
+      }
+    }
+  },
+  "Parameters": {
+    "EC2SSHKeyPairName": {
+      "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances. Required Input",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription": "Must be the name of an existing EC2 KeyPair in same region."
+    },
+    "Env": {
+      "Description": "Environment tag, e.g. prod, nonprod.",
+      "Default": "test",
+      "Type": "String",
+      "AllowedPattern": "[a-z0-9]+",
+      "MaxLength": 15
+    },
+    "EC2ClientInstanceType": {
+      "Description": "EC2 client instance",
+      "Type": "String",
+      "Default": "m5.large",
+      "AllowedValues": [
+        "m5.large",
+        "m5.xlarge",
+        "m5.2xlarge",
+        "m5.4xlarge"
+      ],
+      "ConstraintDescription": "Must be a valid EC2 instance type."
+    },
+    "VPC": {
+      "Description": "Valid VPCId",
+      "Type": "AWS::EC2::VPC::Id",
+      "ConstraintDescription": "Must be the name of an existing VPC in same region."
+    },
+    "Subnet": {
+      "Description": "Valid Subnet",
+      "Type": "AWS::EC2::Subnet::Id",
+      "ConstraintDescription": "Must be the name of an existing Subnet in same region."
+    },
+    "StreamName": {
+      "Description": "Name of the Kinesis Stream to which the driver writes events.",
+      "Type": "String"
+    },
+    "DriverBatchSize": {
+      "Description": "Number of edges to create with each invocation of the driver.",
+      "Type": "Number",
+      "Default": 1,
+      "MinValue": 1,
+      "MaxValue": 3000,
+      "ConstraintDescription": "Must be an integer between 1 and 3000 (inclusive)."
+    },
+    "DriverPeriod": {
+      "Description": "Delay (in milliseconds) between invocations of the driver.",
+      "Type": "Number",
+      "Default": 10,
+      "MinValue": 1,
+      "MaxValue": 1000,
+      "ConstraintDescription": "Must be an integer between 1 and 1000 (inclusive)."
+    },
+    "EdgeFileS3Location": {
+      "Description": "S3 path to edge file (must be named follows.csv.gz)",
+      "AllowedPattern": "^s3://.*follows\\.csv\\.gz$",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "WorkloadSG": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "GroupDescription": "Allow Access",
+        "SecurityGroupIngress": [
+          {
+            "FromPort": "22",
+            "ToPort": "22",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "Description": "ssh from anywhere"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "Neptune-${Env}"
+            }
+          },
+          {
+            "Key": "StackId",
+            "Value": {
+              "Fn::Sub": "${AWS::StackId}"
+            }
+          },
+          {
+            "Key": "Stack",
+            "Value": {
+              "Fn::Sub": "${AWS::Region}-${AWS::StackName}"
+            }
+          },
+          {
+            "Key": "Application",
+            "Value": "NeptuneCloudformation"
+          }
+        ]
+      }
+    },
+    "EC2WorkloadRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/AmazonKinesisFullAccess",
+          "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+        ]
+      }
+    },
+    "EC2WorkloadRoleInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "EC2WorkloadRole"
+          }
+        ]
+      },
+      "DependsOn": [
+        "EC2WorkloadRole"
+      ]
+    },
+    "EC2WorkloadInstance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "KeyName": {
+          "Ref": "EC2SSHKeyPairName"
+        },
+        "InstanceType": {
+          "Ref": "EC2ClientInstanceType"
+        },
+        "ImageId": {
+          "Fn::FindInMap": [
+            "RegionMap",
+            {
+              "Ref": "AWS::Region"
+            },
+            "AMI"
+          ]
+        },
+        "IamInstanceProfile": {
+          "Ref": "EC2WorkloadRoleInstanceProfile"
+        },
+        "SubnetId": {
+          "Ref": "Subnet"
+        },
+        "SecurityGroupIds": [
+          {
+            "Ref": "WorkloadSG"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "stream-2-neptune-${Env}"
+            }
+          },
+          {
+            "Key": "StackId",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName}"
+            }
+          },
+          {
+            "Key": "Stack",
+            "Value": {
+              "Fn::Sub": "${AWS::Region}-${AWS::StackName}"
+            }
+          },
+          {
+            "Key": "Application",
+            "Value": "stream-2-neptune"
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -xe\n",
+                "yum update -y \n",
+                "yum -y install java-1.8.0-devel\n",
+                "yum -y remove java-1.7.0-openjdk\n",
+                "cur_dir=$PWD\n",
+                "cd /home/ec2-user/\n",
+                "pip install --upgrade awscli\n",
+                "aws s3 cp s3://aws-neptune-customer-samples-",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "/neptune-sagemaker/bin/social-app-driver.jar .\n",
+                "aws s3 cp ",
+                {
+                  "Ref": "EdgeFileS3Location"
+                },
+                " .\n",
+                "gunzip follows.csv.gz\n",
+                "# Create workload run script\n",
+                "printf \"#!/bin/bash -ex\n\n\" >> run-workload.sh\n",
+                "printf \"java -jar social-app-driver.jar ",
+                {
+                  "Ref": "StreamName"
+                },
+                " ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                " ",
+                {
+                  "Ref": "DriverPeriod"
+                },
+                " ",
+                {
+                  "Ref": "DriverBatchSize"
+                },
+                "\" >> run-workload.sh\n",
+                "chmod u+x run-workload.sh\n",
+                "cd $cur_dir\n",
+                "# Send signal to WaitHandle that the setup is completed\n",
+                "/opt/aws/bin/cfn-signal -e 0 '",
+                {
+                  "Ref": "WaitHandle"
+                },
+                "'\n"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Init": {
+          "config": {
+            "packages": {
+              "yum": {
+              }
+            }
+          }
+        }
+      }
+    },
+    "WaitHandle": {
+      "Type": "AWS::CloudFormation::WaitConditionHandle"
+    },
+    "WaitCondition": {
+      "Type": "AWS::CloudFormation::WaitCondition",
+      "DependsOn": "EC2WorkloadInstance",
+      "Properties": {
+        "Handle": {
+          "Ref": "WaitHandle"
+        },
+        "Timeout": "1200"
+      }
+    }
+  },
+  "Outputs": {
+    "EC2WorkloadClient": {
+      "Description": "EC2 client ID",
+      "Value": {
+        "Ref": "EC2WorkloadInstance"
+      }
+    },
+    "SSHAccess": {
+      "Description": "This is how you gain remote access to the EC2 client.",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "ssh ec2-user@",
+            {
+              "Fn::GetAtt": [
+                "EC2WorkloadInstance",
+                "PublicIp"
+              ]
+            },
+            " -i ",
+            {
+              "Ref": "EC2SSHKeyPairName"
+            },
+            ".pem"
+          ]
+        ]
+      }
+    }
+  }
+}
