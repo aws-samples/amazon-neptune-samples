@@ -1,0 +1,595 @@
+{
+  "Description": "Neptune Streams example",
+  "Mappings": {
+    "CfnMap": {
+      "config": {
+        "cfnRoot": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates",
+        "notebookContent": "s3://aws-neptune-customer-samples/neptune-sagemaker/notebooks",
+        "scripts": "s3://aws-neptune-customer-samples/neptune-sagemaker/scripts",
+        "lambdaS3BucketPrefix": "aws-neptune-customer-samples",
+        "lambdaS3KeyPrefix": "neptune-sagemaker/"
+      }
+    }
+  },
+  "Parameters": {
+    "ApplicationID": {
+      "Description": "Application ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50
+    }
+  },
+  "Resources": {
+    "NetworkStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": {
+          "Fn::Sub": [
+            "${cfnRoot}/neptune-streams/network-stack.json",
+            {
+              "cfnRoot": {
+                "Fn::FindInMap": [
+                  "CfnMap",
+                  "config",
+                  "cfnRoot"
+                ]
+              }
+            }
+          ]
+        },
+        "Parameters": {
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          }
+        },
+        "TimeoutInMinutes": "10",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          }
+        ]
+      }
+    },
+    "IAMStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": "NetworkStack",
+      "Properties": {
+        "TemplateURL": {
+          "Fn::Sub": [
+            "${cfnRoot}/neptune-streams/iam-stack.json",
+            {
+              "cfnRoot": {
+                "Fn::FindInMap": [
+                  "CfnMap",
+                  "config",
+                  "cfnRoot"
+                ]
+              }
+            }
+          ]
+        },
+        "Parameters": {
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          }
+        },
+        "TimeoutInMinutes": "10",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          }
+        ]
+      }
+    },
+    "NeptuneStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": [
+        "IAMStack"
+      ],
+      "Properties": {
+        "TemplateURL": {
+          "Fn::Sub": [
+            "${cfnRoot}/neptune-streams/services-neptune-stack.json",
+            {
+              "cfnRoot": {
+                "Fn::FindInMap": [
+                  "CfnMap",
+                  "config",
+                  "cfnRoot"
+                ]
+              }
+            }
+          ]
+        },
+        "Parameters": {
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          },
+          "ApplicationID": {
+            "Ref": "ApplicationID"
+          }
+        },
+        "TimeoutInMinutes": "10",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "ApplicationID",
+            "Value": {
+              "Ref": "ApplicationID"
+            }
+          }
+        ]
+      }
+    },
+    "AddIamRoleToNeptuneStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": {
+          "Fn::Sub": [
+            "${cfnRoot}/common/add-iam-role-to-neptune.json",
+            {
+              "cfnRoot": {
+                "Fn::FindInMap": [
+                  "CfnMap",
+                  "config",
+                  "cfnRoot"
+                ]
+              }
+            }
+          ]
+        },
+        "Parameters": {
+          "DBClusterId": {
+            "Fn::GetAtt": [
+              "NeptuneStack",
+              "Outputs.NeptuneDBClusterID"
+            ]
+          },
+          "NeptuneLoadFromS3IAMRoleArn": {
+            "Fn::GetAtt": [
+              "IAMStack",
+              "Outputs.NeptuneLoadFromS3RoleARN"
+            ]
+          }
+        },
+        "TimeoutInMinutes": "60",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "ApplicationID",
+            "Value": {
+              "Ref": "ApplicationID"
+            }
+          }
+        ]
+      }
+    },
+    "ElastiCacheStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": [
+        "IAMStack"
+      ],
+      "Properties": {
+        "TemplateURL": {
+          "Fn::Sub": [
+            "${cfnRoot}/neptune-streams/services-elasticache-stack.json",
+            {
+              "cfnRoot": {
+                "Fn::FindInMap": [
+                  "CfnMap",
+                  "config",
+                  "cfnRoot"
+                ]
+              }
+            }
+          ]
+        },
+        "Parameters": {
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          },
+          "ApplicationID": {
+            "Ref": "ApplicationID"
+          }
+        },
+        "TimeoutInMinutes": "10",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "ApplicationID",
+            "Value": {
+              "Ref": "ApplicationID"
+            }
+          }
+        ]
+      }
+    },
+    "SageMakerStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": [
+        "IAMStack",
+        "NeptuneStack",
+        "ElastiCacheStack"
+      ],
+      "Properties": {
+        "TemplateURL": {
+          "Fn::Sub": [
+            "${cfnRoot}/neptune-streams/services-sagemaker-stack.json",
+            {
+              "cfnRoot": {
+                "Fn::FindInMap": [
+                  "CfnMap",
+                  "config",
+                  "cfnRoot"
+                ]
+              }
+            }
+          ]
+        },
+        "Parameters": {
+          "NeptuneClusterEndpoint": {
+            "Fn::GetAtt": [
+              "NeptuneStack",
+              "Outputs.NeptuneDBClusterEndpoint"
+            ]
+          },
+          "NeptuneReaderEndpoint": {
+            "Fn::GetAtt": [
+              "NeptuneStack",
+              "Outputs.NeptuneDBClusterReadEndpoint"
+            ]
+          },
+          "NeptuneClusterPort": {
+            "Fn::GetAtt": [
+              "NeptuneStack",
+              "Outputs.NeptuneDBClusterPort"
+            ]
+          },
+          "NotebookContentS3Locations": {
+            "Fn::Sub": [
+              "${notebookContent}|neptune-streams/*",
+              {
+                "notebookContent": {
+                  "Fn::FindInMap": [
+                    "CfnMap",
+                    "config",
+                    "notebookContent"
+                  ]
+                }
+              }
+            ]
+          },
+          "StartupScript": "",
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          },
+          "ApplicationID": {
+            "Ref": "ApplicationID"
+          },
+          "LambdaS3BucketPrefix": {
+            "Fn::FindInMap": [
+              "CfnMap",
+              "config",
+              "lambdaS3BucketPrefix"
+            ]
+          },
+          "LambdaS3KeyPrefix": {
+            "Fn::FindInMap": [
+              "CfnMap",
+              "config",
+              "lambdaS3KeyPrefix"
+            ]
+          },
+          "Scripts": {
+            "Fn::FindInMap": [
+              "CfnMap",
+              "config",
+              "scripts"
+            ]
+          }
+        },
+        "TimeoutInMinutes": "30",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "ApplicationID",
+            "Value": {
+              "Ref": "ApplicationID"
+            }
+          }
+        ]
+      }
+    },
+    "NeptuneWorkloadLambdaStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": [
+        "NeptuneStack",
+        "ElastiCacheStack",
+        "IAMStack"
+      ],
+      "Properties": {
+        "TemplateURL": {
+          "Fn::Sub": [
+            "${cfnRoot}/neptune-streams/services-lambda-stack.json",
+            {
+              "cfnRoot": {
+                "Fn::FindInMap": [
+                  "CfnMap",
+                  "config",
+                  "cfnRoot"
+                ]
+              }
+            }
+          ]
+        },
+        "Parameters": {
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          },
+          "ApplicationID": {
+            "Ref": "ApplicationID"
+          },
+          "LambdaS3BucketPrefix": {
+            "Fn::FindInMap": [
+              "CfnMap",
+              "config",
+              "lambdaS3BucketPrefix"
+            ]
+          },
+          "LambdaS3KeyPrefix": {
+            "Fn::FindInMap": [
+              "CfnMap",
+              "config",
+              "lambdaS3KeyPrefix"
+            ]
+          }
+        },
+        "TimeoutInMinutes": "10",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "ApplicationID",
+            "Value": {
+              "Ref": "ApplicationID"
+            }
+          }
+        ]
+      }
+    },
+    "NeptuneStreamsStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": [
+        "NeptuneStack",
+        "ElastiCacheStack"
+      ],
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-stream/neptune_stream_poller_nested_full_stack.json",
+        "Parameters": {
+          "ApplicationName": {
+            "Ref": "ApplicationID"
+          },
+          "AdditionalParams": {
+            "Fn::Join": [
+              "",
+              [
+                "{\"elasticache_endpoint\":\"",
+                {
+                  "Fn::GetAtt": [
+                    "ElastiCacheStack",
+                    "Outputs.ElastiCacheEndpoint"
+                  ]
+                },
+                "\", \"neptune_endpoint\":\"",
+                {
+                  "Fn::GetAtt": [
+                    "NeptuneStack",
+                    "Outputs.NeptuneDBClusterEndpoint"
+                  ]
+                },
+                "\"}"
+              ]
+            ]
+          },
+          "LambdaMemorySize": 2048,
+          "StreamRecordsHandler": "neptune_stream_handler.NeptuneStreamHandler",
+          "NeptuneStreamEndpoint": {
+            "Fn::Join": [
+              "",
+              [
+                "https://",
+                {
+                  "Fn::GetAtt": [
+                    "NeptuneStack",
+                    "Outputs.NeptuneDBClusterEndpoint"
+                  ]
+                },
+                ":",
+                {
+                  "Fn::GetAtt": [
+                    "NeptuneStack",
+                    "Outputs.NeptuneDBClusterPort"
+                  ]
+                },
+                "/gremlin/stream"
+              ]
+            ]
+          },
+          "VPC": {
+            "Fn::GetAtt": [
+              "NetworkStack",
+              "Outputs.VPC"
+            ]
+          },
+          "SubnetIds": {
+            "Fn::GetAtt": [
+              "NetworkStack",
+              "Outputs.PrivateSubnetIDs"
+            ]
+          },
+          "SecurityGroupIds": {
+            "Fn::Join": [
+              ",",
+              [
+                {
+                  "Fn::GetAtt": [
+                    "NetworkStack",
+                    "Outputs.DefaultSecurityGroup"
+                  ]
+                },
+                {
+                  "Fn::GetAtt": [
+                    "NetworkStack",
+                    "Outputs.NeptuneClientSecurityGroup"
+                  ]
+                },
+                {
+                  "Fn::GetAtt": [
+                    "NetworkStack",
+                    "Outputs.ElastiCacheClientSecurityGroup"
+                  ]
+                }
+              ]
+            ]
+          },
+          "RouteTableIds": {
+            "Fn::GetAtt": [
+              "NetworkStack",
+              "Outputs.PrivateRouteTableIDs"
+            ]
+          },
+          "CreateCloudWatchAlarm": "false",
+          "LambdaS3Bucket": {
+            "Fn::Sub": [
+              "${lambdaS3BucketPrefix}-${AWS::Region}",
+              {
+                "lambdaS3BucketPrefix": {
+                  "Fn::FindInMap": [
+                    "CfnMap",
+                    "config",
+                    "lambdaS3BucketPrefix"
+                  ]
+                }
+              }
+            ]
+          },
+          "LambdaS3Key": {
+            "Fn::Sub": [
+              "${lambdaS3KeyPrefix}lambda/neptune-streams/neptune_streams_demo.zip",
+              {
+                "lambdaS3KeyPrefix": {
+                  "Fn::FindInMap": [
+                    "CfnMap",
+                    "config",
+                    "lambdaS3KeyPrefix"
+                  ]
+                }
+              }
+            ]
+          },
+          "MaxPollingWaitTime": 5
+        },
+        "TimeoutInMinutes": "20",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          },
+          {
+            "Key": "ApplicationID",
+            "Value": {
+              "Ref": "ApplicationID"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "SageMakerNotebook": {
+      "Description": "SageMaker notebook",
+      "Value": {
+        "Fn::GetAtt": [
+          "SageMakerStack",
+          "Outputs.NeptuneNotebook"
+        ]
+      }
+    },
+    "StartWorkload": {
+      "Description": "Start workload CLI command",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "aws lambda invoke --function-name ",
+            {
+              "Fn::GetAtt": [
+                "NeptuneWorkloadLambdaStack",
+                "Outputs.NeptuneWorkloadManagerLambdaArn"
+              ]
+            },
+            " --payload '{\"operation\": \"start\"}' --region ",
+            {
+              "Ref": "AWS::Region"
+            },
+            " /dev/stdout 1>/dev/null"
+          ]
+        ]
+      }
+    },
+    "StopWorkload": {
+      "Description": "Start workload CLI command",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "aws lambda invoke --function-name ",
+            {
+              "Fn::GetAtt": [
+                "NeptuneWorkloadLambdaStack",
+                "Outputs.NeptuneWorkloadManagerLambdaArn"
+              ]
+            },
+            " --payload '{\"operation\": \"stop\"}' --region ",
+            {
+              "Ref": "AWS::Region"
+            },
+            " /dev/stdout 1>/dev/null"
+          ]
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "Description": " - Amazon ElasticCache cluster",
+  "Parameters": {
+    "InfrastructureID": {
+      "Description": "Infrastructure ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50
+    },
+    "ApplicationID": {
+      "Description": "Application ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50
+    }
+  },
+  "Resources": {
+    "ElastiCacheSubnetGroup": {
+      "Type": "AWS::ElastiCache::SubnetGroup",
+      "Properties": {
+        "Description": "ElastiCache Subnet Group",
+        "SubnetIds": {
+          "Fn::Split": [
+            ",",
+            {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${InfrastructureID}-PrivateSubnetIDs"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ElastiCacheCluster": {
+      "Type": "AWS::ElastiCache::CacheCluster",
+      "Properties": {
+        "ClusterName": {
+          "Fn::Sub": "${ApplicationID}-elasticache"
+        },
+        "CacheSubnetGroupName": {
+          "Ref": "ElastiCacheSubnetGroup"
+        },
+        "CacheNodeType": "cache.t2.small",
+        "Engine": "redis",
+        "NumCacheNodes": "1",
+        "VpcSecurityGroupIds": [
+          {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${InfrastructureID}-ElastiCacheSecurityGroupId"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "ElastiCacheEndpoint": {
+      "Description": "ElastiCache endpoint",
+      "Value": {
+        "Fn::GetAtt": [
+          "ElastiCacheCluster",
+          "RedisEndpoint.Address"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-ElastiCacheEndpoint"
+        }
+      }
+    }
+  }
+}

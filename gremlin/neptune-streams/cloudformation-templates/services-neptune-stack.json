@@ -1,0 +1,426 @@
+{
+  "Description": " - Amazon Neptune cluster inside a VPC",
+  "Parameters": {
+    "DBInstanceType": {
+      "Description": "Neptune DB instance type",
+      "Type": "String",
+      "Default": "db.r4.xlarge",
+      "AllowedValues": [
+        "db.r4.large",
+        "db.r4.xlarge",
+        "db.r4.2xlarge",
+        "db.r4.4xlarge",
+        "db.r4.8xlarge"
+      ],
+      "ConstraintDescription": "Must be a valid Neptune instance type."
+    },
+    "DBReplicaIdentifierSuffix": {
+      "Description": "OPTIONAL: The ID suffix for the Neptune replica to use. Empty means no read replica.",
+      "Type": "String",
+      "Default": ""
+    },
+    "DBClusterPort": {
+      "Type": "String",
+      "Default": "8182",
+      "Description": "Enter the port of your Neptune cluster"
+    },
+    "NeptuneQueryTimeout": {
+      "Type": "Number",
+      "Default": 20000,
+      "Description": "Neptune query timeout (in milliseconds)"
+    },
+    "NeptuneEnableAuditLog": {
+      "Type": "Number",
+      "Default": 0,
+      "AllowedValues": [
+        0,
+        1
+      ],
+      "Description": "Enable audit log. 0 means disable and 1 means enable."
+    },
+    "IAMAuthEnabled": {
+      "Type": "String",
+      "Default": "false",
+      "AllowedValues": [
+        "true",
+        "false"
+      ],
+      "Description": "Enable IAM auth for Neptune."
+    },
+    "InfrastructureID": {
+      "Description": "Infrastructure ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50
+    },
+    "ApplicationID": {
+      "Description": "Application ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50
+    }
+  },
+  "Conditions": {
+    "CreateDBReplicaInstance": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "DBReplicaIdentifierSuffix"
+            },
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "Resources": {
+    "NeptuneDBSubnetGroup": {
+      "Type": "AWS::Neptune::DBSubnetGroup",
+      "Properties": {
+        "DBSubnetGroupDescription": "Neptune DB subnet group",
+        "SubnetIds": {
+          "Fn::Split": [
+            ",",
+            {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${InfrastructureID}-PrivateSubnetIDs"
+              }
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Neptune DB subnet group"
+          }
+        ]
+      }
+    },
+    "NeptuneDBClusterParameterGroup": {
+      "Type": "AWS::Neptune::DBClusterParameterGroup",
+      "Properties": {
+        "Family": "neptune1",
+        "Description": {
+          "Fn::Sub": "${ApplicationID} DB cluster parameter group"
+        },
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-cluster-parameter-group"
+        },
+        "Parameters": {
+          "neptune_enable_audit_log": {
+            "Ref": "NeptuneEnableAuditLog"
+          }
+        },
+        "Parameters": {
+          "neptune_lab_mode": "Streams=enabled"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Neptune DB cluster parameter group"
+          }
+        ]
+      }
+    },
+    "NeptuneDBParameterGroup": {
+      "Type": "AWS::Neptune::DBParameterGroup",
+      "Properties": {
+        "Family": "neptune1",
+        "Description": {
+          "Fn::Sub": "${ApplicationID} DB parameter group"
+        },
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-parameter-group"
+        },
+        "Parameters": {
+          "neptune_query_timeout": {
+            "Ref": "NeptuneQueryTimeout"
+          }
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Neptune DB parameter group"
+          }
+        ]
+      }
+    },
+    "NeptuneDBCluster": {
+      "Type": "AWS::Neptune::DBCluster",
+      "Properties": {
+        "DBSubnetGroupName": {
+          "Ref": "NeptuneDBSubnetGroup"
+        },
+        "VpcSecurityGroupIds": [
+          {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${InfrastructureID}-NeptuneSecurityGroup"
+            }
+          }
+        ],
+        "DBClusterIdentifier": {
+          "Fn::Sub": "neptune-streams-${ApplicationID}"
+        },
+        "DBClusterParameterGroupName": {
+          "Ref": "NeptuneDBClusterParameterGroup"
+        },
+        "Port": {
+          "Ref": "DBClusterPort"
+        },
+        "IamAuthEnabled": {
+          "Ref": "IAMAuthEnabled"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Neptune DB cluster"
+          }
+        ]
+      },
+      "DependsOn": [
+        "NeptuneDBClusterParameterGroup"
+      ]
+    },
+    "NeptuneDBInstance": {
+      "Type": "AWS::Neptune::DBInstance",
+      "Properties": {
+        "DBClusterIdentifier": {
+          "Ref": "NeptuneDBCluster"
+        },
+        "DBInstanceClass": {
+          "Ref": "DBInstanceType"
+        },
+        "DBInstanceIdentifier": {
+          "Fn::Sub": "neptune-streams-primary-${ApplicationID}"
+        },
+        "DBParameterGroupName": {
+          "Ref": "NeptuneDBParameterGroup"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Neptune DB instance"
+          }
+        ]
+      },
+      "DependsOn": [
+        "NeptuneDBCluster",
+        "NeptuneDBParameterGroup"
+      ]
+    },
+    "NeptuneDBReplicaInstance": {
+      "Type": "AWS::Neptune::DBInstance",
+      "Condition": "CreateDBReplicaInstance",
+      "Properties": {
+        "DBInstanceIdentifier": {
+          "Fn::Sub": "${ApplicationID}-${DBReplicaIdentifierSuffix}"
+        },
+        "DBClusterIdentifier": {
+          "Ref": "NeptuneDBCluster"
+        },
+        "DBInstanceClass": {
+          "Ref": "DBInstanceType"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Neptune DB instance"
+          }
+        ]
+      },
+      "DependsOn": [
+        "NeptuneDBCluster",
+        "NeptuneDBInstance"
+      ]
+    }
+  },
+  "Outputs": {
+    "NeptuneDBClusterID": {
+      "Description": "Neptune cluster identifier",
+      "Value": {
+        "Ref": "NeptuneDBCluster"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-NeptuneDBClusterID"
+        }
+      }
+    },
+    "NeptuneDBClusterResourceID": {
+      "Description": "Neptune Cluster resource identifier",
+      "Value": {
+        "Fn::GetAtt": [
+          "NeptuneDBCluster",
+          "ClusterResourceId"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-NeptuneDBClusterResourceID"
+        }
+      }
+    },
+    "NeptuneDBClusterEndpoint": {
+      "Description": "Cluster endpoint",
+      "Value": {
+        "Fn::GetAtt": [
+          "NeptuneDBCluster",
+          "Endpoint"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-NeptuneDBClusterEndpoint"
+        }
+      }
+    },
+    "NeptuneDBInstanceEndpoint": {
+      "Description": "Primary instance endpoint",
+      "Value": {
+        "Fn::GetAtt": [
+          "NeptuneDBInstance",
+          "Endpoint"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-NeptuneDBInstanceEndpoint"
+        }
+      }
+    },
+    "NeptuneDBReplicaInstanceEndpoint": {
+      "Description": "Read replica instance endpoint",
+      "Condition": "CreateDBReplicaInstance",
+      "Value": {
+        "Fn::GetAtt": [
+          "NeptuneDBReplicaInstance",
+          "Endpoint"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-NeptuneDBReplicaInstanceEndpoint"
+        }
+      }
+    },
+    "NeptuneSparqlEndpoint": {
+      "Description": "SPARQL endpoint for Neptune",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "http://",
+            {
+              "Fn::GetAtt": [
+                "NeptuneDBCluster",
+                "Endpoint"
+              ]
+            },
+            ":",
+            {
+              "Fn::GetAtt": [
+                "NeptuneDBCluster",
+                "Port"
+              ]
+            },
+            "/sparql"
+          ]
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-NeptuneSparqlEndpoint"
+        }
+      }
+    },
+    "NeptuneGremlinEndpoint": {
+      "Description": "Gremlin endpoint for Neptune",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "ws://",
+            {
+              "Fn::GetAtt": [
+                "NeptuneDBCluster",
+                "Endpoint"
+              ]
+            },
+            ":",
+            {
+              "Fn::GetAtt": [
+                "NeptuneDBCluster",
+                "Port"
+              ]
+            },
+            "/gremlin"
+          ]
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-NeptuneGremlinEndpoint"
+        }
+      }
+    },
+    "NeptuneLoaderEndpoint": {
+      "Description": "Loader endpoint for Neptune",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "http://",
+            {
+              "Fn::GetAtt": [
+                "NeptuneDBCluster",
+                "Endpoint"
+              ]
+            },
+            ":",
+            {
+              "Fn::GetAtt": [
+                "NeptuneDBCluster",
+                "Port"
+              ]
+            },
+            "/loader"
+          ]
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-NeptuneLoaderEndpoint"
+        }
+      }
+    },
+    "NeptuneDBClusterReadEndpoint": {
+      "Description": "DB cluster read endpoint",
+      "Value": {
+        "Fn::GetAtt": [
+          "NeptuneDBCluster",
+          "ReadEndpoint"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-NeptuneDBClusterReadEndpoint"
+        }
+      }
+    },
+    "NeptuneDBClusterPort": {
+      "Description": "Port for the Neptune cluster",
+      "Value": {
+        "Fn::GetAtt": [
+          "NeptuneDBCluster",
+          "Port"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-NeptuneDBClusterPort"
+        }
+      }
+    }
+  }
+}
