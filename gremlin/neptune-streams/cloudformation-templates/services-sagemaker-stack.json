@@ -226,7 +226,6 @@
                       "Ref": "NotebookContentS3Locations"
                     },
                     "' >> /home/ec2-user/.bashrc\n",
-                    "# aws s3 sync s3://ianrob-examples/notebooks /home/ec2-user/SageMaker/Neptune --exclude \"*\"\n",
                     {
                       "Fn::If": [
                         "InstallNotebookContent",

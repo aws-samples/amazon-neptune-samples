@@ -16,6 +16,7 @@ import json
 import urllib.request
 import os
 import time
+from neptune_python_utils.endpoints import Endpoints
 
 class BulkLoad:
     

@@ -77,18 +77,17 @@ class VertexMetricsService:
         
     def handle_event(self, op, data):
         
+        type = data['type']
         if op == ADD_OPERATION:
-            type = data['type']
-            
             if type == 'vl':
                 self.__increment_vertex_count()
             if type == 'e':
                 self.__update_degree_centrality(data['to'])
                 
         if op == REMOVE_OPERATION:
-            if command == 'vl':
+            if type == 'vl':
                 self.__decrement_vertex_count()
-            if command == 'e':
+            if type == 'e':
                 self.__update_degree_centrality(data['to'])
             
         
