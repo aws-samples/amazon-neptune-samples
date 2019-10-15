@@ -1,0 +1,334 @@
+{
+  "Description": " - Amazon SageMaker Neptune notebook instance",
+  "Parameters": {
+    "NotebookInstanceType": {
+      "Description": "SageMaker instance type.",
+      "Type": "String",
+      "Default": "ml.t2.medium",
+      "AllowedValues": [
+        "ml.t2.medium",
+        "ml.t2.large",
+        "ml.t2.xlarge",
+        "ml.t2.2xlarge",
+        "ml.m4.xlarge",
+        "ml.m4.2xlarge",
+        "ml.m4.4xlarge",
+        "ml.m4.10xlarge",
+        "ml.m4.16xlarge"
+      ],
+      "ConstraintDescription": "Must be a valid SageMaker instance type."
+    },
+    "NeptuneClusterEndpoint": {
+      "Description": "Cluster endpoint of an existing Neptune cluster.",
+      "Type": "String"
+    },
+    "NeptuneReaderEndpoint": {
+      "Description": "Reader endpoint of an existing Neptune cluster.",
+      "Type": "String"
+    },
+    "NeptuneClusterPort": {
+      "Description": "OPTIONAL: Port of an existing Neptune cluster (default 8182).",
+      "Type": "String",
+      "Default": "8182"
+    },
+    "NotebookContentS3Locations": {
+      "Description": "OPTIONAL: S3 locations of the notebooks to install into the notebook instance.",
+      "Type": "String"
+    },
+    "StartupScript": {
+      "Description": "OPTIONAL: Startup script additions for the notebook instance.",
+      "Type": "String",
+      "Default": ""
+    },
+    "InfrastructureID": {
+      "Description": "Infrastructure ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50
+    },
+    "ApplicationID": {
+      "Description": "Application ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50
+    },
+    "LambdaS3BucketPrefix": {
+      "Description": "Lambda S3 bucket prefix",
+      "Type": "String"
+    },
+    "LambdaS3KeyPrefix": {
+      "Description": "Lambda S3 key prefix",
+      "Type": "String"
+    },
+    "Scripts": {
+      "Description": "Scripts S3 location",
+      "Type": "String"
+    }
+  },
+  "Conditions": {
+    "InstallNotebookContent": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "NotebookContentS3Locations"
+            },
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "Resources": {
+    "NeptuneNotebookInstance": {
+      "Type": "AWS::SageMaker::NotebookInstance",
+      "Properties": {
+        "InstanceType": {
+          "Ref": "NotebookInstanceType"
+        },
+        "SubnetId": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::Split": [
+                ",",
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${InfrastructureID}-PrivateSubnetIDs"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${InfrastructureID}-SageMakerSecurityGroup"
+            }
+          },
+          {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${InfrastructureID}-NeptuneClientSecurityGroup"
+            }
+          },
+          {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${InfrastructureID}-ElastiCacheClientSecurityGroup"
+            }
+          }
+        ],
+        "RoleArn": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-SageMakerExecutionRoleARN"
+          }
+        },
+        "LifecycleConfigName": {
+          "Fn::GetAtt": [
+            "NeptuneNotebookInstanceLifecycleConfig",
+            "NotebookInstanceLifecycleConfigName"
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Neptune SageMaker notebook"
+          }
+        ]
+      }
+    },
+    "NeptuneNotebookInstanceLifecycleConfig": {
+      "Type": "AWS::SageMaker::NotebookInstanceLifecycleConfig",
+      "Properties": {
+        "OnCreate": [
+          {
+            "Content": {
+              "Fn::Base64": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "#!/bin/bash\n",
+                    "set -e\n",
+                    "mkdir /home/ec2-user/SageMaker/Neptune\n",
+                    "chmod a+rwx /home/ec2-user/SageMaker/Neptune\n"
+                  ]
+                ]
+              }
+            }
+          }
+        ],
+        "OnStart": [
+          {
+            "Content": {
+              "Fn::Base64": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "#!/bin/bash\n",
+                    "set -e\n",
+                    "[ -e /home/ec2-user/neptune_ready ] && exit 0\n",
+                    "/home/ec2-user/anaconda3/bin/python3 -m  pip install --target /home/ec2-user/anaconda3/envs/python3/lib/python3.6/site-packages/ ipython_unittest\n",
+                    "/home/ec2-user/anaconda3/bin/python3 -m  pip install --target /home/ec2-user/anaconda3/envs/python3/lib/python3.6/site-packages/ --upgrade tornado==4.5.1\n",
+                    "/home/ec2-user/anaconda3/bin/python3 -m  pip install --target /home/ec2-user/anaconda3/envs/python3/lib/python3.6/site-packages/ redis\n",
+                    "aws s3 cp s3://",
+                    {
+                      "Ref": "LambdaS3BucketPrefix"
+                    },
+                    "-",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    {
+                      "Ref": "LambdaS3KeyPrefix"
+                    },
+                    "/lambda/neptune-streams/neptune_streams_demo.zip /home/ec2-user/anaconda3/envs/python3/lib/python3.6/site-packages/ --region ",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "\n",
+                    "unzip -n /home/ec2-user/anaconda3/envs/python3/lib/python3.6/site-packages/neptune_streams_demo.zip -d /home/ec2-user/anaconda3/envs/python3/lib/python3.6/site-packages/\n",
+                    "echo 'export ELASTICACHE_ENDPOINT=",
+                    {
+                      "Fn::ImportValue": {
+                        "Fn::Sub": "${ApplicationID}-ElastiCacheEndpoint"
+                      }
+                    },
+                    "' >> /home/ec2-user/.bashrc\n",
+                    "echo 'export NEPTUNE_CLUSTER_ENDPOINT=",
+                    {
+                      "Ref": "NeptuneClusterEndpoint"
+                    },
+                    "' >> /home/ec2-user/.bashrc\n",
+                    "echo 'export NEPTUNE_READER_ENDPOINT=",
+                    {
+                      "Ref": "NeptuneReaderEndpoint"
+                    },
+                    "' >> /home/ec2-user/.bashrc\n",
+                    "echo 'export NEPTUNE_CLUSTER_PORT=",
+                    {
+                      "Ref": "NeptuneClusterPort"
+                    },
+                    "' >> /home/ec2-user/.bashrc\n",
+                    "echo 'export NEPTUNE_LOAD_FROM_S3_ROLE_ARN=",
+                    {
+                      "Fn::ImportValue": {
+                        "Fn::Sub": "${InfrastructureID}-NeptuneLoadFromS3RoleARN"
+                      }
+                    },
+                    "' >> /home/ec2-user/.bashrc\n",
+                    "echo 'export AWS_REGION=",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "' >> /home/ec2-user/.bashrc\n",
+                    "echo 'export NOTEBOOK_CONTENT_S3_LOCATION=",
+                    {
+                      "Ref": "NotebookContentS3Locations"
+                    },
+                    "' >> /home/ec2-user/.bashrc\n",
+                    {
+                      "Fn::If": [
+                        "InstallNotebookContent",
+                        {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "aws s3 cp ",
+                              {
+                                "Ref": "Scripts"
+                              },
+                              "/create-sync-notebook-script.sh .\n",
+                              "chmod a+x create-sync-notebook-script.sh\n",
+                              "./create-sync-notebook-script.sh \"",
+                              {
+                                "Ref": "NotebookContentS3Locations"
+                              },
+                              "\" \"/home/ec2-user/SageMaker/Neptune\"\n"
+                            ]
+                          ]
+                        },
+                        "# No notebook content\n"
+                      ]
+                    },
+                    "chmod --recursive a+rw /home/ec2-user/SageMaker/Neptune/*\n",
+                    "if [ ! -d /home/ec2-user/neptune-tools ]; then\n",
+                    "  mkdir /home/ec2-user/neptune-tools\n",
+                    "  chmod a+rwx /home/ec2-user/neptune-tools\n",
+                    "  cd /home/ec2-user/neptune-tools\n",
+                    "  wget https://archive.apache.org/dist/tinkerpop/3.4.3/apache-tinkerpop-gremlin-console-3.4.3-bin.zip\n",
+                    "  unzip apache-tinkerpop-gremlin-console-3.4.3-bin.zip\n",
+                    "  rm apache-tinkerpop-gremlin-console-3.4.3-bin.zip\n",
+                    "  chmod a+rwx apache-tinkerpop-gremlin-console-3.4.3/conf\n",
+                    "  cd apache-tinkerpop-gremlin-console-3.4.3\n",
+                    "  wget https://www.amazontrust.com/repository/SFSRootCAG2.pem\n",
+                    "  cd conf\n",
+                    "  echo hosts: [",
+                    {
+                      "Ref": "NeptuneClusterEndpoint"
+                    },
+                    "] >> neptune-remote.yaml\n",
+                    "  echo port: ",
+                    {
+                      "Ref": "NeptuneClusterPort"
+                    },
+                    " >> neptune-remote.yaml\n",
+                    "  echo connectionPool: { enableSsl: true, trustCertChainFile: \"SFSRootCAG2.pem\"}",
+                    " >> neptune-remote.yaml\n",
+                    "  echo serializer: { className: org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV3d0, config: { serializeResultToString: true }}",
+                    " >> neptune-remote.yaml\n",
+                    "fi\n",
+                    {
+                      "Ref": "StartupScript"
+                    },
+                    "\n",
+                    "sudo touch /home/ec2-user/neptune_ready"
+                  ]
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "NeptuneNotebookInstanceId": {
+      "Value": {
+        "Ref": "NeptuneNotebookInstance"
+      }
+    },
+    "NeptuneNotebook": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::Select": [
+                1,
+                {
+                  "Fn::Split": [
+                    "/",
+                    {
+                      "Ref": "NeptuneNotebookInstance"
+                    }
+                  ]
+                }
+              ]
+            },
+            ".notebook.",
+            {
+              "Ref": "AWS::Region"
+            },
+            ".sagemaker.aws/"
+          ]
+        ]
+      }
+    },
+    "NeptuneNotebookInstanceLifecycleConfigId": {
+      "Value": {
+        "Ref": "NeptuneNotebookInstanceLifecycleConfig"
+      }
+    }
+  }
+}

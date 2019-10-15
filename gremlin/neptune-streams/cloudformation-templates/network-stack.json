@@ -1,0 +1,846 @@
+{
+  "Description": " - Amazon VPC for the example",
+  "Parameters": {
+    "InfrastructureID": {
+      "Description": "Infrastructure ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50
+    }
+  },
+  "Mappings": {
+    "Networking": {
+      "VPC": {
+        "CIDR": "172.30.0.0/16"
+      },
+      "PublicSubnetOne": {
+        "CIDR": "172.30.1.0/24"
+      },
+      "PublicSubnetTwo": {
+        "CIDR": "172.30.2.0/24"
+      },
+      "PublicSubnetThree": {
+        "CIDR": "172.30.3.0/24"
+      },
+      "PrivateSubnetOne": {
+        "CIDR": "172.30.4.0/24"
+      },
+      "PrivateSubnetTwo": {
+        "CIDR": "172.30.5.0/24"
+      },
+      "PrivateSubnetThree": {
+        "CIDR": "172.30.6.0/24"
+      }
+    }
+  },
+  "Resources": {
+    "VPC": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "EnableDnsSupport": "true",
+        "EnableDnsHostnames": "true",
+        "CidrBlock": {
+          "Fn::FindInMap": [
+            "Networking",
+            "VPC",
+            "CIDR"
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "VPC with public subnets (3 AZs) & NAT"
+          }
+        ]
+      }
+    },
+    "InternetGateway": {
+      "Type": "AWS::EC2::InternetGateway"
+    },
+    "GatewayToInternet": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "InternetGatewayId": {
+          "Ref": "InternetGateway"
+        }
+      }
+    },
+    "NATGatewayOne": {
+      "DependsOn": "GatewayToInternet",
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "ElasticIPOne",
+            "AllocationId"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "PublicSubnetOne"
+        }
+      }
+    },
+    "ElasticIPOne": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc"
+      }
+    },
+    "NATGatewayTwo": {
+      "DependsOn": "GatewayToInternet",
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "ElasticIPTwo",
+            "AllocationId"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "PublicSubnetTwo"
+        }
+      }
+    },
+    "ElasticIPTwo": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc"
+      }
+    },
+    "NATGatewayThree": {
+      "DependsOn": "GatewayToInternet",
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "ElasticIPThree",
+            "AllocationId"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "PublicSubnetThree"
+        }
+      }
+    },
+    "ElasticIPThree": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc"
+      }
+    },
+    "PublicRouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        }
+      }
+    },
+    "PublicRoute": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PublicRouteTable"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "InternetGateway"
+        }
+      }
+    },
+    "PublicSubnetOne": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "MapPublicIpOnLaunch": true,
+        "CidrBlock": {
+          "Fn::FindInMap": [
+            "Networking",
+            "PublicSubnetOne",
+            "CIDR"
+          ]
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            "0",
+            {
+              "Fn::GetAZs": {
+                "Ref": "AWS::Region"
+              }
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Public subnet #1"
+          }
+        ]
+      }
+    },
+    "PublicSubnetOneRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "PublicSubnetOne"
+        },
+        "RouteTableId": {
+          "Ref": "PublicRouteTable"
+        }
+      }
+    },
+    "PublicSubnetTwo": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "MapPublicIpOnLaunch": true,
+        "CidrBlock": {
+          "Fn::FindInMap": [
+            "Networking",
+            "PublicSubnetTwo",
+            "CIDR"
+          ]
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            "1",
+            {
+              "Fn::GetAZs": {
+                "Ref": "AWS::Region"
+              }
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Public subnet #2"
+          }
+        ]
+      }
+    },
+    "PublicSubnetTwoRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "PublicSubnetTwo"
+        },
+        "RouteTableId": {
+          "Ref": "PublicRouteTable"
+        }
+      }
+    },
+    "PublicSubnetThree": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "MapPublicIpOnLaunch": true,
+        "CidrBlock": {
+          "Fn::FindInMap": [
+            "Networking",
+            "PublicSubnetThree",
+            "CIDR"
+          ]
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            "2",
+            {
+              "Fn::GetAZs": {
+                "Ref": "AWS::Region"
+              }
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Public subnet #3"
+          }
+        ]
+      }
+    },
+    "PublicSubnetThreeRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "PublicSubnetThree"
+        },
+        "RouteTableId": {
+          "Ref": "PublicRouteTable"
+        }
+      }
+    },
+    "PrivateRouteTableOne": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        }
+      }
+    },
+    "PrivateRouteToInternetOne": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRouteTableOne"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "NATGatewayOne"
+        }
+      }
+    },
+    "PrivateRouteTableTwo": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        }
+      }
+    },
+    "PrivateRouteToInternetTwo": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRouteTableTwo"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "NATGatewayTwo"
+        }
+      }
+    },
+    "PrivateRouteTableThree": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        }
+      }
+    },
+    "PrivateRouteToInternetThree": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRouteTableThree"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "NATGatewayThree"
+        }
+      }
+    },
+    "PrivateSubnetOne": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": {
+          "Fn::FindInMap": [
+            "Networking",
+            "PrivateSubnetOne",
+            "CIDR"
+          ]
+        },
+        "MapPublicIpOnLaunch": "true",
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Private subnet# 1"
+          }
+        ]
+      }
+    },
+    "PrivateSubnetTwo": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": {
+          "Fn::FindInMap": [
+            "Networking",
+            "PrivateSubnetTwo",
+            "CIDR"
+          ]
+        },
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Private subnet #2"
+          }
+        ]
+      }
+    },
+    "PrivateSubnetThree": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": {
+          "Fn::FindInMap": [
+            "Networking",
+            "PrivateSubnetThree",
+            "CIDR"
+          ]
+        },
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            2,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Private subnet #3"
+          }
+        ]
+      }
+    },
+    "PrivateSubnetOneRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "DependsOn": [
+        "PrivateSubnetOne"
+      ],
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRouteTableOne"
+        },
+        "SubnetId": {
+          "Ref": "PrivateSubnetOne"
+        }
+      }
+    },
+    "PrivateSubnetTwoRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "DependsOn": [
+        "PrivateSubnetTwo"
+      ],
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRouteTableTwo"
+        },
+        "SubnetId": {
+          "Ref": "PrivateSubnetTwo"
+        }
+      }
+    },
+    "PrivateSubnetThreeRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "DependsOn": [
+        "PrivateSubnetThree"
+      ],
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRouteTableThree"
+        },
+        "SubnetId": {
+          "Ref": "PrivateSubnetThree"
+        }
+      }
+    },
+    "ElastiCacheClientSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "GroupDescription": "Allow Access",
+        "SecurityGroupIngress": [
+          {
+            "FromPort": "22",
+            "ToPort": "22",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "Description": "SSH from anywhere"
+          },
+          {
+            "FromPort": "6379",
+            "ToPort": "6379",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "Description": "TCP access"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ElastiCache client security group"
+          }
+        ]
+      }
+    },
+    "ElastiCacheSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "DependsOn": [
+        "ElastiCacheClientSecurityGroup"
+      ],
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "GroupDescription": "Allow Access",
+        "SecurityGroupIngress": [
+          {
+            "FromPort": "6379",
+            "ToPort": "6379",
+            "IpProtocol": "tcp",
+            "SourceSecurityGroupId": {
+              "Ref": "ElastiCacheClientSecurityGroup"
+            },
+            "Description": "TCP access from ElastiCache client security group"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ElastiCache security group"
+          }
+        ]
+      }
+    },
+    "LambdaSelfReferencingSecurityGroup": {
+      "Properties": {
+        "GroupDescription": "Self-referencing security group for Lambda",
+        "VpcId": {
+          "Ref": "VPC"
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
+    },
+    "LambdaSelfReferencingSecurityGroupIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "DependsOn": "LambdaSelfReferencingSecurityGroup",
+      "Properties": {
+        "GroupId": {
+          "Fn::GetAtt": [
+            "LambdaSelfReferencingSecurityGroup",
+            "GroupId"
+          ]
+        },
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "LambdaSelfReferencingSecurityGroup",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "-1"
+      }
+    },
+    "VPCS3Endpoint": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "RouteTableIds": [
+          {
+            "Ref": "PublicRouteTable"
+          }
+        ],
+        "ServiceName": {
+          "Fn::Join": [
+            "",
+            [
+              "com.amazonaws.",
+              {
+                "Ref": "AWS::Region"
+              },
+              ".s3"
+            ]
+          ]
+        },
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": "*",
+              "Action": [
+                "s3:*"
+              ],
+              "Resource": [
+                "*"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "NeptuneClientSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "GroupDescription": "Allow Access",
+        "SecurityGroupIngress": [
+          {
+            "FromPort": "22",
+            "ToPort": "22",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "Description": "SSH from anywhere to Neptune"
+          },
+          {
+            "FromPort": "8182",
+            "ToPort": "8182",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "Description": "WebSocket and HTTP access to Neptune"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Neptune client security group"
+          }
+        ]
+      }
+    },
+    "NeptuneSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "DependsOn": [
+        "NeptuneClientSecurityGroup"
+      ],
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "GroupDescription": "Allow Access",
+        "SecurityGroupIngress": [
+          {
+            "FromPort": "22",
+            "ToPort": "22",
+            "IpProtocol": "tcp",
+            "SourceSecurityGroupId": {
+              "Ref": "NeptuneClientSecurityGroup"
+            },
+            "Description": "SSH from Neptune client security group"
+          },
+          {
+            "FromPort": "8182",
+            "ToPort": "8182",
+            "IpProtocol": "tcp",
+            "SourceSecurityGroupId": {
+              "Ref": "NeptuneClientSecurityGroup"
+            },
+            "Description": "WebSocket and HTTP access from Neptune client security group"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Neptune security group"
+          }
+        ]
+      }
+    },
+    "SageMakerSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Allow Access",
+        "VpcId": {
+          "Ref": "VPC"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "VPC": {
+      "Description": "VPC",
+      "Value": {
+        "Ref": "VPC"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-VPC"
+        }
+      }
+    },
+    "PublicRouteTable": {
+      "Description": "Public route table",
+      "Value": {
+        "Ref": "PublicRouteTable"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-PublicRouteTable"
+        }
+      }
+    },
+    "PrivateSubnetIDs": {
+      "Description": "Private subnet IDs",
+      "Value": {
+        "Fn::Join": [
+          ",",
+          [
+            {
+              "Ref": "PrivateSubnetOne"
+            },
+            {
+              "Ref": "PrivateSubnetTwo"
+            },
+            {
+              "Ref": "PrivateSubnetThree"
+            }
+          ]
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-PrivateSubnetIDs"
+        }
+      }
+    },
+    "PrivateRouteTableIDs": {
+      "Description": "Private route table IDs",
+      "Value": {
+        "Fn::Join": [
+          ",",
+          [
+            {
+              "Ref": "PrivateRouteTableOne"
+            },
+            {
+              "Ref": "PrivateRouteTableTwo"
+            },
+            {
+              "Ref": "PrivateRouteTableThree"
+            }
+          ]
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-PrivateRouteTableIDs"
+        }
+      }
+    },
+    "DefaultSecurityGroup": {
+      "Description": "Neptune VPC default security group",
+      "Value": {
+        "Fn::GetAtt": [
+          "VPC",
+          "DefaultSecurityGroup"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-DefaultSecurityGroup"
+        }
+      }
+    },
+    "ElastiCacheSecurityGroup": {
+      "Description": "ElastiCacheSecurityGroup security group",
+      "Value": {
+        "Ref": "ElastiCacheSecurityGroup"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-ElastiCacheSecurityGroup"
+        }
+      }
+    },
+    "ElastiCacheSecurityGroupId": {
+      "Description": "ElastiCacheSecurityGroup security group ID",
+      "Value": {
+        "Fn::GetAtt": [
+          "ElastiCacheSecurityGroup",
+          "GroupId"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-ElastiCacheSecurityGroupId"
+        }
+      }
+    },
+    "ElastiCacheClientSecurityGroup": {
+      "Description": "ElastiCache client security group",
+      "Value": {
+        "Ref": "ElastiCacheClientSecurityGroup"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-ElastiCacheClientSecurityGroup"
+        }
+      }
+    },
+    "LambdaSecurityGroup": {
+      "Description": "Lambda security group",
+      "Value": {
+        "Ref": "LambdaSelfReferencingSecurityGroup"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-LambdaSecurityGroup"
+        }
+      }
+    },
+    "NeptuneSecurityGroup": {
+      "Description": "Neptune security group",
+      "Value": {
+        "Ref": "NeptuneSecurityGroup"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-NeptuneSecurityGroup"
+        }
+      }
+    },
+    "NeptuneClientSecurityGroup": {
+      "Description": "Neptune client security group",
+      "Value": {
+        "Ref": "NeptuneClientSecurityGroup"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-NeptuneClientSecurityGroup"
+        }
+      }
+    },
+    "SageMakerSecurityGroup": {
+      "Description": "SageMaker security group",
+      "Value": {
+        "Ref": "SageMakerSecurityGroup"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-SageMakerSecurityGroup"
+        }
+      }
+    }
+  }
+}

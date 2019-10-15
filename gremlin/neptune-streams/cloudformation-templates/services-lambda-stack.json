@@ -1,0 +1,181 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": " - AWS Lambda functions",
+  "Parameters": {
+    "InfrastructureID": {
+      "Description": "Infrastructure ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50
+    },
+    "ApplicationID": {
+      "Description": "Application ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50
+    },
+    "LambdaS3BucketPrefix": {
+      "Description": "Lambda S3 bucket prefix",
+      "Type": "String"
+    },
+    "LambdaS3KeyPrefix": {
+      "Description": "Lambda S3 key prefix",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "NeptuneWorkloadLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "FunctionName": {
+          "Fn::Join": [
+            "-",
+            [
+              "neptune-workload",
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${InfrastructureID}-VPC"
+                }
+              }
+            ]
+          ]
+        },
+        "Handler": "neptune_workload.lambda_handler",
+        "Role": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-NeptuneWorkloadLambdaExecutionRoleARN"
+          }
+        },
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "${LambdaS3BucketPrefix}-${AWS::Region}"
+          },
+          "S3Key": {
+            "Fn::Sub": "${LambdaS3KeyPrefix}lambda/neptune-streams/neptune_streams_demo.zip"
+          }
+        },
+        "Environment": {
+          "Variables": {
+            "NEPTUNE_CLUSTER_ENDPOINT": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${ApplicationID}-NeptuneDBClusterEndpoint"
+              }
+            },
+            "BATCH_SIZE": "1000",
+            "IS_ACTIVE": "False"
+          }
+        },
+        "MemorySize": 512,
+        "Runtime": "python3.7",
+        "Timeout": "180",
+        "ReservedConcurrentExecutions": 1,
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${InfrastructureID}-LambdaSecurityGroup"
+              }
+            },
+            {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${InfrastructureID}-ElastiCacheClientSecurityGroup"
+              }
+            },
+            {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${InfrastructureID}-NeptuneClientSecurityGroup"
+              }
+            }
+          ],
+          "SubnetIds": {
+            "Fn::Split": [
+              ",",
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${InfrastructureID}-PrivateSubnetIDs"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "NeptuneWorkloadManagerLambda": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": "NeptuneWorkloadLambda",
+      "Properties": {
+        "FunctionName": {
+          "Fn::Join": [
+            "-",
+            [
+              "neptune-workload-manager",
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${InfrastructureID}-VPC"
+                }
+              }
+            ]
+          ]
+        },
+        "Handler": "neptune_workload_manager.lambda_handler",
+        "Role": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-NeptuneWorkloadManagerLambdaExecutionRoleARN"
+          }
+        },
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "${LambdaS3BucketPrefix}-${AWS::Region}"
+          },
+          "S3Key": {
+            "Fn::Sub": "${LambdaS3KeyPrefix}lambda/neptune-streams/neptune_streams_demo.zip"
+          }
+        },
+        "Environment": {
+          "Variables": {
+            "WORKLOAD_ARN": {
+              "Fn::GetAtt": [
+                "NeptuneWorkloadLambda",
+                "Arn"
+              ]
+            }
+          }
+        },
+        "MemorySize": 512,
+        "Runtime": "python3.7",
+        "Timeout": "15",
+        "ReservedConcurrentExecutions": 1
+      }
+    }
+  },
+  "Outputs": {
+    "NeptuneWorkloadLambdaArn": {
+      "Description": "NeptuneWorkloadLambda ARN",
+      "Value": {
+        "Fn::GetAtt": [
+          "NeptuneWorkloadLambda",
+          "Arn"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-NeptuneWorkloadLambdaArn"
+        }
+      }
+    },
+    "NeptuneWorkloadManagerLambdaArn": {
+      "Description": "NeptuneWorkloadManagerLambda ARN",
+      "Value": {
+        "Fn::GetAtt": [
+          "NeptuneWorkloadManagerLambda",
+          "Arn"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${ApplicationID}-NeptuneWorkloadManagerLambdaArn"
+        }
+      }
+    }
+  }
+}
