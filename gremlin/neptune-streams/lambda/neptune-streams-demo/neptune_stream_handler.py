@@ -9,7 +9,7 @@ import logging
 import os
 import lambda_function
 from commons import *
-from handler import AbstractHandler
+from handler import AbstractHandler, HandlerResponse
 from neptune_python_utils.gremlin_utils import GremlinUtils
 from neptune_python_utils.endpoints import Endpoints
 
@@ -88,49 +88,29 @@ class VertexMetricsService:
 
 class NeptuneStreamHandler(AbstractHandler):
 
-    def handle_records(self, stream_log, lease):
+    def handle_records(self, stream_log):
         
         params = json.loads(os.environ['AdditionalParams'])
-        svc = VertexMetricsService(params['neptune_endpoint'], params['elasticache_endpoint'])
+        svc = VertexMetricsService(
+            params['neptune_endpoint'], 
+            params['elasticache_endpoint'])
         
         records = stream_log[RECORDS_STR]
-        
-        last_op_num = None
-        last_commit_num = None        
-        count = 0
         
         try:
             for record in records:
             
                 svc.handle_event(record[OPERATION_STR], record[DATA_STR])
+                yield HandlerResponse(
+                    record[EVENT_ID_STR][OP_NUM_STR], 
+                    record[EVENT_ID_STR][COMMIT_NUM_STR], 
+                    1)
             
-                last_op_num = record[EVENT_ID_STR][OP_NUM_STR]
-                last_commit_num = record[EVENT_ID_STR][COMMIT_NUM_STR]
-            
-                count += 1
-            
+        except Exception as e:
+            logger.error('Error occurred - {}'.format(str(e)))
+            raise e
         finally:
-            try:
-                
-                if last_op_num is not None and last_commit_num is not None:
-            
-                    lease['checkpointSubSequenceNumber'] = last_op_num
-                    lease['checkpoint'] = last_commit_num
-                    
-                    logger.info('Updating lease: checkpoint {}, subSequenceNumber {}'.format(
-                        lease['checkpoint'], 
-                        lease['checkpointSubSequenceNumber']))
-                    
-                    lambda_function.lease_manager.update_lease(lease)
-            
-                lambda_function.metrics_publisher_client.publish_metrics([lambda_function
-                                                                         .metrics_publisher_client
-                                                                         .generate_record_processed_metrics(count)])
-            except Exception as e:
-                logger.error('Error occurred - {} '.format(str(e)))
-                raise e
-            finally:
-                svc.close()
+            svc.close()
        
         
             

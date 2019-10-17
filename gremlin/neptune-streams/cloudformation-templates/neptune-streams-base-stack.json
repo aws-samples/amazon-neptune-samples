@@ -74,6 +74,13 @@
         "Parameters": {
           "InfrastructureID": {
             "Ref": "AWS::StackName"
+          },
+          "LambdaS3BucketPrefix": {
+            "Fn::FindInMap": [
+              "CfnMap",
+              "config",
+              "lambdaS3BucketPrefix"
+            ]
           }
         },
         "TimeoutInMinutes": "10",
@@ -115,55 +122,7 @@
             "Ref": "ApplicationID"
           }
         },
-        "TimeoutInMinutes": "10",
-        "Tags": [
-          {
-            "Key": "InfrastructureID",
-            "Value": {
-              "Ref": "AWS::StackName"
-            }
-          },
-          {
-            "Key": "ApplicationID",
-            "Value": {
-              "Ref": "ApplicationID"
-            }
-          }
-        ]
-      }
-    },
-    "AddIamRoleToNeptuneStack": {
-      "Type": "AWS::CloudFormation::Stack",
-      "Properties": {
-        "TemplateURL": {
-          "Fn::Sub": [
-            "${cfnRoot}/common/add-iam-role-to-neptune.json",
-            {
-              "cfnRoot": {
-                "Fn::FindInMap": [
-                  "CfnMap",
-                  "config",
-                  "cfnRoot"
-                ]
-              }
-            }
-          ]
-        },
-        "Parameters": {
-          "DBClusterId": {
-            "Fn::GetAtt": [
-              "NeptuneStack",
-              "Outputs.NeptuneDBClusterID"
-            ]
-          },
-          "NeptuneLoadFromS3IAMRoleArn": {
-            "Fn::GetAtt": [
-              "IAMStack",
-              "Outputs.NeptuneLoadFromS3RoleARN"
-            ]
-          }
-        },
-        "TimeoutInMinutes": "60",
+        "TimeoutInMinutes": "20",
         "Tags": [
           {
             "Key": "InfrastructureID",
@@ -517,7 +476,9 @@
               }
             ]
           },
-          "MaxPollingWaitTime": 5
+          "MaxPollingWaitTime": 5,
+          "StepFunctionFallbackPeriod": 1,
+          "StepFunctionFallbackPeriodUnit": "minute"
         },
         "TimeoutInMinutes": "20",
         "Tags": [
