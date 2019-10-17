@@ -178,10 +178,11 @@
                     {
                       "Ref": "AWS::Region"
                     },
+                    "/",
                     {
                       "Ref": "LambdaS3KeyPrefix"
                     },
-                    "/lambda/neptune-streams/neptune_streams_demo.zip /home/ec2-user/anaconda3/envs/python3/lib/python3.6/site-packages/ --region ",
+                    "lambda/neptune-streams/neptune_streams_demo.zip /home/ec2-user/anaconda3/envs/python3/lib/python3.6/site-packages/ --region ",
                     {
                       "Ref": "AWS::Region"
                     },
@@ -207,13 +208,6 @@
                     "echo 'export NEPTUNE_CLUSTER_PORT=",
                     {
                       "Ref": "NeptuneClusterPort"
-                    },
-                    "' >> /home/ec2-user/.bashrc\n",
-                    "echo 'export NEPTUNE_LOAD_FROM_S3_ROLE_ARN=",
-                    {
-                      "Fn::ImportValue": {
-                        "Fn::Sub": "${InfrastructureID}-NeptuneLoadFromS3RoleARN"
-                      }
                     },
                     "' >> /home/ec2-user/.bashrc\n",
                     "echo 'export AWS_REGION=",
