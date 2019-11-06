@@ -35,7 +35,7 @@
         "Path": "/",
         "Policies": [
           {
-            "PolicyName": "root",
+            "PolicyName": "neptuneworkloadlambdapolicy",
             "PolicyDocument": {
               "Version": "2012-10-17",
               "Statement": [
@@ -106,7 +106,7 @@
         "Path": "/",
         "Policies": [
           {
-            "PolicyName": "root",
+            "PolicyName": "sagemakerpolicy",
             "PolicyDocument": {
               "Version": "2012-10-17",
               "Statement": [
@@ -114,7 +114,6 @@
                   "Effect": "Allow",
                   "Action": [
                     "sagemaker:*",
-                    "ecr:GetAuthorizationToken",
                     "cloudwatch:PutMetricData",
                     "logs:CreateLogGroup",
                     "logs:CreateLogStream",
@@ -132,6 +131,23 @@
                   "Resource": [
                     {
                       "Fn::Sub": "arn:aws:s3:::${LambdaS3BucketPrefix}/*"
+                    },
+                    {
+                      "Fn::Sub": "arn:aws:s3:::${LambdaS3BucketPrefix}-${AWS::Region}/*"
+                    }
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:ListBucket"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:aws:s3:::${LambdaS3BucketPrefix}"
+                    },
+                    {
+                      "Fn::Sub": "arn:aws:s3:::${LambdaS3BucketPrefix}-${AWS::Region}"
                     }
                   ]
                 }
@@ -163,7 +179,7 @@
         "Path": "/",
         "Policies": [
           {
-            "PolicyName": "root",
+            "PolicyName": "neptuneworkloadmanagerlambdapolicy",
             "PolicyDocument": {
               "Version": "2012-10-17",
               "Statement": [

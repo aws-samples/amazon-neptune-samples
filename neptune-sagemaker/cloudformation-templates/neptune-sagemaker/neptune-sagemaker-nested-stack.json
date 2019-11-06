@@ -307,14 +307,32 @@
         "Path": "/",
         "Policies": [
           {
-            "PolicyName": "root",
+            "PolicyName": "sagemakerneptunepolicy",
             "PolicyDocument": {
               "Version": "2012-10-17",
               "Statement": [
                 {
                   "Effect": "Allow",
-                  "Action": "*",
+                  "Action": [
+                    "sagemaker:*",
+                    "cloudwatch:PutMetricData",
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:DescribeLogStreams",
+                    "logs:PutLogEvents",
+                    "logs:GetLogEvents"
+                  ],
                   "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:Get*",
+                    "s3:List*"
+                  ],
+                  "Resource": [
+                    "arn:aws:s3:::*"
+                  ]
                 }
               ]
             }
