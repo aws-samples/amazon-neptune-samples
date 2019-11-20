@@ -1,0 +1,62 @@
+{
+  "VertexTypes": [
+    {
+      "name": "User",
+      "columns": {
+        "name": {"dataType":"String", "dataSubType":"name", "composit":true}
+      },
+      "row": 150
+    },
+    {
+      "name": "Tweet",
+      "columns": {
+        "text": {"dataType":"String", "dataSubType":"shakespeare", "composit":true, "mixedIndex":"search"}
+      },
+      "row": 1500
+    }
+  ],
+  "EdgeTypes": [
+    {
+      "name": "Follows",
+			"multiplicity": "SIMPLE",
+			"selfRef": false,
+      "relations": [
+        {"left": "User", "right": "User", "row": 10000, "selfRef":false,  "supernode":{"vertices":1, "edges":50}  }
+      ]
+    },
+    {
+      "name": "Likes",
+			"multiplicity": "SIMPLE",
+      "relations": [
+        {"left": "User", "right": "Tweet", "row": 10000, "supernode":{"vertices":1, "edges":500 } }
+      ]
+    },
+    {
+      "name": "Retweets",
+			"multiplicity": "MULTI",
+      "relations": [
+        {"left": "User", "right": "Tweet", "row": 10000, "supernode":{"vertices":1, "edges":500} }
+      ]
+    },
+    {
+      "name": "Tweets",
+			"multiplicity": "ONE2MANY",
+      "columns": {
+        "Date": {
+          "dataType":"Date","composit":true,
+          "dateRange":{"from":"01-Jan-2015", "to":"31-Dec-2017"}
+        }
+      },
+      "relations": [
+        {"left": "User", "right": "Tweet", "row": 1000, "supernode":{"vertices":1, "edges":50} }
+      ]
+    },
+    {
+      "name": "Mentions",
+			"multiplicity": "MULTI",
+      "relations": [
+        {"left": "Tweet", "right": "User", "row": 10000, "supernode":{"vertices":1, "edges":500}}
+      ]
+    }
+  ]
+}
