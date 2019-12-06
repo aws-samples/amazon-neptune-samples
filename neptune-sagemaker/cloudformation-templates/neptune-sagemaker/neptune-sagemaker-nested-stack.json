@@ -185,7 +185,7 @@
                   [
                     "#!/bin/bash\n",
                     "set -e\n",
-                    "[ -e /home/ec2-user/neptune_ready ] && exit 0\n",
+                    "#[ -e /home/ec2-user/neptune_ready ] && exit 0\n",
                     "/home/ec2-user/anaconda3/bin/python3 -m  pip install --target /home/ec2-user/anaconda3/envs/python3/lib/python3.6/site-packages/ msgpack\n",
                     "/home/ec2-user/anaconda3/bin/python3 -m  pip install --target /home/ec2-user/anaconda3/envs/python3/lib/python3.6/site-packages/ ipython-gremlin\n",
                     "/home/ec2-user/anaconda3/bin/python3 -m  pip install --target /home/ec2-user/anaconda3/envs/python3/lib/python3.6/site-packages/ gremlinpython\n",
@@ -199,7 +199,7 @@
                     {
                       "Ref": "NeptuneClusterEndpoint"
                     },
-                    "' >> /home/ec2-user/.bashrc\n",
+                    "' > /home/ec2-user/.bashrc\n",
                     "echo 'export NEPTUNE_READER_ENDPOINT=",
                     {
                       "Ref": "NeptuneReaderEndpoint"
@@ -251,14 +251,16 @@
                     "  mkdir /home/ec2-user/neptune-tools\n",
                     "  chmod a+rwx /home/ec2-user/neptune-tools\n",
                     "  cd /home/ec2-user/neptune-tools\n",
-                    "  wget https://ftp.osuosl.org/pub/eclipse/rdf4j/eclipse-rdf4j-2.3.2-sdk.zip\n",
-                    "  unzip eclipse-rdf4j-2.3.2-sdk.zip\n",
-                    "  rm eclipse-rdf4j-2.3.2-sdk.zip\n",
-                    "  wget https://archive.apache.org/dist/tinkerpop/3.3.3/apache-tinkerpop-gremlin-console-3.3.3-bin.zip\n",
-                    "  unzip apache-tinkerpop-gremlin-console-3.3.3-bin.zip\n",
-                    "  rm apache-tinkerpop-gremlin-console-3.3.3-bin.zip\n",
-                    "  chmod a+rwx apache-tinkerpop-gremlin-console-3.3.3/conf\n",
-                    "  cd apache-tinkerpop-gremlin-console-3.3.3/conf\n",
+                    "  wget https://ftp.osuosl.org/pub/eclipse/rdf4j/eclipse-rdf4j-2.5.4-sdk.zip\n",
+                    "  unzip eclipse-rdf4j-2.5.4-sdk.zip\n",
+                    "  rm eclipse-rdf4j-2.5.4-sdk.zip\n",
+                    "  wget https://archive.apache.org/dist/tinkerpop/3.4.1/apache-tinkerpop-gremlin-console-3.4.1-bin.zip\n",
+                    "  unzip apache-tinkerpop-gremlin-console-3.4.1-bin.zip\n",
+                    "  rm apache-tinkerpop-gremlin-console-3.4.1-bin.zip\n",
+                    "  chmod a+rwx apache-tinkerpop-gremlin-console-3.4.1/conf\n",
+                    "  cd apache-tinkerpop-gremlin-console-3.4.1\n",
+                    "  wget https://www.amazontrust.com/repository/SFSRootCAG2.pem\n",
+                    "  cd conf\n",
                     "  echo hosts: [",
                     {
                       "Ref": "NeptuneClusterEndpoint"
@@ -268,6 +270,8 @@
                     {
                       "Ref": "NeptuneClusterPort"
                     },
+                    " >> neptune-remote.yaml\n",
+                    "  echo connectionPool: { enableSsl: true, trustCertChainFile: \"SFSRootCAG2.pem\"}",
                     " >> neptune-remote.yaml\n",
                     "  echo serializer: { className: org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV3d0, config: { serializeResultToString: true }}",
                     " >> neptune-remote.yaml\n",
