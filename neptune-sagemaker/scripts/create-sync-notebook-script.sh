@@ -3,7 +3,7 @@
 notebookS3Locations=$1
 target=$2
 
-find . -name 'sync.sh' -type f -delete
+rm -rf sync.sh
 
 printf "#!/bin/bash -ex\n\n" >> sync.sh
 
