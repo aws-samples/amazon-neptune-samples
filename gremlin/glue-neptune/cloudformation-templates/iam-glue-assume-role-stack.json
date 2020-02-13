@@ -1,5 +1,5 @@
 {
-	"Description": " - AWS Glue IAM resources",
+	"Description": " - AWS Glue IAM assumed role resources",
 	"Parameters": {
 		"InfrastructureID": {
 			"Description": "Infrastructure ID",
@@ -9,7 +9,7 @@
 		}
 	},
 	"Resources": {
-		"GlueRole": {
+		"GlueConnectToNeptuneRole": {
 			"Type": "AWS::IAM::Role",
 			"Properties": {
 				"AssumeRolePolicyDocument": {
@@ -18,29 +18,30 @@
 						{
 							"Effect": "Allow",
 							"Principal": {
-								"Service": "glue.amazonaws.com"
+								"AWS": "*"
 							},
-							"Action": "sts:AssumeRole"
+							"Action": "sts:AssumeRole",
+							"Condition": {
+								"ArnEquals": {
+									"aws:SourceArn": {
+										"Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/AWSGlueServiceRole_${InfrastructureID}"
+									}
+								}
+							}
 						}
 					]
 				},
-				"ManagedPolicyArns": [
-					"arn:aws:iam::aws:policy/AmazonS3FullAccess",
-					"arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
-				],
 				"Policies": [
 					{
-						"PolicyName": "glueassumerolepolicy",
+						"PolicyName": "glueconnecttoneptunerole",
 						"PolicyDocument": {
 							"Version": "2012-10-17",
 							"Statement": [
 								{
 									"Effect": "Allow",
-									"Action": "sts:AssumeRole",
+									"Action": "neptune-db:connect",
 									"Resource": {
-										"Fn::ImportValue": {
-											"Fn::Sub": "${InfrastructureID}-GlueConnectToNeptuneRoleARN"
-										}
+										"Fn::Sub": "arn:${AWS::Partition}:neptune-db:${AWS::Region}:${AWS::AccountId}:*/*"
 									}
 								}
 							]
@@ -49,23 +50,23 @@
 				],
 				"MaxSessionDuration": 43200,
 				"RoleName": {
-					"Fn::Sub": "AWSGlueServiceRole_${InfrastructureID}"
+					"Fn::Sub": "GlueConnectToNeptuneRole_${InfrastructureID}"
 				}
 			}
 		}
 	},
 	"Outputs": {
-		"GlueRoleARN": {
-			"Description": "Glue IAM role ARN",
+		"GlueConnectToNeptuneRoleARN": {
+			"Description": "Glue IAM connect to Neptune role ARN",
 			"Value": {
 				"Fn::GetAtt": [
-					"GlueRole",
+					"GlueConnectToNeptuneRole",
 					"Arn"
 				]
 			},
 			"Export": {
 				"Name": {
-					"Fn::Sub": "${InfrastructureID}-GlueRoleARN"
+					"Fn::Sub": "${InfrastructureID}-GlueConnectToNeptuneRoleARN"
 				}
 			}
 		}

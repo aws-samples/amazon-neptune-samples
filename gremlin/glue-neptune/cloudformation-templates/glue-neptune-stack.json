@@ -147,9 +147,30 @@
         ]
       }
     },
-    "IAMStackGlue": {
+    "IAMStackGlueAssumeRole": {
       "Type": "AWS::CloudFormation::Stack",
       "DependsOn": "VPCStack",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/glue-neptune/iam-glue-assume-role-stack.json",
+        "Parameters": {
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          }
+        },
+        "TimeoutInMinutes": "10",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          }
+        ]
+      }
+    },
+    "IAMStackGlue": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": "IAMStackGlueAssumeRole",
       "Properties": {
         "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/glue-neptune/iam-glue-stack.json",
         "Parameters": {
@@ -240,7 +261,8 @@
           },
           "ApplicationID": {
             "Ref": "ApplicationID"
-          }
+          },
+		  "IAMAuthEnabled": "true"
         },
         "TimeoutInMinutes": "10",
         "Tags": [
@@ -320,12 +342,6 @@
           "SQLScriptS3Key": "neptune-sagemaker/data/salesdb/salesdb-init.sql",
           "S3ExportPath": {
             "Ref": "S3ExportPath"
-          },
-          "GlueIAMRole": {
-            "Fn::GetAtt": [
-              "IAMStackGlue",
-              "Outputs.GlueRoleARN"
-            ]
           }
         },
         "TimeoutInMinutes": "30",
