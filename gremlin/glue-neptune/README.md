@@ -1,6 +1,8 @@
 # Migrating from MySQL to Amazon Neptune using AWS Glue
 
-This demo shows how to migrate relational data from MySQL to Amazon Neptune using AWS Glue.
+__Updated Feb 2020: The example now supports Amazon Neptune [IAM DB Authentication](https://docs.aws.amazon.com/neptune/latest/userguide/iam-auth.html)__
+
+This demo shows how to use AWS Glue to migrate data to Amazon Neptune. The example shows migrating data from Amazon Aurora MySQL, but you can use the same approach to migrate from any source that you can access with AWS Glue.
 
 The demo uses several different migration techniques:
 
@@ -58,7 +60,7 @@ In this notebook we incrementally export frequently changing orders and order de
   
   4. The Neptune DB and Aurora MySQL subnet groups each span at least three subnets in three Availability Zones.
   
-  5. Each Glue job assumes an IAM role that has permission to extract data from the data store (Aurora MySQL) and write to the target (S3 or Neptune). 
+  5. Each Glue job assumes an IAM role that has permission to extract data from the data store (Aurora MySQL) and write to the target (S3 or Neptune). All connections to Neptune use [IAM DB Authentication](https://docs.aws.amazon.com/neptune/latest/userguide/iam-auth.html).
   
   6. Both Glue and Neptune use an Amazon S3 VPC endpoint to access data in S3: Glue to write data to S3, Neptune to bulk load data from S3. For more details on setting up an IAM role and S3VPC endpoint for Neptune, see the [bulk load tutorial](https://docs.aws.amazon.com/neptune/latest/userguide/bulk-load-tutorial-IAM.html).
   

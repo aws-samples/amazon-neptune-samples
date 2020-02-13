@@ -6,6 +6,12 @@
 			"Type": "String",
 			"AllowedPattern": "[-a-z0-9]+",
 			"MaxLength": 50
+		},
+		"ApplicationID": {
+			"Description": "Application ID",
+			"Type": "String",
+			"AllowedPattern": "[-a-z0-9]+",
+			"MaxLength": 50
 		}
 	},
 	"Resources": {
@@ -18,16 +24,13 @@
 						{
 							"Effect": "Allow",
 							"Principal": {
-								"AWS": "*"
-							},
-							"Action": "sts:AssumeRole",
-							"Condition": {
-								"ArnEquals": {
-									"aws:SourceArn": {
-										"Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/AWSGlueServiceRole_${InfrastructureID}"
+								"AWS": {
+									"Fn::ImportValue": {
+										"Fn::Sub": "${InfrastructureID}-GlueRoleARN"
 									}
 								}
-							}
+							},
+							"Action": "sts:AssumeRole"
 						}
 					]
 				},
@@ -41,7 +44,16 @@
 									"Effect": "Allow",
 									"Action": "neptune-db:connect",
 									"Resource": {
-										"Fn::Sub": "arn:${AWS::Partition}:neptune-db:${AWS::Region}:${AWS::AccountId}:*/*"
+										"Fn::Sub": [
+											"arn:${AWS::Partition}:neptune-db:${AWS::Region}:${AWS::AccountId}:${DBClusterResourceID}/*",
+											{
+												"DBClusterResourceID": {
+													"Fn::ImportValue": {
+														"Fn::Sub": "${ApplicationID}-NeptuneDBClusterResourceID"
+													}
+												}
+											}
+										]
 									}
 								}
 							]

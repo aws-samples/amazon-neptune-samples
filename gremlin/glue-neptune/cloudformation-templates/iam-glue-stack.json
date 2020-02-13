@@ -38,9 +38,7 @@
 									"Effect": "Allow",
 									"Action": "sts:AssumeRole",
 									"Resource": {
-										"Fn::ImportValue": {
-											"Fn::Sub": "${InfrastructureID}-GlueConnectToNeptuneRoleARN"
-										}
+										"Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/GlueConnectToNeptuneRoleARN_*"
 									}
 								}
 							]
