@@ -114,7 +114,7 @@ NOTE: Use `subnet-ids` from the VPC in which Amazon Neptune cluster is provision
 ```
 aws lambda create-function --function-name <lambda-function-name> \
 --role "arn:aws:iam::<aws-account-number>:role/service-role/lambda-vpc-access-role" \
---runtime nodejs8.10 --handler indexLambda.handler \
+--runtime nodejs10.x --handler indexLambda.handler \
 --description "Lambda function to make gremlin calls to Amazon Neptune" \
 --timeout 120 --memory-size 256 --publish \
 --vpc-config SubnetIds=<subnet-ids>,SecurityGroupIds=<sec-group-id> \
