@@ -1,6 +1,6 @@
 # Migrating from MySQL to Amazon Neptune using AWS Glue
 
-__Updated Feb 2020: The example now supports Amazon Neptune [IAM DB Authentication](https://docs.aws.amazon.com/neptune/latest/userguide/iam-auth.html)__
+__Updated Feb 2020: The example now supports Amazon Neptune [IAM DB Authentication](https://docs.aws.amazon.com/neptune/latest/userguide/iam-auth.html). The AWS Glue job scripts now use the [neptune-python-utils](https://github.com/awslabs/amazon-neptune-tools/tree/master/neptune-python-utils) Python library instead of _glue-neptune_.__
 
 This demo shows how to use AWS Glue to migrate data to Amazon Neptune. The example shows migrating data from Amazon Aurora MySQL, but you can use the same approach to migrate from any source that you can access with AWS Glue.
 
@@ -12,7 +12,7 @@ The demo uses several different migration techniques:
 
 The two data models are shown below. The MySQL database contains details of products, suppliers, orders and customers. The demo shows us migrating products, suppliers and orders data, but not customer data – though there's no reason it couldn't be expanded to also migrate customer data. We leave that as an exercise for the reader.
 
-The scripts for the AWS Glue jobs can be found [here](https://github.com/aws-samples/amazon-neptune-samples/tree/master/gremlin/glue-neptune/glue-jobs/). The scripts use the [glue_neptune](https://github.com/awslabs/amazon-neptune-tools/tree/master/glue-neptune) Python library.
+The scripts for the AWS Glue jobs can be found [here](https://github.com/aws-samples/amazon-neptune-samples/tree/master/gremlin/glue-neptune/glue-jobs/). The scripts use the [neptune-python-utils](https://github.com/awslabs/amazon-neptune-tools/tree/master/neptune-python-utils) Python library.
 
 ![MySQL to Neptune](mysql-2-neptune-01.png)
 
