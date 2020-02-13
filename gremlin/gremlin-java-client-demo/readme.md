@@ -2,6 +2,25 @@
 
 This app show how to use the Gremlin Java client to connect to Amazon Neptune via a Network Load Balancer (NLB) or Application Load Balancer (ALB), with or without SSL enabled, and with or without [IAM DB Authentication](https://docs.aws.amazon.com/neptune/latest/userguide/iam-auth.html) enabled.
 
+You can use the four classes in the `org.apache.tinkerpop.gremlin.driver` package in your own application to facilitate connecting to Neptune via a load balancer. You can use the `NeptuneClusterBuilder` where normally you would use a `ClusterBuilder` in your client code to configure the driver for a load balancer with SSL and IAM DB Auth properties:
+
+```
+Cluster cluster = NeptuneClusterBuilder.build()
+        .enableSsl(true)
+        .enableIamAuth(true)
+        .addContactPoint(neptuneClusterEndpoint)
+        .networkLoadBalancerEndpoint(networkLoadBalancerEndpoint)
+        .create();
+```
+
+The demo app simply connects to your Neptune database and executes the following query:
+
+```
+ g.V().limit(10)
+  .valueMap().with(WithOptions.tokens)
+  .toList()
+```
+
 ## Build the solution
 ```
 mvn clean install
