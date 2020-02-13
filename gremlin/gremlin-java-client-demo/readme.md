@@ -83,3 +83,7 @@ If you have IAM DB Auth enabled for your Neptune database, you must set the **SE
 For more details on connecting to Neptune via SSL, see [Encryption in Transit: Connecting to Neptune Using SSL/HTTPS](https://docs.aws.amazon.com/neptune/latest/userguide/security-ssl.html).
 
 For more details on connecting to Neptune via a load balancer, see [Connecting to Amazon Neptune from Clients Outside the Neptune VPC](https://github.com/aws-samples/aws-dbs-refarch-graph/tree/master/src/connecting-using-a-load-balancer).
+
+## License Summary
+
+This sample code is made available under a modified MIT license. See the LICENSE file.
