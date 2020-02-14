@@ -40,7 +40,7 @@ def run_job(job_name):
     while is_running:
         response = client.get_job_run(JobName=job_name, RunId=job_run_id)
         job_run_state = response['JobRun']['JobRunState']
-        if job_run_state == 'STOPPED' or job_run_state == 'SUCCEEDED':
+        if job_run_state == 'STOPPED' or job_run_state == 'SUCCEEDED' or job_run_state == 'FAILED':
             is_running = False
         else:
             status.update()

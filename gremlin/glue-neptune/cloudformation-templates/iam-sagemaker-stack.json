@@ -1,66 +1,108 @@
 {
-  "Description": " - Amazon Neptune IAM resources",
-  "Parameters": {
-    "InfrastructureID": {
-      "Description": "Infrastructure ID",
-      "Type": "String",
-      "AllowedPattern": "[-a-z0-9]+",
-      "MaxLength": 50
-    }
-  },
-  "Resources": {
-    "SageMakerExecutionRole": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "Service": [
-                  "sagemaker.amazonaws.com"
-                ]
-              },
-              "Action": [
-                "sts:AssumeRole"
-              ]
-            }
-          ]
-        },
-        "Path": "/",
-        "Policies": [
-          {
-            "PolicyName": "root",
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Action": "*",
-                  "Resource": "*"
-                }
-              ]
-            }
-          }
-        ]
-      }
-    }
-  },
-  "Outputs": {
-    "SageMakerExecutionRoleARN": {
-      "Description": "SageMaker IAM execution role",
-      "Value": {
-        "Fn::GetAtt": [
-          "SageMakerExecutionRole",
-          "Arn"
-        ]
-      },
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${InfrastructureID}-SageMakerExecutionRoleARN"
-        }
-      }
-    }
-  }
+	"Description": " - Amazon Neptune IAM resources",
+	"Parameters": {
+		"InfrastructureID": {
+			"Description": "Infrastructure ID",
+			"Type": "String",
+			"AllowedPattern": "[-a-z0-9]+",
+			"MaxLength": 50
+		}
+	},
+	"Resources": {
+		"SageMakerExecutionRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Principal": {
+								"Service": [
+									"sagemaker.amazonaws.com"
+								]
+							},
+							"Action": [
+								"sts:AssumeRole"
+							]
+						}
+					]
+				},
+				"Path": "/",
+				"Policies": [
+					{
+						"PolicyName": "sagemakerpolicy",
+						"PolicyDocument": {
+							"Version": "2012-10-17",
+							"Statement": [
+								{
+									"Effect": "Allow",
+									"Action": [
+										"cloudwatch:PutMetricData"
+									],
+									"Resource": {
+										"Fn::Sub": "arn:${AWS::Partition}:cloudwatch:${AWS::Region}:${AWS::AccountId}:*"
+									}
+								},
+								{
+									"Effect": "Allow",
+									"Action": [
+										"logs:CreateLogGroup",
+										"logs:CreateLogStream",
+										"logs:DescribeLogStreams",
+										"logs:PutLogEvents",
+										"logs:GetLogEvents"
+									],
+									"Resource": {
+										"Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:*"
+									}
+								},
+								{
+									"Effect": "Allow",
+									"Action": "neptune-db:connect",
+									"Resource": {
+										"Fn::Sub": "arn:${AWS::Partition}:neptune-db:${AWS::Region}:${AWS::AccountId}:*/*"
+									}
+								},
+								{
+									"Effect": "Allow",
+									"Action": "glue:*",
+									"Resource": {
+										"Fn::Sub": "arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:*/*",
+										"Fn::Sub": "arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:*"
+									}
+								},
+								{
+									"Effect": "Allow",
+									"Action": [
+										"s3:Get*",
+										"s3:List*"
+									],
+									"Resource": {
+										"Fn::Sub": "arn:${AWS::Partition}:s3:::*"
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	},
+	"Outputs": {
+		"SageMakerExecutionRoleARN": {
+			"Description": "SageMaker IAM execution role",
+			"Value": {
+				"Fn::GetAtt": [
+					"SageMakerExecutionRole",
+					"Arn"
+				]
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${InfrastructureID}-SageMakerExecutionRoleARN"
+				}
+			}
+		}
+	}
 }

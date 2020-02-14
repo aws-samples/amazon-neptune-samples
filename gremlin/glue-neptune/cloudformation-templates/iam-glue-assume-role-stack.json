@@ -1,0 +1,86 @@
+{
+	"Description": " - AWS Glue IAM assumed role resources",
+	"Parameters": {
+		"InfrastructureID": {
+			"Description": "Infrastructure ID",
+			"Type": "String",
+			"AllowedPattern": "[-a-z0-9]+",
+			"MaxLength": 50
+		},
+		"ApplicationID": {
+			"Description": "Application ID",
+			"Type": "String",
+			"AllowedPattern": "[-a-z0-9]+",
+			"MaxLength": 50
+		}
+	},
+	"Resources": {
+		"GlueConnectToNeptuneRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Principal": {
+								"AWS": {
+									"Fn::ImportValue": {
+										"Fn::Sub": "${InfrastructureID}-GlueRoleARN"
+									}
+								}
+							},
+							"Action": "sts:AssumeRole"
+						}
+					]
+				},
+				"Policies": [
+					{
+						"PolicyName": "glueconnecttoneptunerole",
+						"PolicyDocument": {
+							"Version": "2012-10-17",
+							"Statement": [
+								{
+									"Effect": "Allow",
+									"Action": "neptune-db:connect",
+									"Resource": {
+										"Fn::Sub": [
+											"arn:${AWS::Partition}:neptune-db:${AWS::Region}:${AWS::AccountId}:${DBClusterResourceID}/*",
+											{
+												"DBClusterResourceID": {
+													"Fn::ImportValue": {
+														"Fn::Sub": "${ApplicationID}-NeptuneDBClusterResourceID"
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"MaxSessionDuration": 43200,
+				"RoleName": {
+					"Fn::Sub": "GlueConnectToNeptuneRole_${InfrastructureID}"
+				}
+			}
+		}
+	},
+	"Outputs": {
+		"GlueConnectToNeptuneRoleARN": {
+			"Description": "Glue IAM connect to Neptune role ARN",
+			"Value": {
+				"Fn::GetAtt": [
+					"GlueConnectToNeptuneRole",
+					"Arn"
+				]
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${InfrastructureID}-GlueConnectToNeptuneRoleARN"
+				}
+			}
+		}
+	}
+}
