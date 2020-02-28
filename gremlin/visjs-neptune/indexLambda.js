@@ -33,7 +33,11 @@ exports.handler = function(event, context, callback) {
     var DriverRemoteConnection = gremlin.driver.DriverRemoteConnection;
     var Graph = gremlin.structure.Graph;
     //Use wss:// for secure connections. See https://docs.aws.amazon.com/neptune/latest/userguide/access-graph-ssl.html 
-    dc = new DriverRemoteConnection('wss://'+process.env.NEPTUNE_CLUSTER_ENDPOINT+':'+process.env.NEPTUNE_PORT+'/gremlin');
+    dc = new DriverRemoteConnection(
+      `wss://${process.env.NEPTUNE_CLUSTER_ENDPOINT}:${process.env.NEPTUNE_PORT}/gremlin`,
+      {mimeType: 'application/vnd.gremlin-v2.0+json'}
+    );
+
     var graph = new Graph();
     var g = graph.traversal().withRemote(dc);
 
