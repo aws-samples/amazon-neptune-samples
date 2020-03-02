@@ -24,20 +24,6 @@
 
 const gremlin = require('gremlin');
 
-const formatResponse = payload => {
-  return {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
-      'Access-Control-Max-Age': 2592000, // 30 days
-      'Access-Control-Allow-Headers': '*',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  };
-}
-
 exports.handler = async event => {
   const {DriverRemoteConnection} = gremlin.driver;
   const {Graph} = gremlin.structure;
@@ -100,4 +86,18 @@ exports.handler = async event => {
     console.log('ERROR', error);
     dc.close();
   }
+};
+
+const formatResponse = payload => {
+  return {
+    statusCode: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
+      'Access-Control-Max-Age': 2592000, // 30 days
+      'Access-Control-Allow-Headers': '*',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  };
 };
