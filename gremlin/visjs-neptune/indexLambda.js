@@ -48,6 +48,7 @@ exports.handler = async event => {
   );
   const graph = new Graph();
   const g = graph.traversal().withRemote(dc);
+  const withTokens = '~tinkerpop.valueMap.tokens';
 
   try {
     let data = [];
@@ -59,32 +60,37 @@ exports.handler = async event => {
       const nodes = await g.V()
         .hasLabel('User')
         .limit(1000)
-        .valueMap(true)
+        .valueMap()
+        .with_(withTokens)
         .toList();
       data = nodes.map(row => ({name: row.name.toString()}));
     } else if (event.pathParameters.proxy.match(/search/ig)) {
       data = await g.V().has('name', gremlin.process.P.between(username, touser))
         .limit(20)
-        .valueMap(true)
+        .valueMap()
+        .with_(withTokens)
         .toList();
     } else if (event.pathParameters.proxy.match(/neighbours/ig)) {
       data = await g.V().has('User', '~id', id)
         .in_('Follows')
-        .valueMap(true)
+        .valueMap()
+        .with_(withTokens)
         .limit(10)
         .toList();
     } else if (event.pathParameters.proxy.match(/getusertweets/ig)) {
       data = await g.V().has('User', '~id', userid)
         .out('Tweets')
         .limit(3)
-        .valueMap(true)
+        .valueMap()
+        .with_(withTokens)
         .toList();
     } else if (event.pathParameters.proxy.match(/whichusersliketweet/ig)) {
       data = await g.V().has('Tweet', '~id', tweetid)
         .in_('Likes')
         .hasLabel('User')
         .limit(5)
-        .valueMap(true)
+        .valueMap()
+        .with_(withTokens)
         .toList();
     }
 
