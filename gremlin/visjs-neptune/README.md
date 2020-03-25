@@ -1,7 +1,7 @@
 # Visualize data in Amazon Neptune using VIS.js library
 
-This GitHub lab will take you through hands-on excercise of visualizing graph data in Amazon Neptune using VIS.js library.
-Amazon Neptune is a fast, reliable, fully-managed graph database service available from AWS.
+This GitHub lab will take you through hands-on exercise of visualizing graph data in Amazon Neptune using VIS.js library.
+Amazon Neptune is a fast, reliable, fully managed graph database service available from AWS.
 With Amazon Neptune you can use open source and popular graph query languages such as Apache TinkerPop Gremlin for property graph databases or SPARQL for W3C RDF model graph databases.
 
 ## Primer
