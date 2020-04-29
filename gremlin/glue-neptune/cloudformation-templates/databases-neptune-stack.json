@@ -36,7 +36,7 @@
     },
     "NeptuneEnableAuditLog": {
       "Type": "Number",
-      "Default": 0,
+      "Default": 1,
       "AllowedValues": [
         0,
         1
