@@ -50,7 +50,7 @@ applymapping1 = ApplyMapping.apply(frame = datasource2, mappings = [("NAME", "st
 applymapping1 = GlueGremlinCsvTransforms.create_prefixed_columns(applymapping1, [('~id', 'productId', 'p'),('~to', 'supplierId', 's')])
 selectfields1 = SelectFields.apply(frame = applymapping1, paths = ["~id", "name:String", "category:String", "description:String", "unitPrice", "quantityPerUnit:Int", "imageUrl:String"], transformation_ctx = "selectfields1")
 
-selectfields1.toDF().foreachPartition(gremlin_client.upsert_vertices('Product'))
+selectfields1.toDF().foreachPartition(gremlin_client.upsert_vertices('Product', batch_size=100))
 
 # Supplier vertices
 
@@ -62,7 +62,7 @@ applymapping2 = ApplyMapping.apply(frame = datasource3, mappings = [("COUNTRY", 
 applymapping2 = GlueGremlinCsvTransforms.create_prefixed_columns(applymapping2, [('~id', 'supplierId', 's')])
 selectfields3 = SelectFields.apply(frame = applymapping2, paths = ["~id", "country:String", "address:String", "city:String", "phone:String", "name:String", "state:String"], transformation_ctx = "selectfields3")
 
-selectfields3.toDF().foreachPartition(gremlin_client.upsert_vertices('Supplier'))
+selectfields3.toDF().foreachPartition(gremlin_client.upsert_vertices('Supplier', batch_size=100))
 
 # SUPPLIER edges
 
@@ -72,7 +72,7 @@ applymapping1 = RenameField.apply(applymapping1, "~id", "~from")
 applymapping1 = GlueGremlinCsvTransforms.create_edge_id_column(applymapping1, '~from', '~to')
 selectfields2 = SelectFields.apply(frame = applymapping1, paths = ["~id", "~from", "~to"], transformation_ctx = "selectfields2")
         
-selectfields2.toDF().foreachPartition(gremlin_client.upsert_edges('SUPPLIER'))
+selectfields2.toDF().foreachPartition(gremlin_client.upsert_edges('SUPPLIER', batch_size=100))
 
 # End
 

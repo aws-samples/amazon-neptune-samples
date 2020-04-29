@@ -79,7 +79,7 @@ applymapping1 = ApplyMapping.apply(frame = datasource1, mappings = [("ORDER_DATE
 applymapping1 = GlueGremlinCsvTransforms.create_prefixed_columns(applymapping1, [('~id', 'orderId', 'o')])
 selectfields1 = SelectFields.apply(frame = applymapping1, paths = ["~id", "orderDate", "shipMode"], transformation_ctx = "selectfields1")
 
-selectfields1.toDF().foreachPartition(gremlin_client.add_vertices('Order'))
+selectfields1.toDF().foreachPartition(gremlin_client.add_vertices('Order', batch_size=100))
 
 print("Creating OrderDetail vertices...")
 
@@ -93,7 +93,7 @@ applymapping2 = ApplyMapping.apply(frame = datasource3, mappings = [("DISCOUNT",
 applymapping2 = GlueGremlinCsvTransforms.create_prefixed_columns(applymapping2, [('~id', 'lineId', 'od')])
 selectfields2 = SelectFields.apply(frame = applymapping2, paths = ["~id", "lineNumber", "quantity", "unitPrice", "discount", "supplyCost", "tax"], transformation_ctx = "selectfields2")
 
-selectfields2.toDF().foreachPartition(gremlin_client.add_vertices('OrderDetail'))
+selectfields2.toDF().foreachPartition(gremlin_client.add_vertices('OrderDetail', batch_size=100))
 
 print("Creating ORDER_DETAIL edges...")
 
@@ -102,7 +102,7 @@ applymapping3 = GlueGremlinCsvTransforms.create_prefixed_columns(applymapping3, 
 applymapping3 = GlueGremlinCsvTransforms.create_edge_id_column(applymapping3, '~from', '~to')
 selectfields3 = SelectFields.apply(frame = applymapping3, paths = ["~id", "~from", "~to", "lineNumber"], transformation_ctx = "selectfields3")
 
-selectfields3.toDF().foreachPartition(gremlin_client.add_edges('ORDER_DETAIL'))
+selectfields3.toDF().foreachPartition(gremlin_client.add_edges('ORDER_DETAIL', batch_size=100))
 
 print("Creating PRODUCT edges...")
 
@@ -111,7 +111,7 @@ applymapping4 = GlueGremlinCsvTransforms.create_prefixed_columns(applymapping4, 
 applymapping4 = GlueGremlinCsvTransforms.create_edge_id_column(applymapping4, '~from', '~to')
 selectfields4 = SelectFields.apply(frame = applymapping4, paths = ["~id", "~from", "~to"], transformation_ctx = "selectfields4")
 
-selectfields4.toDF().foreachPartition(gremlin_client.add_edges('PRODUCT'))
+selectfields4.toDF().foreachPartition(gremlin_client.add_edges('PRODUCT', batch_size=100))
 
 update_checkpoint(gremlin_utils, order_table, newcheckpoint)
 
