@@ -262,7 +262,10 @@
 		},
 		"IAMStackGlueAssumeRole": {
 			"Type": "AWS::CloudFormation::Stack",
-			"DependsOn": "NeptuneStack",
+			"DependsOn": [
+				"NeptuneStack",
+				"IAMStackGlue"
+			],
 			"Properties": {
 				"TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/glue-neptune/iam-glue-assume-role-stack.json",
 				"Parameters": {
