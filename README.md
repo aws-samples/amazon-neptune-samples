@@ -2,6 +2,9 @@
 
 Samples and documentation for using the Amazon Neptune graph database service
 
+## Tools and Utilities
+You may also be interested in the [Amazon Neptune Tools](https://github.com/awslabs/amazon-neptune-tools) github repository, which includes tools for data export, conversion, gremlin client load balancing, and more.
+
 ### Amazon Neptune Graphs and Jupyter Notebooks
 Whether you’re creating a new graph data model and queries, or exploring an existing graph dataset, it can be useful to have an interactive query environment that allows you to visualize the results. This [directory](neptune-sagemaker/README.md) has samples from two blog posts to show you how to achieve this by connecting an Amazon SageMaker notebook to an Amazon Neptune database. Using the notebook, you load data into the database, query it and visualize the results.
 
