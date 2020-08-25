@@ -1,5 +1,5 @@
 /*
-Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
 software and associated documentation files (the "Software"), to deal in the Software
@@ -22,8 +22,13 @@ import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.KinesisEvent;
 import com.amazonaws.services.neptune.examples.utils.ActivityTimer;
+import com.amazonaws.services.neptune.examples.utils.ConnectionConfig;
+import com.amazonaws.services.neptune.examples.utils.Metrics;
+import com.amazonaws.services.neptune.examples.utils.Parameters;
 
 public class SocialAppNeptuneWriterStreamHandler implements RequestHandler<KinesisEvent, Void> {
+
+    private static final ConnectionConfig connectionConfig = new ConnectionConfig();
 
     @Override
     public Void handleRequest(KinesisEvent event, Context context) {
@@ -35,25 +40,23 @@ public class SocialAppNeptuneWriterStreamHandler implements RequestHandler<Kines
             throw new RuntimeException("Waiting... [Set 'wait' Lambda environment variable to 'false' to continue processing]");
         }
 
-        try (ActivityTimer timer = new ActivityTimer(logger, "All code")) {
-            try (NeptuneClient neptuneClient = new NeptuneClient(parameters.neptuneEndpoint(), logger)) {
+        try (ActivityTimer timer = new ActivityTimer("All code")) {
 
-                Metrics metrics = new Metrics(parameters.clusterId(), logger);
-                Batches batches = new Batches(event.getRecords(), parameters.batchWriteSize());
+            Metrics metrics = new Metrics(parameters.clusterId());
+            Batches batches = new Batches(event.getRecords(), parameters.batchWriteSize());
 
-                logger.log("Number of records: " + batches.totalNumberRecords() + " [" + context.getAwsRequestId() + "]");
-                logger.log("Number of batches: " + batches.size() + " [" + context.getAwsRequestId() + "]");
+            logger.log("Number of records: " + batches.totalNumberRecords() + " [" + context.getAwsRequestId() + "]");
+            logger.log("Number of batches: " + batches.size() + " [" + context.getAwsRequestId() + "]");
 
-                for (Batch batch : batches) {
-                    batch.writeToNeptune(neptuneClient, parameters, metrics, logger);
-                }
-
-                metrics.publish();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
+            for (Batch batch : batches) {
+                batch.writeToNeptune(connectionConfig, parameters, metrics);
             }
+
+            metrics.publish();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
         return null;

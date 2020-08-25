@@ -206,6 +206,12 @@
             ]
           },
           "NeptuneClientSecurityGroup": "",
+          "NeptuneClusterResourceId": {
+            "Fn::GetAtt": [
+              "NeptuneCluster",
+              "Outputs.DBClusterResourceId"
+            ]
+          },
           "NotebookContentS3Locations": "s3://aws-neptune-customer-samples/neptune-sagemaker/notebooks|stream-2-neptune/*",
           "StartupScript": {
             "Fn::Join": [

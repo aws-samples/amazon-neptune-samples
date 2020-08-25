@@ -1,5 +1,5 @@
 /*
-Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
 software and associated documentation files (the "Software"), to deal in the Software
@@ -15,13 +15,10 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-package com.amazonaws.services.neptune.examples.social;
-
-import com.amazonaws.services.neptune.examples.utils.EnvironmentVariableUtils;
+package com.amazonaws.services.neptune.examples.utils;
 
 public class Parameters {
 
-    private final String neptuneEndpoint;
     private final int percentError;
     private final int batchWriteSize;
     private final boolean conditionalCreate;
@@ -29,16 +26,11 @@ public class Parameters {
     private final boolean wait;
 
     public Parameters(){
-        neptuneEndpoint = EnvironmentVariableUtils.getMandatoryEnv("neptune_endpoint");
         percentError = Integer.parseInt(EnvironmentVariableUtils.getOptionalEnv("percent_error", "0"));
         batchWriteSize = Integer.parseInt(EnvironmentVariableUtils.getOptionalEnv("batch_write_size", "100"));
         conditionalCreate = Boolean.parseBoolean(EnvironmentVariableUtils.getOptionalEnv("conditional_create", "true"));
         clusterId = EnvironmentVariableUtils.getMandatoryEnv("cluster_id");
         wait = Boolean.parseBoolean(EnvironmentVariableUtils.getOptionalEnv("wait", "true"));
-    }
-
-    public String neptuneEndpoint() {
-        return neptuneEndpoint;
     }
 
     public int percentError() {
