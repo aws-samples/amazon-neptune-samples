@@ -1,0 +1,433 @@
+{
+  "Description": "Neptune Gremlin Client demo",
+  "Resources": {
+    "NeptuneBaseStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/v2/cloudformation-templates/neptune-base-stack.json",
+        "Parameters": {
+          "Env": "demo",
+          "DbInstanceType": "db.r5.large",
+          "DBReplicaIdentifierSuffix": "replica1",
+          "NeptuneQueryTimeout": "300000"
+        },
+        "TimeoutInMinutes": "60"
+      }
+    },
+    "SecondNeptuneReplica": {
+      "DependsOn": "NeptuneBaseStack",
+      "Type": "AWS::Neptune::DBInstance",
+      "Properties": {
+        "DBInstanceIdentifier": {
+          "Fn::Join": [
+            "",
+            [
+              "replica2-",
+              {
+                "Fn::Sub": "${AWS::StackName}"
+              }
+            ]
+          ]
+        },
+        "DBClusterIdentifier": {
+          "Fn::GetAtt": [
+            "NeptuneBaseStack",
+            "Outputs.DBClusterId"
+          ]
+        },
+        "DBInstanceClass": "db.r5.large",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "Neptune-demo"
+            }
+          },
+          {
+            "Key": "StackId",
+            "Value": {
+              "Fn::Sub": "${AWS::StackId}"
+            }
+          },
+          {
+            "Key": "Stack",
+            "Value": {
+              "Fn::Sub": "${AWS::Region}-${AWS::StackName}"
+            }
+          },
+          {
+            "Key": "Application",
+            "Value": "NeptuneCloudformation"
+          }
+        ]
+      }
+    },
+    "ThirdNeptuneReplica": {
+      "DependsOn": "NeptuneBaseStack",
+      "Type": "AWS::Neptune::DBInstance",
+      "Properties": {
+        "DBInstanceIdentifier": {
+          "Fn::Join": [
+            "",
+            [
+              "replica3-",
+              {
+                "Fn::Sub": "${AWS::StackName}"
+              }
+            ]
+          ]
+        },
+        "DBClusterIdentifier": {
+          "Fn::GetAtt": [
+            "NeptuneBaseStack",
+            "Outputs.DBClusterId"
+          ]
+        },
+        "DBInstanceClass": "db.r5.large",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "Neptune-demo"
+            }
+          },
+          {
+            "Key": "StackId",
+            "Value": {
+              "Fn::Sub": "${AWS::StackId}"
+            }
+          },
+          {
+            "Key": "Stack",
+            "Value": {
+              "Fn::Sub": "${AWS::Region}-${AWS::StackName}"
+            }
+          },
+          {
+            "Key": "Application",
+            "Value": "NeptuneCloudformation"
+          }
+        ]
+      }
+    },
+    "NeptuneEnpointsInfoLambdaStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/neptune-gremlin-client/neptune-endpoints-info-lambda.json",
+        "Parameters": {
+          "NeptuneClusterId": {
+            "Fn::GetAtt": [
+              "NeptuneBaseStack",
+              "Outputs.DBClusterId"
+            ]
+          },
+          "Concurrency": 1,
+          "S3Bucket": {
+            "Fn::Join": [
+              "",
+              [
+                "aws-neptune-customer-samples-",
+                {
+                  "Ref": "AWS::Region"
+                }
+              ]
+            ]
+          },
+          "S3Key": "neptune-sagemaker/lambda/neptune-gremlin-client/neptune-endpoints-info-lambda.jar"
+        },
+        "TimeoutInMinutes": "60"
+      }
+    },
+    "NeptuneGremlinClientExampleLambdaStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/neptune-gremlin-client-demo/neptune-gremlin-client-lambda.json",
+        "Parameters": {
+          "NeptuneClusterId": {
+            "Fn::GetAtt": [
+              "NeptuneBaseStack",
+              "Outputs.DBClusterId"
+            ]
+          },
+          "VPC": {
+            "Fn::GetAtt": [
+              "NeptuneBaseStack",
+              "Outputs.VPC"
+            ]
+          },
+          "PrivateSubnet1": {
+            "Fn::GetAtt": [
+              "NeptuneBaseStack",
+              "Outputs.PrivateSubnet1"
+            ]
+          },
+          "PrivateSubnet2": {
+            "Fn::GetAtt": [
+              "NeptuneBaseStack",
+              "Outputs.PrivateSubnet2"
+            ]
+          },
+          "NeptuneSecurityGroupId": {
+            "Fn::GetAtt": [
+              "NeptuneBaseStack",
+              "Outputs.NeptuneSG"
+            ]
+          }
+        },
+        "TimeoutInMinutes": "60"
+      }
+    },
+    "RDSManagementAPIPolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "Description": "Policy for getting cluster and instance details via RDS API",
+        "Path": "/",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "rds:DescribeDBClusters",
+                "rds:DescribeDBInstances",
+                "rds:ListTagsForResource",
+                "rds:FailoverDBCluster"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "lambda:InvokeFunction"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+      }
+    },
+    "SageMakerNeptuneStack": {
+      "DependsOn": "RDSManagementAPIPolicy",
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/neptune-sagemaker/neptune-sagemaker-nested-stack.json",
+        "Parameters": {
+          "NeptuneClusterEndpoint": {
+            "Fn::GetAtt": [
+              "NeptuneBaseStack",
+              "Outputs.DBClusterEndpoint"
+            ]
+          },
+          "NeptuneReaderEndpoint": {
+            "Fn::GetAtt": [
+              "NeptuneBaseStack",
+              "Outputs.DBClusterReadEndpoint"
+            ]
+          },
+          "NeptuneClusterPort": {
+            "Fn::GetAtt": [
+              "NeptuneBaseStack",
+              "Outputs.DBClusterPort"
+            ]
+          },
+          "NeptuneClusterVpc": {
+            "Fn::GetAtt": [
+              "NeptuneBaseStack",
+              "Outputs.VPC"
+            ]
+          },
+          "NeptuneClusterSubnetId": {
+            "Fn::GetAtt": [
+              "NeptuneBaseStack",
+              "Outputs.PublicSubnet1"
+            ]
+          },
+          "NeptuneLoadFromS3RoleArn": {
+            "Fn::GetAtt": [
+              "NeptuneBaseStack",
+              "Outputs.NeptuneLoadFromS3IAMRoleArn"
+            ]
+          },
+          "NeptuneClientSecurityGroup": "",
+          "NeptuneClusterResourceId": {
+            "Fn::GetAtt": [
+              "NeptuneBaseStack",
+              "Outputs.DBClusterResourceId"
+            ]
+          },
+          "NotebookContentS3Locations": "s3://aws-neptune-customer-samples/neptune-sagemaker/notebooks|neptune-gremlin-client-demo/*",
+          "StartupScript": {
+            "Fn::Join": [
+              "",
+              [
+                "python3 -m pip install bash_kernel\n",
+                "python3 -m bash_kernel.install\n",
+                "echo 'export NEPTUNE_CLUSTER_ID=",
+                {
+                  "Fn::GetAtt": [
+                    "NeptuneBaseStack",
+                    "Outputs.DBClusterId"
+                  ]
+                },
+                "' >> /home/ec2-user/.bashrc\n",
+                "echo 'export PRIMARY_ENDPOINT=",
+                {
+                  "Fn::GetAtt": [
+                    "NeptuneBaseStack",
+                    "Outputs.DBInstanceEndpoint"
+                  ]
+                },
+                "' >> /home/ec2-user/.bashrc\n",
+                "echo 'export REPLICA_1_ENDPOINT=",
+                {
+                  "Fn::GetAtt": [
+                    "NeptuneBaseStack",
+                    "Outputs.DBReplicaInstanceEndpoint"
+                  ]
+                },
+                "' >> /home/ec2-user/.bashrc\n",
+                "echo 'export REPLICA_2_ENDPOINT=",
+                {
+                  "Fn::GetAtt": [
+                    "SecondNeptuneReplica",
+                    "Endpoint"
+                  ]
+                },
+                "' >> /home/ec2-user/.bashrc\n",
+                "echo 'export REPLICA_3_ENDPOINT=",
+                {
+                  "Fn::GetAtt": [
+                    "ThirdNeptuneReplica",
+                    "Endpoint"
+                  ]
+                },
+                "' >> /home/ec2-user/.bashrc\n"
+              ]
+            ]
+          },
+          "CustomPolicyArn": {
+            "Ref": "RDSManagementAPIPolicy"
+          }
+        },
+        "TimeoutInMinutes": "60"
+      }
+    },
+    "AddIamRoleToNeptuneStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/common/add-iam-role-to-neptune.json",
+        "Parameters": {
+          "DBClusterId": {
+            "Fn::GetAtt": [
+              "NeptuneBaseStack",
+              "Outputs.DBClusterId"
+            ]
+          },
+          "NeptuneLoadFromS3IAMRoleArn": {
+            "Fn::GetAtt": [
+              "NeptuneBaseStack",
+              "Outputs.NeptuneLoadFromS3IAMRoleArn"
+            ]
+          }
+        },
+        "TimeoutInMinutes": "60"
+      }
+    }
+  },
+  "Outputs": {
+    "SageMakerNotebook": {
+      "Value": {
+        "Fn::GetAtt": [
+          "SageMakerNeptuneStack",
+          "Outputs.NeptuneNotebook"
+        ]
+      }
+    },
+    "CloudWatchMetrics": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://console.aws.amazon.com/cloudwatch/home?region=",
+            {
+              "Ref": "AWS::Region"
+            },
+            "#metricsV2:graph=~(metrics~(~(~'AWS*2fNeptune~'GremlinRequestsPerSec~'DBInstanceIdentifier~'",
+            {
+              "Fn::Select": [
+                0,
+                {
+                  "Fn::Split": [
+                    ".",
+                    {
+                      "Fn::GetAtt": [
+                        "NeptuneBaseStack",
+                        "Outputs.DBInstanceEndpoint"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            ")~(~'...~'",
+            {
+              "Fn::Select": [
+                0,
+                {
+                  "Fn::Split": [
+                    ".",
+                    {
+                      "Fn::GetAtt": [
+                        "NeptuneBaseStack",
+                        "Outputs.DBReplicaInstanceEndpoint"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            ")~(~'...~'",
+            {
+              "Fn::Select": [
+                0,
+                {
+                  "Fn::Split": [
+                    ".",
+                    {
+                      "Fn::GetAtt": [
+                        "SecondNeptuneReplica",
+                        "Endpoint"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            ")~(~'...~'",
+            {
+              "Fn::Select": [
+                0,
+                {
+                  "Fn::Split": [
+                    ".",
+                    {
+                      "Fn::GetAtt": [
+                        "ThirdNeptuneReplica",
+                        "Endpoint"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "))~view~'timeSeries~stacked~false~region~'",
+            {
+              "Ref": "AWS::Region"
+            },
+            "~stat~'Average~period~60~start~'-PT15M~end~'P0D~title~'neptune-gremlin-client);query=~'*7bAWS*2fNeptune*2cDBInstanceIdentifier*7d"
+          ]
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,192 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS Lambda function that uses Neptune Gremlin Client to query Amazon Neptune",
+  "Parameters": {
+    "NeptuneClusterId": {
+      "Description": "Amazon Neptune DB cluster identifier.",
+      "Type": "String"
+    },
+    "PrivateSubnet1": {
+      "Description": "Private subnet ID.",
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "PrivateSubnet2": {
+      "Description": "Private subnet ID.",
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "VPC": {
+      "Description": "VPC ID.",
+      "Type": "AWS::EC2::VPC::Id"
+    },
+    "NeptuneSecurityGroupId": {
+      "Description": "ID of a security group that the Lambda functions can use to access Neptune",
+      "Type": "AWS::EC2::SecurityGroup::Id"
+    }
+  },
+  "Resources": {
+    "LambdaSelfReferencingSecurityGroup": {
+      "Properties": {
+        "GroupDescription": "Self-referencing security group for Lambda",
+        "VpcId": {
+          "Ref": "VPC"
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
+    },
+    "LambdaSelfReferencingSecurityGroupIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "DependsOn": "LambdaSelfReferencingSecurityGroup",
+      "Properties": {
+        "GroupId": {
+          "Fn::GetAtt": [
+            "LambdaSelfReferencingSecurityGroup",
+            "GroupId"
+          ]
+        },
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "LambdaSelfReferencingSecurityGroup",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "-1"
+      }
+    },
+    "LambdaExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "root",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents",
+                    "ec2:CreateNetworkInterface",
+                    "ec2:DescribeNetworkInterfaces",
+                    "ec2:DeleteNetworkInterface",
+                    "cloudwatch:*",
+                    "lambda:*"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "neptune-db:*"
+                  ],
+                  "Resource": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:neptune-db:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":",
+                        {
+                          "Ref": "AWS::AccountId"
+                        },
+                        ":*/*"
+                      ]
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "NeptuneGremlinClientExampleLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "FunctionName": {
+          "Fn::Sub": "neptune-gremlin-client-example_${NeptuneClusterId}"
+        },
+        "Handler": "software.amazon.lambda.NeptuneGremlinClientExampleLambda::handleRequest",
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        },
+        "Code": {
+          "S3Bucket": {
+            "Fn::Join": [
+              "",
+              [
+                "aws-neptune-customer-samples-",
+                {
+                  "Ref": "AWS::Region"
+                }
+              ]
+            ]
+          },
+          "S3Key": "neptune-sagemaker/bin/neptune-gremlin-client/gremlin-client-demo.jar"
+        },
+        "Environment": {
+          "Variables": {
+            "neptuneEndpointsInfoLambda": {
+              "Fn::Sub": "neptune-endpoint-info_${NeptuneClusterId}"
+            }
+          }
+        },
+        "MemorySize": 512,
+        "Runtime": "java8",
+        "Timeout": "120",
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Ref": "LambdaSelfReferencingSecurityGroup"
+            },
+            {
+              "Ref": "NeptuneSecurityGroupId"
+            }
+          ],
+          "SubnetIds": [
+            {
+              "Ref": "PrivateSubnet1"
+            },
+            {
+              "Ref": "PrivateSubnet2"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "NeptuneGremlinClientExampleLambdaArn": {
+      "Description": "NeptuneGremlinClientExampleLambda ARN",
+      "Value": {
+        "Fn::GetAtt": [
+          "NeptuneGremlinClientExampleLambda",
+          "Arn"
+        ]
+      }
+    }
+  }
+}
