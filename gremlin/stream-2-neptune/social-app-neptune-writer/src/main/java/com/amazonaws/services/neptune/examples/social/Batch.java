@@ -1,5 +1,5 @@
 /*
-Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
 software and associated documentation files (the "Software"), to deal in the Software
@@ -17,12 +17,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.amazonaws.services.neptune.examples.social;
 
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.events.KinesisEvent;
-import com.amazonaws.services.neptune.examples.utils.ActivityTimer;
+import com.amazonaws.services.neptune.examples.utils.*;
 import org.joda.time.DateTime;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
@@ -30,6 +28,7 @@ public class Batch {
     private final int batchId;
     private final List<KinesisEvent.KinesisEventRecord> records;
     private final Random random = new Random(DateTime.now().getMillis());
+    private final RetryClient retryClient = new RetryClient();
 
     Batch(int batchId, List<KinesisEvent.KinesisEventRecord> records) {
         this.batchId = batchId;
@@ -37,37 +36,47 @@ public class Batch {
     }
 
     public void writeToNeptune(
-            NeptuneClient neptuneClient,
+            ConnectionConfig connectionConfig,
             Parameters parameters,
-            Metrics metrics,
-            LambdaLogger logger) throws IOException {
+            Metrics metrics) throws Exception {
 
-        try (ActivityTimer batchTimer = new ActivityTimer(logger, "TOTAL write batch [" + batchId + "]")) {
+        try (ActivityTimer batchTimer = new ActivityTimer("TOTAL write batch [" + batchId + "]")) {
 
-            AddBatchEdgesQuery query = new AddBatchEdgesQuery(neptuneClient, logger, parameters.conditionalCreate());
+            Runnable retriableQuery = () -> {
 
-            try (ActivityTimer timer = new ActivityTimer(logger, "Parse batch [" + batchId + "]")) {
-                for (KinesisEvent.KinesisEventRecord record : records) {
+                try (TraversalSource traversalSource = connectionConfig.traversalSource()) {
+                    AddBatchEdgesQuery query = new AddBatchEdgesQuery(traversalSource.get(),  parameters.conditionalCreate());
 
-                    String data = new String(record.getKinesis().getData().array());
-                    String[] columns = data.split(",");
+                    try (ActivityTimer timer = new ActivityTimer("Parse batch [" + batchId + "]")) {
+                        for (KinesisEvent.KinesisEventRecord record : records) {
 
-                    String fromVertexId = columns[0];
-                    String toVertexId = columns[1];
-                    String creationDate = columns[2];
-                    long insertDateTime = DateTime.now().getMillis();
+                            String data = new String(record.getKinesis().getData().array());
+                            String[] columns = data.split(",");
 
-                    query.addEdge(fromVertexId, toVertexId, creationDate, insertDateTime);
+                            String fromVertexId = columns[0];
+                            String toVertexId = columns[1];
+                            String creationDate = columns[2];
+                            long insertDateTime = DateTime.now().getMillis();
+
+                            query.addEdge(fromVertexId, toVertexId, creationDate, insertDateTime);
+                        }
+                    }
+
+                    if (random.nextInt(100) < parameters.percentError()) {
+                        query.provokeError();
+                    }
+
+                    query.execute(batchId);
                 }
-            }
+            };
 
-            if (random.nextInt(100) < parameters.percentError()) {
-                query.provokeError();
-            }
+            int retryCount = retryClient.retry(
+                    retriableQuery,
+                    5,
+                    RetryCondition.containsMessage("ConcurrentModificationException"),
+                    connectionConfig);
 
-            long duration = query.execute(batchId);
-
-            metrics.add(records.size(), duration);
+            metrics.add(records.size(), batchTimer.calculateDuration(false), retryCount);
         }
     }
 }

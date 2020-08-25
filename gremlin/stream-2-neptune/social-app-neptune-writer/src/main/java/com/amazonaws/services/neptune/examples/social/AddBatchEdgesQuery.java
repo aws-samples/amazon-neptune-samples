@@ -1,5 +1,5 @@
 /*
-Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
 software and associated documentation files (the "Software"), to deal in the Software
@@ -17,11 +17,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.amazonaws.services.neptune.examples.social;
 
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.neptune.examples.utils.ActivityTimer;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.T;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
@@ -31,12 +32,12 @@ import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.unfold
 class AddBatchEdgesQuery {
 
     private GremlinTraversal traversal;
-    private final LambdaLogger logger;
     private final boolean conditionalCreate;
 
-    AddBatchEdgesQuery(NeptuneClient neptuneClient, LambdaLogger logger, boolean conditionalCreate) {
-        this.traversal = new GremlinTraversal(neptuneClient.newTraversal());
-        this.logger = logger;
+    private static final Logger logger = LoggerFactory.getLogger(AddBatchEdgesQuery.class);
+
+    AddBatchEdgesQuery(GraphTraversalSource traversalSource, boolean conditionalCreate) {
+        this.traversal = new GremlinTraversal(traversalSource);
         this.conditionalCreate = conditionalCreate;
     }
 
@@ -66,7 +67,7 @@ class AddBatchEdgesQuery {
     }
 
     void provokeError() {
-        logger.log("Forcing a ConstraintViolationException (and rollback)");
+        logger.info("Forcing a ConstraintViolationException (and rollback)");
 
         traversal = new GremlinTraversal(traversal.
                 addV("error").property(T.id, "error").
@@ -74,7 +75,7 @@ class AddBatchEdgesQuery {
     }
 
     long execute(int batchId) {
-        return traversal.execute(logger, batchId);
+        return traversal.execute(batchId);
     }
 
     public static class GremlinTraversal {
@@ -106,11 +107,11 @@ class AddBatchEdgesQuery {
             }
         }
 
-        long execute(LambdaLogger logger, int batchId) {
-            ActivityTimer timer = new ActivityTimer(logger, "Execute query [" + batchId + "]");
+        long execute(int batchId) {
+            ActivityTimer timer = new ActivityTimer("Execute query [" + batchId + "]");
             traversal.forEachRemaining(e -> {
             });
-            return timer.stop();
+            return timer.calculateDuration(true);
         }
     }
 }
