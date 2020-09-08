@@ -94,8 +94,7 @@ class Neptune:
         print('clearing rdf data...')
         sparql_endpoint = self.sparql_endpoint(neptune_endpoint, neptune_port)
         data = 'update=DROP%20ALL'
-        request_parameters = sparql_endpoint.prepare_request('POST', data)
-        request_parameters.headers['Content-Type'] = 'application/x-www-form-urlencoded'
+        request_parameters = sparql_endpoint.prepare_request('POST', data, headers={'Content-Type':'application/x-www-form-urlencoded'})
         req = urllib.request.Request(request_parameters.uri, data=data.encode('utf8'), headers=request_parameters.headers)
         response = urllib.request.urlopen(req, timeout=3600)
         
