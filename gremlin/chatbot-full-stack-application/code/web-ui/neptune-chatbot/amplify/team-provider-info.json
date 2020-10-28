@@ -1,0 +1,20 @@
+{
+    "dev": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-neptunechatbot-dev-134725-authRole",
+            "UnauthRoleArn": "arn:aws:iam::852474358610:role/amplify-neptunechatbot-dev-134725-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::852474358610:role/amplify-neptunechatbot-dev-134725-authRole",
+            "Region": "us-west-2",
+            "DeploymentBucketName": "amplify-neptunechatbot-dev-134725-deployment",
+            "UnauthRoleName": "amplify-neptunechatbot-dev-134725-unauthRole",
+            "StackName": "amplify-neptunechatbot-dev-134725",
+            "StackId": "arn:aws:cloudformation:us-west-2:852474358610:stack/amplify-neptunechatbot-dev-134725/e69ddb80-e8ae-11ea-ac2e-06c1882c17fc",
+            "AmplifyAppId": "d2irk1bzqjt3iu"
+        },
+        "categories": {
+            "auth": {
+                "cognito80d33dbf": {}
+            }
+        }
+    }
+}
