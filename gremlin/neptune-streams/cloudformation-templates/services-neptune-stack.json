@@ -110,10 +110,8 @@
         "Parameters": {
           "neptune_enable_audit_log": {
             "Ref": "NeptuneEnableAuditLog"
-          }
-        },
-        "Parameters": {
-          "neptune_lab_mode": "Streams=enabled"
+          },
+          "neptune_streams": "1"
         },
         "Tags": [
           {
