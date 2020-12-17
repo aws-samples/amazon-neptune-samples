@@ -16,7 +16,7 @@
     "react-dom": "^16.5.2",
     "react-force-graph": "^1.36.7",
     "react-force-graph-2d": "^1.17.4",
-    "react-scripts": "3.4.3"
+    "react-scripts": "3.4.4"
   },
   "scripts": {
     "start": "react-scripts start",
