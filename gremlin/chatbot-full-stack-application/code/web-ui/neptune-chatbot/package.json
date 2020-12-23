@@ -12,10 +12,10 @@
     "@testing-library/user-event": "^7.1.2",
     "aws-amplify": "^3.0.25-ui-preview.14",
     "axios": "^0.20.0",
+    "cytoscape-cose-bilkent": "^4.1.0",
     "react": "^16.5.2",
+    "react-cytoscapejs": "^1.2.1",
     "react-dom": "^16.5.2",
-    "react-force-graph": "^1.36.7",
-    "react-force-graph-2d": "^1.17.4",
     "react-scripts": "3.4.4"
   },
   "scripts": {
