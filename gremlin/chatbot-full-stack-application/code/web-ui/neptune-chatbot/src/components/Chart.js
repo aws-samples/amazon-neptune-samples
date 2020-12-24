@@ -1,84 +1,76 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-import React, { useRef } from "react";
-import ForceGraph2D from "react-force-graph-2d";
+import React from "react";
 import { useWindowSize } from "@react-hook/window-size";
+import coseBilkent from 'cytoscape-cose-bilkent';
 import PropTypes from "prop-types";
+import CytoscapeComponent from 'react-cytoscapejs';
+import Cytoscape from 'cytoscape';
 
-const nodeConfig = {
-  author: {
-    imgSrc:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Person_icon_BLACK-01.svg/50px-Person_icon_BLACK-01.svg.png",
-    labelField: "name",
-    tooltip: "name",
-  },
-  post: {
-    imgSrc:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Document_icon_%28the_Noun_Project_27904%29.svg/50px-Document_icon_%28the_Noun_Project_27904%29.svg.png",
-    labelField: "title",
-    tooltip: "title",
-  },
-  tag: {
-    imgSrc:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Idea.svg/50px-idea.svg.png",
-    labelField: "tag",
-    tooltip: "tag",
-  },
-};
+Cytoscape.use(coseBilkent);
 
 /**
  * Renders the network chart
  * @param {*} props - The props for the chart
  */
 export default function Chart(props) {
-  const fgRef = useRef();
-  const chartData = {
-    nodes: [],
-    links: [],
-  };
+  let cy;
+  const chartData = [];
   const [width, height] = useWindowSize();
-  if (props.chartData != null) {
-    props.chartData["vertices"].forEach((node) => {
-      chartData.nodes.push(JSON.parse(JSON.stringify(node)));
-    });
 
-    props.chartData["edges"].forEach((edge) => {
-      chartData.links.push(JSON.parse(JSON.stringify(edge)));
-    });
+  /**
+   * Retieves the proper image for the  label
+   * @param {*} label The image URL
+   */
+   const getDefaultImage = (label) => {
+    switch (label) {
+      case 'author':
+        return "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Person_icon_BLACK-01.svg/50px-Person_icon_BLACK-01.svg.png";
+      case 'post':
+        return "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Document_icon_%28the_Noun_Project_27904%29.svg/50px-Document_icon_%28the_Noun_Project_27904%29.svg.png";
+      case 'tag':
+        return "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Idea.svg/50px-idea.svg.png";
+    }
   }
 
   /**
-   * Returns the height for the resized image
-   * @param {*} node - The node object
-   * @param {*} size - The size parameter
+   * Returns the label text for the node
+   * @param {*} node the node object
    */
-  const getSizeY = (node, size) => {
-    if (node.label === "author") {
-      const ratio = node.img_height / node.img_width;
-      return (
-        size * (node.img_src === "" || node.img_src === undefined ? 1 : ratio)
-      );
-    } else {
-      return size;
+  const getLabelText = (node) => {
+    switch (node.label) {
+      case 'author':
+        return node.name;
+      case 'post':
+        return truncateString(node.title, 50, "...");
+      case 'tag':
+        return node.tag;
     }
-  };
+  }
 
   /**
-   * Returns the width for the resized image
-   * @param {*} node - The node object
-   * @param {*} size - The size parameter
+   * Returns the proper background color based on the label
+   * @param {*} label The label
    */
-  const getSizeX = (node, size) => {
-    if (node.label === "post") {
-      const ratio = node.img_width / node.img_height;
-      return (
-        size * (node.img_src === "" || node.img_src === undefined ? 1 : ratio)
-      );
-    } else {
-      return size;
+  const getBackgroundColor = (label) => {
+    switch (label) {
+      case 'author':
+        return "#48a3c6";
+      case 'post':
+        return "#e47911";
+      case 'tag':
+        return "#cccccc";
+      default:
+        return "white";
     }
-  };
+  }
 
+  /**
+   * Truncates the string to specified length
+   * @param {*} str The string to truncate
+   * @param {*} len The length to truncate it to
+   * @param {*} append If you want to append anything to the end
+   */
   const truncateString = (str, len, append) => {
     var newLength;
     append = append || ""; //Optional: append a string to str after truncating. Defaults to an empty string if no value is given
@@ -103,58 +95,60 @@ export default function Chart(props) {
     return tempString;
   };
 
+  if (props.chartData != null) {
+    props.chartData["vertices"].forEach((node) => {
+      let d = {data: (JSON.parse(JSON.stringify(node)))}
+      d.data.label = getLabelText(node)
+      d.style={w: 48, h: 48, shape: 'roundrectangle'}
+      d.style["background-color"]=getBackgroundColor(node.label);
+      d.style["background-image"]=getDefaultImage(node.label);
+      d.style["background-fit"] = "cover cover"
+
+      chartData.push(d);
+    });
+
+    props.chartData["edges"].forEach((edge) => {
+      let d = {data: (JSON.parse(JSON.stringify(edge)))}
+      chartData.push(d);
+    });
+  }
+
+  const style={height: height - 75, width: width - 510}
+  const layout = { name: 'cose-bilkent',
+      ready: function () {
+      },
+      stop: function () {
+      },
+      quality: 'default',
+      nodeDimensionsIncludeLabels: true,
+      refresh: 30,
+      fit: true,
+      padding: 10,
+      randomize: true,
+      nodeRepulsion: 450000,
+      idealEdgeLength: 100,
+      edgeElasticity: 0.45,
+      nestingFactor: 0.1,
+      gravity: 0.1,
+      numIter: 2500,
+      tile: true,
+      animate: 'end',
+      animationDuration: 500,
+      tilingPaddingVertical: 10,
+      tilingPaddingHorizontal: 10,
+      gravityRangeCompound: 1.5,
+      gravityCompound: 1.0,
+      gravityRange: 3.8,
+      initialEnergyOnIncremental: 0.5
+    };
+  console.log(chartData);
   return (
-    <ForceGraph2D
-      height={height - 110}
-      width={width - 550}
-      ref={fgRef}
-      graphData={chartData}
-      nodeLabel="tooltip"
-      linkDesc="label"
-      cooldownTicks={1}
-      linkDirectionalArrowLength={1.5}
-      linkDirectionalArrowRelPos={1}
-      d3VelocityDecay={0.001}
-      onEngineStop={() => fgRef.current.zoomToFit(100, 25)}
-      onNodeClick={(node) => {
-        if (node.label === "post") {
-          window.open(node.id);
-        }
-      }}
-      onNodeDragEnd={(node) => {
-        node.fx = node.x;
-        node.fy = node.y;
-      }}
-      nodeCanvasObject={(node, ctx, globalScale) => {
-        const label = node[nodeConfig[node.label].labelField];
-        node.tooltip = node[nodeConfig[node.label].tooltip];
-        const fontSize = 12 / globalScale;
-        ctx.font = `${fontSize}px Sans-Serif`;
-
-        let img = new Image();
-        img.src =
-          node.img_src === "" || node.img_src === undefined
-            ? nodeConfig[node.label].imgSrc
-            : node.img_src;
-        const size = 8;
-        ctx.drawImage(
-          img,
-          node.x - getSizeX(node, size) / 2,
-          node.y - getSizeY(node, size) / 2,
-          getSizeX(node, size),
-          getSizeY(node, size)
-        );
-
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = "black";
-        ctx.fillText(
-          node.label === "post" ? truncateString(label, 30, "...") : label,
-          node.x,
-          node.y + getSizeY(node, size) / 2 + 1
-        );
-      }}
+    <CytoscapeComponent style={style}
+      elements={chartData}
+      layout={layout}
+      cy={(c) => { cy = c }}
     />
+
   );
 }
 
