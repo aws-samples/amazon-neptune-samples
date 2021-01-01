@@ -33,6 +33,7 @@ build/
 dist/
 node_modules/
 aws-exports.js
+config.json
 awsconfiguration.json
 amplifyconfiguration.json
 amplify-build-config.json

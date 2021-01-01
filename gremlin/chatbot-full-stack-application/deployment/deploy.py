@@ -7,6 +7,7 @@ import time
 import io
 import logging
 import sys
+import os
 from amazon_lex_bot_deploy import amazon_lex_bot_deploy
 from aws.blog_parser.blog_parser import AwsBlogParser
 from aws.comprehend.process_posts import ComprehendProcessor
@@ -22,7 +23,7 @@ lex_client = boto3.client('lex-models')
 url = 'https://aws.amazon.com/blogs/database/category/database/amazon-neptune/'
 
 
-def main(neptune_cluster_name: str) -> int:
+def main(neptune_cluster_name: str, frontend_path: str) -> int:
     # Get and choose neptune instances
     describe_db_clusters_response = neptune_client.describe_db_clusters(
         DBClusterIdentifier=neptune_cluster_name
@@ -147,24 +148,28 @@ def main(neptune_cluster_name: str) -> int:
         )
 
     logger.info(f'Deployment Complete')
-    logger.info(f'*******************')
-    logger.info(
-        f'Copy the text below into the config.json in the web-ui project')
-    logger.info(f'*******************')
-    logger.info(f'"SERVER_URL": "{api_invoke_url}"')
-    logger.info(f'*******************')
-    logger.info(
-        f'Copy the text below into the aws-exports.js in the web-ui project')
-    logger.info(f'aws_project_region: "{boto3.session.Session().region_name}"')
-    logger.info(f'aws_cognito_identity_pool_id: "{identity_pool_id}"')
-    logger.info(f'aws_cognito_region: "{boto3.session.Session().region_name}"')
-    logger.info(f'region: "{boto3.session.Session().region_name}"')
-    logger.info(f'*******************')
+    logger.info(f'Writing Configuration Files')
+    with open(f'{frontend_path}/src/config.json', "w") as f: 
+        f.writelines(json.dumps({"SERVER_URL": api_invoke_url}, indent=2)) 
 
+    with open(f'{frontend_path}/src/aws-exports.js', "w") as f: 
+        f.write('const awsmobile = {\n') 
+        f.write(f'\taws_project_region: "{boto3.session.Session().region_name}",\n') 
+        f.write(f'\taws_cognito_identity_pool_id: "{identity_pool_id}",\n')
+        f.write(f'\taws_cognito_region: "{boto3.session.Session().region_name}",\n')
+        f.write("\toauth: {},\n") 
+        f.write('\taws_bots: "enable",\n') 
+        f.write('\taws_bots_config: [{\n') 
+        f.write('\t\tname: "blog_chatbot",\n') 
+        f.write('\t\talias: "$LATEST",\n') 
+        f.write(f'\t\tregion: "{boto3.session.Session().region_name}"\n') 
+        f.write('}]};\n') 
+        f.write('export default awsmobile;\n')
+
+if not os.getenv('CLUSTERNAME'):
+    print("You must specify a CLUSTERNAME environment variable")
     exit(0)
-
-
-if len(sys.argv) != 2:
-    print("You must specify a command line arguement for the database name")
+if not os.getenv('FRONTEND_PATH'):
+    print("You must specify a FRONTEND_PATH environment variable")
     exit(0)
-main(sys.argv[1])
+main(os.getenv('CLUSTERNAME'), os.getenv("FRONTEND_PATH"))

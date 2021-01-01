@@ -99,9 +99,15 @@ export default function Chart(props) {
     props.chartData["vertices"].forEach((node) => {
       let d = {data: (JSON.parse(JSON.stringify(node)))}
       d.data.label = getLabelText(node)
-      d.style={w: 48, h: 48, shape: 'roundrectangle'}
-      d.style["background-color"]=getBackgroundColor(node.label);
-      d.style["background-image"]=getDefaultImage(node.label);
+      if(node.thumbnail) {
+        d.style={width: node.img_width, height: node.img_height, shape: 'roundrectangle'}
+        d.style["background-color"]="transparent"      
+        d.style["background-image"]=`url(${node.thumbnail})`
+      } else {
+        d.style={width: 75, height: 75, shape: 'roundrectangle'}
+        d.style["background-color"]=getBackgroundColor(node.label);
+        d.style["background-image"]=getDefaultImage(node.label);
+      }
       d.style["background-fit"] = "cover cover"
 
       chartData.push(d);

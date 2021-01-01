@@ -1,5 +1,3 @@
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: MIT-0
 import sys
 import logging
 import json
@@ -17,6 +15,7 @@ class NeptuneWriter:
     # Array containing the HTML of each blogs paginated blog post titles and previews
 
     logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
     g = None
     conn = None
 
@@ -48,6 +47,7 @@ class NeptuneWriter:
                 __.addV('post')
                 .property(T.id, post['url'])
                 .property('title', post['title'])
+                .property('thumbnail', post['thumbnail'])
                 .property('post_date', post['date'])
                 .property('img_src', post['img_src'])
                 .property('img_height', post['img_height'])
@@ -58,11 +58,6 @@ class NeptuneWriter:
         return t
 
     def __add_author(self, t, author, post_url):
-        img_src = None
-        if "img_src" in author.keys():
-            img_src = author['img_src']
-            img_height = author['img_height']
-            img_width = author['img_width']
         t = (
             t.V(author['name'])
             .fold()
@@ -74,13 +69,14 @@ class NeptuneWriter:
             ).as_('p').addE('written_by').from_(__.V(post_url))
         )
         # Conditionally add the img_src, img_height, and img_width property if they do not exist
-        if img_src:
+        if "img_src" in author.keys():
             t = (
                 t.sideEffect(
                     __.select('p').hasNot('img_src')
-                    .property('img_src', img_src)
-                    .property('img_height', img_height)
-                    .property('img_width', img_width)
+                    .property('img_src', author['img_src'])
+                    .property('thumbnail', author['thumbnail'])
+                    .property('img_height', author['img_height'])
+                    .property('img_width', author['img_width'])
                 )
             )
         return t

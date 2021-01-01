@@ -4,10 +4,14 @@ from requests import get
 from requests.exceptions import RequestException
 from contextlib import closing
 from bs4 import BeautifulSoup
+from PIL import Image
+from io import BytesIO
+import base64
 import sys
 import json
 import argparse
 import logging
+import urllib
 
 
 class AwsBlogParser:
@@ -46,6 +50,37 @@ class AwsBlogParser:
         return (resp.status_code == 200
                 and content_type is not None
                 and content_type.find('html') > -1)
+    
+    def __resize_image(self, img):
+        max_size=100
+        # resize the image to a max dimension of max_size
+        width=img.size[0]
+        height=img.size[1]
+        if width>max_size or height>max_size:
+            ratio=1
+            size=()
+            if width>height: # horizontal image
+                ratio = max_size/width
+                size=(max_size, height*ratio)
+            else: # vertical image
+                ratio = max_size/height
+                size=(width*ratio, max_size)
+
+            img.thumbnail(size,Image.ANTIALIAS)
+        return img
+
+    def __url_to_datauri(self, url):
+        urllib.request.urlretrieve(url, "sample.png")
+        img = Image.open("sample.png")
+        img=self.__resize_image(img)
+        #converts image to datauri
+        data = BytesIO()
+        img.save(data, "PNG")
+        data64 = base64.b64encode(data.getvalue())
+        return {'img_src': url,
+                'thumbnail': u'data:img/png;base64,'+data64.decode('utf-8'),
+                'img_height': img.size[1],
+                'img_width': img.size[0]}
 
     def parse(self):
         siteContent = []
@@ -106,9 +141,9 @@ class AwsBlogParser:
                     if not str(type(tag)) == "<class 'bs4.element.NavigableString'>":
                         children = tag.findChildren('img')
                         if len(children) == 1:
-                            author_images.append({'url': children[0]['src'],
-                                                  'img_height': children[0]['height'] if children[0].has_attr('height') else 100,
-                                                  'img_width': children[0]['width']} if children[0].has_attr('width') else 200,)
+                            author_images.append(self.__url_to_datauri(children[0]['src']))
+                            
+
 
             tagArray = []
             authorArray = []
@@ -116,18 +151,16 @@ class AwsBlogParser:
                 tagArray.append(tag.text)
             for auth in Authors:
                 authorArray.append(auth.text)
-            postJson = {}
+            postJson = self.__url_to_datauri(post["img_src"])
             postJson["url"] = post["url"]
-            postJson["img_src"] = post["img_src"]
-            postJson["img_height"] = post["img_height"]
-            postJson["img_width"] = post["img_width"]
             postJson["title"] = Title[0].text
             authors = []
             i = 0
             for i, a in enumerate(authorArray):
                 auth = {'name': a}
                 if i < len(author_images):
-                    auth['img_src'] = author_images[i]['url']
+                    auth['img_src'] = author_images[i]['img_src']
+                    auth['thumbnail'] = author_images[i]['thumbnail']
                     auth['img_height'] = author_images[i]['img_height']
                     auth['img_width'] = author_images[i]['img_width']
                 authors.append(auth)
@@ -136,6 +169,6 @@ class AwsBlogParser:
             postJson["tags"] = tagArray
             postJson["post"] = postContent[0].text
             output["posts"].append(postJson)
-
+            
         self.logger.info("Processing Completed!")
         return output["posts"]
