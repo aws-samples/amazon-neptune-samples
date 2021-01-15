@@ -1,0 +1,112 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: A nested template to deploy Neptune ML Quick start related
+Parameters:
+  Env:
+    Description: Environment tag, e.g. prod, nonprod.
+    Default: demo
+    Type: String
+    AllowedPattern: "[a-z0-9]+"
+    MaxLength: 15
+  DbInstanceType:
+    Description: Neptune DB instance type
+    Type: String
+    Default: db.r5.large
+    AllowedValues:
+    - db.t3.medium
+    - db.r4.large
+    - db.r4.xlarge
+    - db.r4.2xlarge
+    - db.r4.4xlarge
+    - db.r4.8xlarge
+    - db.r5.large
+    - db.r5.xlarge
+    - db.r5.2xlarge
+    - db.r5.4xlarge
+    - db.r5.8xlarge
+    - db.r5.12xlarge
+    ConstraintDescription: Must be a valid Neptune instance type. Note that for Stockholm
+      and OSU only R5 and T3 instances are available.
+  DBClusterPort:
+    Type: String
+    Default: '8182'
+    Description: Enter the port of your Neptune cluster
+Resources:
+  NeptuneBaseStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL:
+        Fn::Join:
+        - ''
+        - - https://s3.amazonaws.com/aws-neptune-customer-samples/v2/cloudformation-templates/neptune-base-stack.json
+      TimeoutInMinutes: '60'
+      Parameters:
+        Env:
+          Ref: Env
+        DBClusterPort:
+          Ref: DBClusterPort
+        DbInstanceType:
+          Ref: DbInstanceType
+  ChatbotCoreStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL:
+        Fn::Join:
+        - ''
+        - - https://s3.amazonaws.com/aws-neptune-customer-samples/chatbot-blog/cfn-templates/chatbot.yaml
+      TimeoutInMinutes: '30'
+      Parameters:
+        SecurityGroupId:
+            Fn::GetAtt:
+            - NeptuneBaseStack
+            - Outputs.NeptuneSG
+        SubnetIds:
+            Fn::GetAtt:
+              - NeptuneBaseStack
+              - Outputs.PublicSubnet1
+        ClusterEndpoint:
+            Fn::GetAtt:
+            - NeptuneBaseStack
+            - Outputs.DBClusterEndpoint
+        ClusterPort:
+            Fn::GetAtt:
+            - NeptuneBaseStack
+            - Outputs.DBClusterPort
+  LexBotDeployStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL:
+        Fn::Join:
+        - ''
+        - - https://s3.amazonaws.com/aws-neptune-customer-samples/chatbot-blog/cfn-templates/lexbot-deploy.yaml
+      TimeoutInMinutes: '30'
+      Parameters:
+        ValidationLambdaArn:
+            Fn::GetAtt:
+            - ChatbotCoreStack
+            - Outputs.ValidationLambdaARN
+  BlogParserStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL:
+        Fn::Join:
+        - ''
+        - - https://s3.amazonaws.com/aws-neptune-customer-samples/chatbot-blog/cfn-templates/blog-parser.yaml
+      TimeoutInMinutes: '30'
+      Parameters:
+        ChatBotDatabaseLoaderArn:
+            Fn::GetAtt:
+            - ChatbotCoreStack
+            - Outputs.ChatBotDatabaseLoaderARN
+Outputs:
+  IdentityPoolId:
+    Description: Cognito Identity Pool ID
+    Value:
+      Fn::GetAtt:
+      - ChatbotCoreStack
+      - Outputs.IdentityPoolId
+  ApiGatewayInvokeURL:
+    Description: API Gateway URL
+    Value:
+      Fn::GetAtt:
+      - ChatbotCoreStack
+      - Outputs.ApiGatewayInvokeURL

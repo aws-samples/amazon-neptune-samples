@@ -1,6 +1,6 @@
 # Knowledge Graph Chatbot Full Stack Application Example
 
-This folder provides a sample full stack application showing how to build a knowledge graph backed application with NLP and Natural Language search integration using Amazon Neptune, Amazon Comprehend, and Amazon Lex. This application has an accompanying blog post on the [AWS Databases blog](https://aws.amazon.com/blogs/database/category/database/amazon-neptune/).
+This folder provides a sample full stack application showing how to build a knowledge graph backed application with NLP and Natural Language search integration using Amazon Neptune, Amazon Comprehend, and Amazon Lex. This application has an accompanying blog post on the [AWS Databases blog](https://aws.amazon.com/blogs/database/category/database/amazon-neptune/). The functionality shown here is to highlight how an integration of these components can work together but is not meant to be an exhaustive example of best practices.
 
 # Architectual Overview
 
@@ -10,16 +10,10 @@ The solution in this post demonstrates how to build a full-stack application to 
 
 Now that we know what we are going to build let’s take a look at how to deploy the sample solution. Before getting started we need a few things.
 
-- Create or identify an Amazon Neptune cluster to store the data. If you need to create a new cluster the steps for doing this can be found here (https://docs.aws.amazon.com/neptune/latest/userguide/get-started-create-cluster.html).
-- A computer with Python 3.6+ installed.
-- A computer with NodeJS 14 or greater installed as well as yarn (https://classic.yarnpkg.com/en/docs/install#mac-stable).
-- The latest version of the git repository found here (https://github.com/aws-samples/amazon-neptune-samples). This can be retrieved using the command below:
+- A machine running Docker, either a laptop or a server
+- An AWS account with the ability to create resources
 
-```
-git clone https://github.com/aws-samples/amazon-neptune-samples.git
-```
-
-With these prerequisites completed the next step is to run the deployment script which will:
+With these prerequisites completed the next step is to run the CloudFormation deployment script which will:
 
 - Deploy all the Lambda Functions
 - Deploy the API Gateway required for our web application
@@ -28,29 +22,40 @@ With these prerequisites completed the next step is to run the deployment script
 - Run code that scrapes the blog posts, enhances the data, and loads it into our knowledge graph with data from the AWS Database blog
 - Return the configuration values required for our web application to connect
 
-To execute this deployment we first need to install all the prerequisites. This can be accomplished using the command below:
+To run the script click on the link below for the region you would like to create the resources in:
 
-```
-pip install -r requirements.txt
-```
+- [us-east-2](https://us-east-2.console.aws.amazon.com/cloudformation/home?region=us-east-2#/stacks/create/review?templateURL=https://aws-neptune-customer-samples.s3.amazonaws.com/chatbot-blog/cfn-templates/overall.yaml)
 
-As part of this installation the boto3 (https://boto3.amazonaws.com/v1/documentation/api/latest/index.html) client is installed, which we will use as part of the deployment. However before we can use this, we need to configure the client using the following command:
+- [us-east-1](https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://aws-neptune-customer-samples.s3.amazonaws.com/chatbot-blog/cfn-templates/overall.yaml)
 
-```
-aws configure
-```
+- [us-west-2](https://us-west-2.console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/create/review?templateURL=https://aws-neptune-customer-samples.s3.amazonaws.com/chatbot-blog/cfn-templates/overall.yaml)
 
-Enter the appropriate values for each field when prompted for a user that has permissions to create resources in the region specified. Once this step is complete, we are ready to deploy our application using the following command from within the deployment folder:
+- [eu-west-2](https://eu-west-1.console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/create/review?templateURL=https://aws-neptune-customer-samples.s3.amazonaws.com/chatbot-blog/cfn-templates/overall.yaml)
 
-```
-python deploy.py <INSERT NEPTUNE CLUSTER NAME>
-```
+Upon completion of the CloudFormation template the output tab will list the following values which you will need to run the web front end.
 
-This script will take several minutes to execute. When it is complete, it will provide several configuration values that we need for our web application. Go into the /code/web-ui/neptune-chatbot/src folder of the repository. In this folder you will need to locate the config.json as well as aws-exports.js files and copy the specified configuration parameters into the files. Once this is finished you can launch the web application using the following commands from the /code/web-ui/neptune-chatbot/ folder.
+- ApiGatewayInvokeURL
+- IdentityPoolId
 
-```
-yarn install
-yarn start
-```
+With these values copied you can run the following command to create the web interface for this, pasting in the appropriate parameters:
 
-Once this start has completed you can access the web application at http://localhost:3000/.
+`docker run -td -p 3000:3000 -e IDENTITY_POOL_ID=<IdentityPoolId Value> -e API_GATEWAY_INVOKE_URL=<ApiGatewayInvokeURL Value> -e REGION=<Selected Region> public.ecr.aws/v4y0h0y7/neptune-chatbot:latest`
+
+Once this container has completed you can access the web application at http://localhost:3000/.
+
+# Using the Application
+
+Once you have sucessfully started the application you can try out the chatbot integration with some of the following phrases:
+
+- Show me all posts by Ian Robinson
+- What has Dave Bechberger written on Amazon Neptune?
+- Have Ian Robinson and Kelvin Lawrence worked together
+- Show me posts by Taylor Rigg
+  (This should prompt for Taylor Riggan then answer "Yes")
+- Show me all posts on Amazon Neptune
+
+Refreshing the browser will clear the canvas and chatbox.
+
+# Clean up
+
+To clean up the resources being used you can delete the CloudFormation stack created.

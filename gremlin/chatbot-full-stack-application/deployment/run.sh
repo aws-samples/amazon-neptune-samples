@@ -1,8 +1,4 @@
 #!/bin/bash
-
-pip install -r requirements.txt
-
-python deploy.py ${CLUSTERNAME}
-echo ${FRONTEND_PATH}
+python deploy.py
 cd ${FRONTEND_PATH}
 yarn start

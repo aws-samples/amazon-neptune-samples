@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  ValidationLambdaArn:
+    Description: "The ARN for the validation Lambda"
+    Type: String
+Resources:
+# Upload Layers
+  CRHelperLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleRuntimes:
+        - python3.7
+        - python3.8
+      Content:
+        S3Bucket: 
+          Fn::Join:
+          - ''
+          - - 'aws-neptune-customer-samples-'
+            - Ref: AWS::Region
+        S3Key: chatbot-blog/crhelper-layer.zip
+      Description: Python 3.7 Lambda Layer with crhelper library for creating custom CFN resources
+      LayerName: crhelper
+  LexBotDeployLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleRuntimes:
+        - python3.7
+        - python3.8
+      Content:
+        S3Bucket: 
+          Fn::Join:
+          - ''
+          - - 'aws-neptune-customer-samples-'
+            - Ref: AWS::Region
+        S3Key: chatbot-blog/amazonlexbotdeploy-layer.zip
+      Description: Python 3.7 Lambda Layer with amazon=lex-bot-deploy library for deploying lex bot resources
+      LayerName: lexbot-deploy
+
+
+#Create Lambda Role
+  ChatBotDeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      Policies:
+      - PolicyName: blog-chatbot-lexdeploy-role
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - lex:GetBot
+            - lex:CreateBotVersion
+            - lex:GetIntent
+            - lex:PutIntent
+            - lex:StartImport
+            - lex:CreateIntentVersion
+            - lex:GetImport
+            - lex:PutBot
+            Resource: "*"        
+      - PolicyName: blog-chatbot-lexdeploy-lambda-role
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - lambda:AddPermission
+            Resource: !Ref ValidationLambdaArn
+  
+# Upload Custom Deploy Function
+  LexBotDeploy:
+    Type: AWS::Lambda::Function
+    DependsOn: 
+      - LexBotDeployLayer
+      - CRHelperLayer
+      - ChatBotDeployRole
+    Properties:
+      Code:
+        S3Bucket: 
+          Fn::Join:
+          - ''
+          - - 'aws-neptune-customer-samples-'
+            - Ref: AWS::Region
+        S3Key: chatbot-blog/blog-chatbot-lex-deploy.zip
+      Description: Custom CFN Resource for deploying the lexbot
+      FunctionName: chatbot-lexbot-deploy
+      Handler: lambda_function.lambda_handler
+      Layers:
+        - !Ref LexBotDeployLayer
+        - !Ref CRHelperLayer
+      Role: !GetAtt ChatBotDeployRole.Arn
+      Runtime: python3.8
+      Timeout: 600
+
+  #Call Custom Deploy
+  LexDeployResource:
+    Type: "Custom::LexDeploy"
+    DependsOn: 
+      - LexBotDeploy
+    Properties:
+      ServiceToken: !GetAtt LexBotDeploy.Arn
+      ValidationLambdaArn: !Ref ValidationLambdaArn
+Outputs:
+  Sum:
+    Value: !GetAtt LexDeployResource.Status
