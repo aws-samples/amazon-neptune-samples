@@ -39,7 +39,7 @@ Upon completion of the CloudFormation template the output tab will list the foll
 
 With these values copied you can run the following command to create the web interface for this, pasting in the appropriate parameters:
 
-`docker run -td -p 3000:3000 -e IDENTITY_POOL_ID=<IdentityPoolId Value> -e API_GATEWAY_INVOKE_URL=<ApiGatewayInvokeURL Value> -e REGION=<Selected Region> public.ecr.aws/v4y0h0y7/neptune-chatbot:latest`
+`docker run -td -p 3000:3000 -e IDENTITY_POOL_ID=<IdentityPoolId Value> -e API_GATEWAY_INVOKE_URL=<ApiGatewayInvokeURL Value> -e REGION=<Selected Region> public.ecr.aws/a8u6m7l5/neptune-chatbot:latest`
 
 Once this container has completed you can access the web application at http://localhost:3000/.
 
