@@ -11,7 +11,7 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "aws-amplify": "^3.0.25-ui-preview.14",
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "cytoscape-cose-bilkent": "^4.1.0",
     "react": "^16.5.2",
     "react-cytoscapejs": "^1.2.1",

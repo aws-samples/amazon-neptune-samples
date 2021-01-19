@@ -1,0 +1,520 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: A template for creating the role and the lambda functions required for the dependencies
+Metadata:
+  QuickStartDocumentation:
+    EntrypointName: "Parameters for launching stack creation"
+Parameters:
+  SecurityGroupId:
+    Description: "The Security Group ID with access to the Neptune Cluster"
+    Type: List<AWS::EC2::SecurityGroup::Id>
+  SubnetIds:
+    Description: "The Subnets with access to the Neptune Cluster"
+    Type: List<AWS::EC2::Subnet::Id>
+  ClusterEndpoint:
+    Description: "The Neptune Cluster endpoint"
+    Type: String
+  ClusterPort:
+    Description: "The Neptune Cluster Port"
+    Type: Number
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  LambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleRuntimes:
+        - python3.7
+      Content:
+        S3Bucket: 
+          Fn::Join:
+          - ''
+          - - 'aws-neptune-customer-samples-'
+            - Ref: AWS::Region
+        S3Key: chatbot-blog/gremlin-python-layer.zip
+      Description: Python 3.7 Lambda Layer with gremlinpython client
+      LayerName: gremlin-python
+  ChatBotValidation:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: 
+          Fn::Join:
+          - ''
+          - - 'aws-neptune-customer-samples-'
+            - Ref: AWS::Region
+        S3Key: chatbot-blog/blog_chatbot_author_validation.zip
+      Description: Chatbot validation code for authors
+      FunctionName: chatbot-author-validation
+      Handler: lambda_function.lambda_handler
+      Layers:
+        - !Ref LambdaLayer
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.7
+      Timeout: 30
+      VpcConfig:
+        SecurityGroupIds: !Ref SecurityGroupId
+        SubnetIds: !Ref SubnetIds
+      Environment:
+        Variables:
+          NEPTUNE_ENDPOINT: !Ref ClusterEndpoint
+          NEPTUNE_PORT: !Ref ClusterPort
+  ChatBotGateway:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: 
+          Fn::Join:
+          - ''
+          - - 'aws-neptune-customer-samples-'
+            - Ref: AWS::Region
+        S3Key: chatbot-blog/blog_chatbot_gateway.zip
+      Description: Lambda to handle the gateway requests
+      FunctionName: chatbot-gateway
+      Handler: lambda_function.lambda_handler
+      Layers:
+        - !Ref LambdaLayer
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.7
+      Timeout: 30
+      VpcConfig:
+        SecurityGroupIds: !Ref SecurityGroupId
+        SubnetIds: !Ref SubnetIds
+      Environment:
+        Variables:
+          NEPTUNE_ENDPOINT: !Ref ClusterEndpoint
+          NEPTUNE_PORT: !Ref ClusterPort
+  ChatBotDatabaseLoader:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: 
+          Fn::Join:
+          - ''
+          - - 'aws-neptune-customer-samples-'
+            - Ref: AWS::Region
+        S3Key: chatbot-blog/chatbot-database-loader.zip
+      Description: Chatbot database loading code for authors
+      FunctionName: chatbot-database-loader
+      Handler: lambda_function.lambda_handler
+      Layers:
+        - !Ref LambdaLayer
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.7
+      Timeout: 30
+      VpcConfig:
+        SecurityGroupIds: !Ref SecurityGroupId
+        SubnetIds: !Ref SubnetIds
+      Environment:
+        Variables:
+          NEPTUNE_ENDPOINT: !Ref ClusterEndpoint
+          NEPTUNE_PORT: !Ref ClusterPort
+  ChatbotGatewayApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: Chatbot API
+      Description: API used for the Chatbot requests
+      FailOnWarnings: true
+  LambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName: !GetAtt ChatBotGateway.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+          Fn::Join:
+          - ''
+          - - 'arn:aws:execute-api:'
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: ChatbotGatewayApi
+            - "/*"
+  ChatbotGatewayApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      DeploymentId:
+        Ref: ApiDeployment
+      MethodSettings:
+      - DataTraceEnabled: true
+        HttpMethod: "*"
+        LoggingLevel: INFO
+        ResourcePath: "/*"
+      RestApiId:
+        Ref: ChatbotGatewayApi
+      StageName: LATEST
+  ApiGatewayCloudWatchLogsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - apigateway.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName: ApiGatewayLogsPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:DescribeLogGroups
+            - logs:DescribeLogStreams
+            - logs:PutLogEvents
+            - logs:GetLogEvents
+            - logs:FilterLogEvents
+            Resource: "*"
+  ApiGatewayAccount:
+    Type: AWS::ApiGateway::Account
+    Properties:
+      CloudWatchRoleArn:
+        Fn::GetAtt:
+        - ApiGatewayCloudWatchLogsRole
+        - Arn
+  ApiDeployment:
+    DependsOn: AuthorsGet
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId:
+        Ref: ChatbotGatewayApi
+      StageName: DummyStage
+  ChatbotAuthorsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: ChatbotGatewayApi
+      ParentId:
+        Fn::GetAtt:
+        - ChatbotGatewayApi
+        - RootResourceId
+      PathPart: authors
+  ChatbotPostsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: ChatbotGatewayApi
+      ParentId:
+        Fn::GetAtt:
+        - ChatbotGatewayApi
+        - RootResourceId
+      PathPart: posts
+  AuthorsOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      RestApiId:
+        Ref: ChatbotGatewayApi
+      ResourceId:
+        Ref: ChatbotAuthorsResource
+      HttpMethod: OPTIONS
+      Integration:
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+          ResponseTemplates:
+            application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        Type: MOCK
+      MethodResponses:
+      - StatusCode: 200
+        ResponseModels:
+          application/json: 'Empty'
+        ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+  PostsOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      RestApiId:
+        Ref: ChatbotGatewayApi
+      ResourceId:
+        Ref: ChatbotPostsResource
+      HttpMethod: OPTIONS
+      Integration:
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+          ResponseTemplates:
+            application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        Type: MOCK
+      MethodResponses:
+      - StatusCode: 200
+        ResponseModels:
+          application/json: 'Empty'
+        ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+  AuthorsGet:
+    DependsOn: LambdaPermission
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: GET
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Join:
+          - ''
+          - - 'arn:aws:apigateway:'
+            - Ref: AWS::Region
+            - ":lambda:path/2015-03-31/functions/"
+            - !GetAtt ChatBotGateway.Arn
+            - "/invocations"
+        IntegrationResponses:
+        - StatusCode: 200
+        RequestTemplates:
+          application/json:
+            Fn::Join:
+            - ''
+            - - "{"
+              - '"author2": "$input.params(''author2'')",'
+              - '"author1": "$input.params(''author1'')",'
+              - "}"
+      RequestParameters:
+        method.request.querystring.author1: false
+        method.request.querystring.author2: false
+      ResourceId:
+        Ref: ChatbotAuthorsResource
+      RestApiId:
+        Ref: ChatbotGatewayApi
+      MethodResponses:
+      - StatusCode: 200
+  PostsGet:
+    DependsOn: LambdaPermission
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: GET
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Join:
+          - ''
+          - - 'arn:aws:apigateway:'
+            - Ref: AWS::Region
+            - ":lambda:path/2015-03-31/functions/"
+            - !GetAtt ChatBotGateway.Arn
+            - "/invocations"
+        IntegrationResponses:
+        - StatusCode: 200
+        RequestTemplates:
+          application/json:
+            Fn::Join:
+            - ''
+            - - "{"
+              - '"authorname": "$input.params(''authorname'')",'
+              - '"topic": "$input.params(''topic'')",'
+              - "}"
+      RequestParameters:
+        method.request.querystring.authorname: false
+        method.request.querystring.topic: false
+      ResourceId:
+        Ref: ChatbotPostsResource
+      RestApiId:
+        Ref: ChatbotGatewayApi
+      MethodResponses:
+      - StatusCode: 200
+
+# Creates a role that allows Cognito to send SNS messages
+  SNSRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal: 
+              Service: 
+                - "cognito-idp.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: "CognitoSNSPolicy"
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement: 
+              - Effect: "Allow"
+                Action: "sns:publish"
+                Resource: "*"
+
+  # Creates a user pool in cognito for your app to auth against
+  # This example requires MFA and validates the phone number to use as MFA
+  # Other fields can be added to the schema
+  UserPool:
+    Type: "AWS::Cognito::UserPool"
+    Properties:
+      UserPoolName: blog-chatbot-user-pool
+      AutoVerifiedAttributes:
+        - phone_number
+      MfaConfiguration: "ON"
+      SmsConfiguration:
+        ExternalId: blog-chatbot-external
+        SnsCallerArn: !GetAtt SNSRole.Arn
+      Schema:
+        - Name: name
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: email
+          AttributeDataType: String
+          Mutable: false
+          Required: true
+        - Name: phone_number
+          AttributeDataType: String
+          Mutable: false
+          Required: true
+        - Name: slackId
+          AttributeDataType: String
+          Mutable: true
+  
+  # Creates a User Pool Client to be used by the identity pool
+  UserPoolClient:
+    Type: "AWS::Cognito::UserPoolClient"
+    Properties:
+      ClientName: blog-chatbot-client
+      GenerateSecret: false
+      UserPoolId: !Ref UserPool
+  
+  # Creates a federeated Identity pool
+  IdentityPool:
+    Type: "AWS::Cognito::IdentityPool"
+    Properties:
+      IdentityPoolName: blog-chatbotIdentity
+      AllowUnauthenticatedIdentities: true
+      CognitoIdentityProviders: 
+        - ClientId: !Ref UserPoolClient
+          ProviderName: !GetAtt UserPool.ProviderName
+
+  # Create a role for unauthorized acces to AWS resources. Very limited access. Only allows users in the previously created Identity Pool
+  CognitoUnAuthorizedRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal: 
+              Federated: "cognito-identity.amazonaws.com"
+            Action: 
+              - "sts:AssumeRoleWithWebIdentity"
+            Condition:
+              StringEquals: 
+                "cognito-identity.amazonaws.com:aud": !Ref IdentityPool
+              "ForAnyValue:StringLike":
+                "cognito-identity.amazonaws.com:amr": unauthenticated
+      Policies:
+        - PolicyName: "CognitoUnauthorizedPolicy"
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement: 
+              - Effect: "Allow"
+                Action:
+                  - "mobileanalytics:PutEvents"
+                  - "cognito-sync:*"
+                Resource: "*"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonLexRunBotsOnly"
+
+  # Create a role for authorized acces to AWS resources. Control what your user can access. This example only allows Lambda invokation
+  # Only allows users in the previously created Identity Pool
+  CognitoAuthorizedRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal: 
+              Federated: "cognito-identity.amazonaws.com"
+            Action: 
+              - "sts:AssumeRoleWithWebIdentity"
+            Condition:
+              StringEquals: 
+                "cognito-identity.amazonaws.com:aud": !Ref IdentityPool
+              "ForAnyValue:StringLike":
+                "cognito-identity.amazonaws.com:amr": authenticated
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonLexRunBotsOnly"
+      Policies:
+        - PolicyName: "CognitoAuthorizedPolicy"
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement: 
+              - Effect: "Allow"
+                Action:
+                  - "mobileanalytics:PutEvents"
+                  - "cognito-sync:*"
+                  - "cognito-identity:*"
+                Resource: "*"
+              - Effect: "Allow"
+                Action:
+                  - "lambda:InvokeFunction"
+                Resource: "*"
+  
+  # Assigns the roles to the Identity Pool
+  IdentityPoolRoleMapping:
+    Type: "AWS::Cognito::IdentityPoolRoleAttachment"
+    Properties:
+      IdentityPoolId: !Ref IdentityPool
+      Roles:
+        authenticated: !GetAtt CognitoAuthorizedRole.Arn
+        unauthenticated: !GetAtt CognitoUnAuthorizedRole.Arn
+Outputs:
+  GatewayLambdaARN:
+    Description: Information about the gateway lambda
+    Value: !GetAtt ChatBotGateway.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-GatewayLambdaARN"
+  ValidationLambdaARN:
+    Description: Information about the validation lambda
+    Value: !GetAtt ChatBotValidation.Arn
+  ChatBotDatabaseLoaderARN:
+    Description: Information about the chatbot database loader lambda
+    Value: !GetAtt ChatBotDatabaseLoader.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-ValidationLambdaARN"
+  IdentityPoolId:
+    Value: !Ref IdentityPool
+    Export:
+      Name: "IdentityPool::Id"
+  ApiGatewayInvokeURL:
+    Value: !Sub "https://${ChatbotGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/LATEST"
+
+
+      
