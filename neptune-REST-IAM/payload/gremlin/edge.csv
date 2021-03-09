@@ -1,0 +1,2 @@
+~id, ~from, ~to, ~label, weight:Double
+e1, v1, v2, created, 0.4

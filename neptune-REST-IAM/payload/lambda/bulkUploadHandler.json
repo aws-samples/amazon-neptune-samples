@@ -1,0 +1,38 @@
+{
+    "Records": [
+        {
+            "eventVersion": "2.1",
+            "eventSource": "aws:s3",
+            "awsRegion": "eu-west-1",
+            "eventTime": "2021-03-09T16:35:48.440Z",
+            "eventName": "ObjectCreated:Put",
+            "userIdentity": {
+                "principalId": "AWS:AROAXGSPONKWYPLROFWYY:kobler-Isengard"
+            },
+            "requestParameters": {
+                "sourceIPAddress": "54.240.197.231"
+            },
+            "responseElements": {
+                "x-amz-request-id": "6BD9335205DC638C",
+                "x-amz-id-2": "JbZqllBP3OkWjpdPBH18sCreQsVWZ09djmaewEq9OzydqBBKLJx66RzG4nC9bcb8LeHvmtfsQeE53AAI4y4CbbBw8OFdBa1F"
+            },
+            "s3": {
+                "s3SchemaVersion": "1.0",
+                "configurationId": "NTM0YWVjMjMtM2EzNy00OTVhLTkxMTItNjE4OTAyNTNjNTY1",
+                "bucket": {
+                    "name": "neptunerestiamstack-uploadf00d9b70-1mi4s1p0xx6rw",
+                    "ownerIdentity": {
+                        "principalId": "A1NZL71PRVS9FS"
+                    },
+                    "arn": "arn:aws:s3:::neptunerestiamstack-uploadf00d9b70-1mi4s1p0xx6rw"
+                },
+                "object": {
+                    "key": "edge.csv",
+                    "size": 63,
+                    "eTag": "c6f63af21452fc24219b36a1f41b0a21",
+                    "sequencer": "006047A3E67B355081"
+                }
+            }
+        }
+    ]
+}
