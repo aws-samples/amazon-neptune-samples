@@ -1,0 +1,23 @@
+{
+  "app": "npx ts-node --prefer-ts-exts bin/amundsen-cdk.ts",
+  "context": {
+    "@aws-cdk/core:enableStackNameDuplicates": "true",
+    "aws-cdk:enableDiffNoFail": "true",
+    "@aws-cdk/core:stackRelativeExports": "true",
+    "@aws-cdk/aws-ecr-assets:dockerIgnoreSupport": true,
+    "@aws-cdk/aws-secretsmanager:parseOwnedSecretName": true,
+    "@aws-cdk/aws-kms:defaultKeyPolicies": true,
+    "@aws-cdk/aws-s3:grantWriteWithoutAcl": true,
+    "@aws-cdk/aws-ecs-patterns:removeDefaultDesiredCount": true,
+    "vpc-cidr": "10.100.0.0/16",
+    "rds-engine": "POSTGRES",
+    "rds-port": 5432,
+    "rds-database": "sample",
+    "sample-data-s3-bucket": "amundsen-neptune-blog",
+    "sample-data-rds-dump-filename": "amundsen_sample.dump",
+    "sample-data-redshift-query-s3-bucket": "amundsen-neptune-blog",
+    "sample-data-redshift-query-filename": "amundsen_dw.sql",
+    "application":"amundsen",
+    "environment":"dev"
+  }
+}
