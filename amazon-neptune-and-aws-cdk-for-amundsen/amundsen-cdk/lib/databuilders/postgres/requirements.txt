@@ -1,0 +1,16 @@
+amundsen-databuilder==4.2.2
+amundsen-gremlin==0.0.7
+amundsen-rds==0.0.3
+boto3==1.17.43
+botocore==1.20.43
+elasticsearch==6.8.2
+Flask==1.1.2
+gremlinpython==3.4.10
+overrides==3.1.0
+psycopg2-binary==2.8.6
+pyhocon==0.3.57
+requests-aws4auth==1.0.1
+SQLAlchemy==1.4.5
+versioneer==0.19
+numpy==1.20.2
+pandas==1.1.5
