@@ -376,5 +376,16 @@ export class AmundsenStack extends cdk.Stack {
       pathPattern: '/*',
     });
 
+    alb.loadBalancerDnsName;
+
+    // 👇 create an Output
+    new cdk.CfnOutput(this, 'amundsen-frontend-hostname', {
+      value: alb.loadBalancerDnsName,
+      description: 'Amundsen Frontend Hostname',
+      exportName: 'amundsen-frontend-hostname',
+    });
+
+    console.log('Access Amundsen here: https://' + alb.loadBalancerDnsName);
+
   }
 }
