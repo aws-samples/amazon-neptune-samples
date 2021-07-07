@@ -1,5 +1,7 @@
-// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: MIT-0
+// Original Copyright Peter Hanssens
+// Original SPDX-License-Identifier: Apache-2.0
+// Modified Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// Modified SPDX-License-Identifier: MIT-0
 import * as cdk from '@aws-cdk/core';
 import * as ec2 from '@aws-cdk/aws-ec2';
 import * as iam from '@aws-cdk/aws-iam';

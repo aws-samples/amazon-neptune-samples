@@ -1,5 +1,7 @@
-# Copyright Contributors to the Amundsen project.
-# SPDX-License-Identifier: Apache-2.0
+# Original Copyright Contributors to the Amundsen project.
+# Original SPDX-License-Identifier: Apache-2.0
+# Modified Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Modified SPDX-License-Identifier: MIT-0
 
 """
 This script extracts data from a postgres database and loads into Neptune and Elasticsearch without using an Airflow DAG.
