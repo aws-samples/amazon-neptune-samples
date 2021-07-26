@@ -174,12 +174,6 @@ export class AmundsenStack extends cdk.Stack {
       storageEncrypted: true,
       vpcSecurityGroupIds: [
         props.ingressSecurityGroup.securityGroupId
-      ],
-      tags: [
-        {
-          key: 'hello',
-          value: 'world'
-        }
       ]
     });
 
@@ -191,13 +185,7 @@ export class AmundsenStack extends cdk.Stack {
       dbClusterIdentifier: `${application}-${environment}-neptune-cluster`,
       dbInstanceIdentifier: `${application}-${environment}-neptune-instance`,
       dbSubnetGroupName: neptuneSubnetGroup.dbSubnetGroupName,
-      preferredMaintenanceWindow: 'mon:03:00-mon:04:00',
-      tags: [
-        {
-          key: 'blah',
-          value: 'world'
-        }
-      ]
+      preferredMaintenanceWindow: 'mon:03:00-mon:04:00'
     }).addDependsOn(this.neptuneCluster);
 
     // Fargate Cluster
@@ -290,7 +278,8 @@ export class AmundsenStack extends cdk.Stack {
     });
 
     const metadataContainer = amundsenFrontend.addContainer('AmundsenMetadataContainer', {
-      image: ecs.ContainerImage.fromRegistry('amundsendev/amundsen-metadata:latest'),
+      // image: ecs.ContainerImage.fromRegistry('amundsendev/amundsen-metadata:latest'),
+      image: ecs.ContainerImage.fromRegistry('amundsendev/amundsen-metadata:3.5.0'),
       logging: ecs.LogDrivers.awsLogs({ streamPrefix: 'amundsen-metadata' }),
       environment: {
         // LOG_LEVEL: 'DEBUG',
