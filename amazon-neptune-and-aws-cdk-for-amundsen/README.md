@@ -69,6 +69,8 @@ npm install -g npm@latest
 npm install
 # Build
 npm run build
+# Bootstrap AWS Cloud Development Kit (AWS CDK)
+cdk bootstrap
 # Synthesize CloudFormation
 cdk synth
 # Deploy each stack
