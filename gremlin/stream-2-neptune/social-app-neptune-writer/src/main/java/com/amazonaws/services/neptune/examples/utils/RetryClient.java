@@ -17,15 +17,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.amazonaws.services.neptune.examples.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Random;
 
 public class RetryClient {
 
     private static final Random random = new Random();
-    private static final Logger logger = LoggerFactory.getLogger(RetryClient.class);
 
     public int retry(Runnable task, int retryCount, int baseMillis, RetryCondition... conditions) throws Exception {
 
@@ -39,7 +35,7 @@ public class RetryClient {
             if (count > 0) {
                 try {
                     int delayMillis = baseMillis + ((2 ^ count) * 15) + random.nextInt(100);
-                    logger.info(String.format("Retry – count %s delay %s", count, delayMillis));
+                    System.out.println(String.format("Retry – count %s delay %s", count, delayMillis));
                     Thread.sleep(delayMillis);
                 } catch (InterruptedException e) {
                     // Do nothing
@@ -56,7 +52,7 @@ public class RetryClient {
                         if (condition.allowRetry(e)) {
                             count++;
                             isRetriable = true;
-                            logger.info(String.format("Retriable exception: %s", e.getMessage()));
+                            System.out.println(String.format("Retriable exception: %s", e.getMessage()));
                             break;
                         }
                     }
