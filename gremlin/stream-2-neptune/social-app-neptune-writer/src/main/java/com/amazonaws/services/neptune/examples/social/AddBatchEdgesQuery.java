@@ -21,8 +21,6 @@ import com.amazonaws.services.neptune.examples.utils.ActivityTimer;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.T;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
@@ -34,7 +32,6 @@ class AddBatchEdgesQuery {
     private GremlinTraversal traversal;
     private final boolean conditionalCreate;
 
-    private static final Logger logger = LoggerFactory.getLogger(AddBatchEdgesQuery.class);
 
     AddBatchEdgesQuery(GraphTraversalSource traversalSource, boolean conditionalCreate) {
         this.traversal = new GremlinTraversal(traversalSource);
@@ -67,7 +64,7 @@ class AddBatchEdgesQuery {
     }
 
     void provokeError() {
-        logger.info("Forcing a ConstraintViolationException (and rollback)");
+        System.out.println("Forcing a ConstraintViolationException (and rollback)");
 
         traversal = new GremlinTraversal(traversal.
                 addV("error").property(T.id, "error").

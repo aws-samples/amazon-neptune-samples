@@ -31,8 +31,6 @@ import java.io.StringWriter;
 
 public class ConnectionConfig implements RetryCondition {
 
-    private static final Logger logger = LoggerFactory.getLogger(ConnectionConfig.class);
-
     private Cluster cluster = null;
 
     public TraversalSource traversalSource() {
@@ -55,7 +53,7 @@ public class ConnectionConfig implements RetryCondition {
         e.printStackTrace(new PrintWriter(stringWriter));
         String message = stringWriter.toString();
 
-        logger.info(String.format("Determining whether this is a retriable Cluster error: %s", message));
+        System.out.println(String.format("Determining whether this is a retriable Cluster error: %s", message));
 
         if (message.contains("Timed out while waiting for an available host") ||
                 message.contains("Connection reset by peer") ||
@@ -65,7 +63,7 @@ public class ConnectionConfig implements RetryCondition {
                     cluster.close();
                 }
             } catch (Exception ex) {
-                logger.error("Error closing cluster", ex);
+                System.out.println(String.format("Error closing cluster: %s", ex));
             }
             cluster = null;
             return true;
@@ -73,13 +71,13 @@ public class ConnectionConfig implements RetryCondition {
         return false;
     }
 
-    Cluster cluster(){
+    Cluster cluster() {
         return cluster;
     }
 
     void createCluster() {
 
-        logger.info("Creating cluster");
+        System.out.println("Creating cluster");
         cluster = Cluster.build()
                 .addContactPoint(EnvironmentVariableUtils.getMandatoryEnv("neptune_endpoint"))
                 .port(Integer.parseInt(EnvironmentVariableUtils.getOptionalEnv("neptune_port", "8182")))
@@ -90,7 +88,7 @@ public class ConnectionConfig implements RetryCondition {
                 .maxInProcessPerConnection(16)
                 .serializer(Serializers.GRAPHBINARY_V1D0)
                 .create();
-        logger.info(String.format(
+        System.out.println(String.format(
                 "minInProcessPerConnection: %s, " +
                         "maxInProcessPerConnection: %s, " +
                         "minSimultaneousUsagePerConnection: %s, " +

@@ -17,9 +17,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.amazonaws.services.neptune.examples.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.concurrent.TimeUnit;
 
 public class ActivityTimer implements AutoCloseable {
@@ -27,17 +24,15 @@ public class ActivityTimer implements AutoCloseable {
     private final String description;
     private final long start = System.nanoTime();
 
-    private static final Logger logger = LoggerFactory.getLogger(ActivityTimer.class);
-
     public ActivityTimer(String description) {
         this.description = description;
     }
 
-    public long calculateDuration(boolean logDuration){
+    public long calculateDuration(boolean logDuration) {
         long end = System.nanoTime();
         long duration = TimeUnit.NANOSECONDS.toMillis(end - start);
-        if (logDuration){
-            logger.info(description + ": " + duration + " ms");
+        if (logDuration) {
+            System.out.println(description + ": " + duration + " ms");
         }
         return duration;
     }
