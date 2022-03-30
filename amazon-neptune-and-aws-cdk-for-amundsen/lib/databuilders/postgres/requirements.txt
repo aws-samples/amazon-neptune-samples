@@ -12,5 +12,5 @@ pyhocon==0.3.57
 requests-aws4auth==1.0.1
 SQLAlchemy==1.4.5
 versioneer==0.19
-numpy==1.20.2
+numpy==1.21.0
 pandas==1.1.5
