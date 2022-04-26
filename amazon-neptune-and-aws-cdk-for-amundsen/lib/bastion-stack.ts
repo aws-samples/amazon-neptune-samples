@@ -1,11 +1,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-import {App, Stack, StackProps} from '@aws-cdk/core';
-import {SubnetType, Vpc, BastionHostLinux} from '@aws-cdk/aws-ec2'
-import {Effect, ManagedPolicy, Policy, PolicyStatement, Role} from '@aws-cdk/aws-iam';
-import {DatabaseInstance} from '@aws-cdk/aws-rds';
-import {Cluster} from '@aws-cdk/aws-redshift';
-import {Secret} from '@aws-cdk/aws-secretsmanager';
+import {App, Stack, StackProps} from 'aws-cdk-lib';
+import {SubnetType, Vpc, BastionHostLinux} from 'aws-cdk-lib/aws-ec2'
+import {Effect, ManagedPolicy, Policy, PolicyStatement, Role} from 'aws-cdk-lib/aws-iam';
+import {DatabaseInstance} from 'aws-cdk-lib/aws-rds';
+import {Cluster} from '@aws-cdk/aws-redshift-alpha';
+import {Secret} from 'aws-cdk-lib/aws-secretsmanager';
 
 export interface BastionStackProps extends StackProps {
 	vpc: Vpc;

@@ -1,9 +1,9 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-import {App, Stack, StackProps} from "@aws-cdk/core";
-import {DatabaseInstance, DatabaseInstanceEngine, StorageType} from '@aws-cdk/aws-rds';
-import {Secret} from '@aws-cdk/aws-secretsmanager';
-import {InstanceClass, InstanceSize, InstanceType, SubnetType, Vpc, SecurityGroup} from "@aws-cdk/aws-ec2";
+import {App, Stack, StackProps} from 'aws-cdk-lib';
+import {DatabaseInstance, DatabaseInstanceEngine, StorageType, PostgresEngineVersion} from 'aws-cdk-lib/aws-rds';
+import {Secret} from 'aws-cdk-lib/aws-secretsmanager';
+import {InstanceClass, InstanceSize, InstanceType, SubnetType, Vpc, SecurityGroup} from 'aws-cdk-lib/aws-ec2';
 
 export interface RDSStackProps extends StackProps {
 	    vpc: Vpc;
@@ -20,7 +20,7 @@ export class RdsStack extends Stack {
 		const rdsEngine = this.node.tryGetContext('rds-engine');
 		const rdsPort = this.node.tryGetContext('rds-port');
 		const rdsDatabase = this.node.tryGetContext('rds-database');
-		var engine = DatabaseInstanceEngine.POSTGRES;
+		var engine = DatabaseInstanceEngine.postgres({ version: PostgresEngineVersion.VER_12_10 });
 		if (rdsEngine == 'MYSQL') engine = DatabaseInstanceEngine.MYSQL;
 
 		this.rdsInstance = new DatabaseInstance(this, 'RDS-DB-Instance', {
