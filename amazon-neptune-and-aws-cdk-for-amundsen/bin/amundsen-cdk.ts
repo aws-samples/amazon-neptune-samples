@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
-import * as cdk from '@aws-cdk/core';
+import {App} from 'aws-cdk-lib';
 import {VpcStack} from "../lib/vpc-stack";
 import {RdsStack} from "../lib/rds-stack";
 import {RedshiftStack} from "../lib/redshift-stack";
@@ -8,7 +8,7 @@ import {BastionStack} from "../lib/bastion-stack";
 import {AmundsenStack} from "../lib/amundsen-stack";
 import {DatabuilderStack} from "../lib/databuilder-stack";
 
-const app = new cdk.App();
+const app = new App();
     	
 const vpcStackEntity = new VpcStack(app, 'Amundsen-Blog-VPC-Stack');
 

@@ -1,9 +1,9 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-import {App, RemovalPolicy, Stack, StackProps} from '@aws-cdk/core';
-import {Peer, Port, SecurityGroup, SubnetType, Vpc, InterfaceVpcEndpoint, InterfaceVpcEndpointAwsService, GatewayVpcEndpoint, GatewayVpcEndpointAwsService} from '@aws-cdk/aws-ec2'
-import {Secret} from '@aws-cdk/aws-secretsmanager';
-import {Bucket, BlockPublicAccess} from '@aws-cdk/aws-s3';
+import {App, RemovalPolicy, Stack, StackProps} from 'aws-cdk-lib';
+import {Peer, Port, SecurityGroup, SubnetType, Vpc, InterfaceVpcEndpoint, InterfaceVpcEndpointAwsService, GatewayVpcEndpoint, GatewayVpcEndpointAwsService} from 'aws-cdk-lib/aws-ec2'
+import {Secret} from 'aws-cdk-lib/aws-secretsmanager';
+import {Bucket, BlockPublicAccess} from 'aws-cdk-lib/aws-s3';
 
 export class VpcStack extends Stack {
     readonly vpc: Vpc;

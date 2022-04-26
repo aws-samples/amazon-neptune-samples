@@ -1,22 +1,22 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-import * as cdk from '@aws-cdk/core';
-import * as ec2 from '@aws-cdk/aws-ec2';
-import * as iam from '@aws-cdk/aws-iam';
-import * as neptune from '@aws-cdk/aws-neptune';
-import * as ecs from '@aws-cdk/aws-ecs';
-import * as es from '@aws-cdk/aws-elasticsearch';
-import * as elbv2 from '@aws-cdk/aws-elasticloadbalancingv2';
-import {Bucket} from '@aws-cdk/aws-s3';
-import * as rds from '@aws-cdk/aws-rds';
-import {Secret} from '@aws-cdk/aws-secretsmanager';
-import * as events from '@aws-cdk/aws-events';
-import * as targets from '@aws-cdk/aws-events-targets';
-import { DockerImageAsset } from '@aws-cdk/aws-ecr-assets';
+import {App,CfnOutput,Stack,StackProps} from 'aws-cdk-lib';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import * as neptune from 'aws-cdk-lib/aws-neptune';
+import * as ecs from 'aws-cdk-lib/aws-ecs';
+import * as es from 'aws-cdk-lib/aws-elasticsearch';
+import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import {Bucket} from 'aws-cdk-lib/aws-s3';
+import * as rds from 'aws-cdk-lib/aws-rds';
+import {Secret} from 'aws-cdk-lib/aws-secretsmanager';
+import * as events from 'aws-cdk-lib/aws-events';
+import * as targets from 'aws-cdk-lib/aws-events-targets';
+import { DockerImageAsset } from 'aws-cdk-lib/aws-ecr-assets';
 
 const path = require('path');
 
-export interface DatabuilderStackProps extends cdk.StackProps {
+export interface DatabuilderStackProps extends StackProps {
 	vpc: ec2.Vpc;
 	ingressSecurityGroup: ec2.SecurityGroup;
 	cluster: ecs.Cluster;
@@ -27,8 +27,8 @@ export interface DatabuilderStackProps extends cdk.StackProps {
   rdsSecret: Secret;
 }
 
-export class DatabuilderStack extends cdk.Stack {
-  constructor(scope: cdk.App, id: string, props: DatabuilderStackProps) {
+export class DatabuilderStack extends Stack {
+  constructor(scope: App, id: string, props: DatabuilderStackProps) {
     super(scope, id, props);
 
     const application = this.node.tryGetContext('application');

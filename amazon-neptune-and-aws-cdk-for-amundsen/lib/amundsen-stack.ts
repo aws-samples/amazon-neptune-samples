@@ -2,27 +2,27 @@
 // Original SPDX-License-Identifier: Apache-2.0
 // Modified Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // Modified SPDX-License-Identifier: MIT-0
-import * as cdk from '@aws-cdk/core';
-import * as ec2 from '@aws-cdk/aws-ec2';
-import * as iam from '@aws-cdk/aws-iam';
-import * as neptune from '@aws-cdk/aws-neptune';
-import * as ecs from '@aws-cdk/aws-ecs';
-import * as es from '@aws-cdk/aws-elasticsearch';
-import * as elbv2 from '@aws-cdk/aws-elasticloadbalancingv2';
-import {Bucket} from '@aws-cdk/aws-s3';
+import {App,CfnOutput,Stack,StackProps} from 'aws-cdk-lib';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import * as neptune from 'aws-cdk-lib/aws-neptune';
+import * as ecs from 'aws-cdk-lib/aws-ecs';
+import * as es from 'aws-cdk-lib/aws-elasticsearch';
+import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 
-export interface AmundsenStackProps extends cdk.StackProps {
+export interface AmundsenStackProps extends StackProps {
 	vpc: ec2.Vpc;
 	ingressSecurityGroup: ec2.SecurityGroup;
 	airflowS3Bucket: Bucket;
 }
 
-export class AmundsenStack extends cdk.Stack {
+export class AmundsenStack extends Stack {
   readonly fargateCluster : ecs.Cluster;
   readonly esDomain: es.CfnDomain;
   readonly neptuneCluster: neptune.CfnDBCluster;
   
-  constructor(scope: cdk.App, id: string, props: AmundsenStackProps) {
+  constructor(scope: App, id: string, props: AmundsenStackProps) {
     super(scope, id, props);
 
 	const application = this.node.tryGetContext('application');
@@ -174,7 +174,8 @@ export class AmundsenStack extends cdk.Stack {
       storageEncrypted: true,
       vpcSecurityGroupIds: [
         props.ingressSecurityGroup.securityGroupId
-      ]
+      ],
+      engineVersion: '1.0.4.2'
     });
 
     new neptune.CfnDBInstance(this, 'NeptuneInstance', {
@@ -260,11 +261,9 @@ export class AmundsenStack extends cdk.Stack {
     });
 
     const frontendContainer = amundsenFrontend.addContainer('AmundsenFrontendContainer', {
-      image: ecs.ContainerImage.fromRegistry('amundsendev/amundsen-frontend:latest'),
+      image: ecs.ContainerImage.fromRegistry('amundsendev/amundsen-frontend:3.7.0'),
       logging: ecs.LogDrivers.awsLogs({ streamPrefix: 'amundsen-frontend' }),
       environment: {
-        // LOG_LEVEL: 'DEBUG',
-        // PORT: '5000',
         SEARCHSERVICE_BASE: 'http://localhost:5001',
         METADATASERVICE_BASE: 'http://localhost:5002',
         FRONTEND_SVC_CONFIG_MODULE_CLASS: 'amundsen_application.config.TestConfig',
@@ -278,12 +277,9 @@ export class AmundsenStack extends cdk.Stack {
     });
 
     const metadataContainer = amundsenFrontend.addContainer('AmundsenMetadataContainer', {
-      // image: ecs.ContainerImage.fromRegistry('amundsendev/amundsen-metadata:latest'),
       image: ecs.ContainerImage.fromRegistry('amundsendev/amundsen-metadata:3.5.0'),
       logging: ecs.LogDrivers.awsLogs({ streamPrefix: 'amundsen-metadata' }),
       environment: {
-        // LOG_LEVEL: 'DEBUG',
-        // PORT: '5002',
         METADATA_SVC_CONFIG_MODULE_CLASS: 'metadata_service.config.NeptuneConfig',
         AWS_REGION: `${this.region}`,
         S3_BUCKET_NAME: props.airflowS3Bucket.bucketName,
@@ -303,7 +299,7 @@ export class AmundsenStack extends cdk.Stack {
     });
 
     const searchContainer = amundsenFrontend.addContainer('AmundsenSearchContainer', {
-      image: ecs.ContainerImage.fromRegistry('amundsendev/amundsen-search:latest'),
+      image: ecs.ContainerImage.fromRegistry('amundsendev/amundsen-search:2.5.1'),
       logging: ecs.LogDrivers.awsLogs({ streamPrefix: 'amundsen-search' }),
       environment: {
         PROXY_CLIENT: 'ELASTICSEARCH',
@@ -364,11 +360,11 @@ export class AmundsenStack extends cdk.Stack {
         port: '5000',
       },
       targets: [amundsenService],
-      pathPattern: '/*',
+      conditions: [elbv2.ListenerCondition.pathPatterns(['/*'])]
     });
 
     // create an Output
-    new cdk.CfnOutput(this, 'amundsen-frontend-hostname', {
+    new CfnOutput(this, 'amundsen-frontend-hostname', {
       value: alb.loadBalancerDnsName,
       description: 'Amundsen Frontend Hostname',
       exportName: 'amundsen-frontend-hostname',

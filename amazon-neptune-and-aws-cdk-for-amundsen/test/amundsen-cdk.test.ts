@@ -1,9 +1,9 @@
-import { expect as expectCDK, matchTemplate, MatchStyle } from '@aws-cdk/assert';
-import * as cdk from '@aws-cdk/core';
+import {expect as expectCDK, matchTemplate, MatchStyle } from '@aws-cdk/assert';
+import {App} from 'aws-cdk-lib';
 import * as SampleDbs from '../lib/sample-dbs-stack';
 
 test('Empty Stack', () => {
-    const app = new cdk.App();
+    const app = new App();
     // WHEN
     const stack = new SampleDbs.SampleDbsStack(app, 'MyTestStack');
     // THEN

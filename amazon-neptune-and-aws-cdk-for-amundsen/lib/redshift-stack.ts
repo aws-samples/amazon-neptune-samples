@@ -1,10 +1,10 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-import {App, Stack, StackProps} from "@aws-cdk/core";
-import {Cluster, ClusterType} from '@aws-cdk/aws-redshift';
-import {Secret} from '@aws-cdk/aws-secretsmanager';
-import {SubnetType, Vpc, SecurityGroup} from "@aws-cdk/aws-ec2";
-import {Effect, PolicyStatement, Role, ServicePrincipal} from '@aws-cdk/aws-iam';
+import {App, Stack, StackProps} from 'aws-cdk-lib';
+import {Cluster, ClusterType} from '@aws-cdk/aws-redshift-alpha';
+import {Secret} from 'aws-cdk-lib/aws-secretsmanager';
+import {SubnetType, Vpc, SecurityGroup} from "aws-cdk-lib/aws-ec2";
+import {Effect, PolicyStatement, Role, ServicePrincipal} from 'aws-cdk-lib/aws-iam';
 
 export interface RedshiftStackProps extends StackProps {
 	vpc: Vpc;
