@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Amazon neptune + Gremlin + Ogma</title>
+    <link type="text/css" rel="stylesheet" href="styles.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/awesomplete@1.1.2/awesomplete.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/awesomplete@1.1.2/awesomplete.min.js"></script>
+  </head>
+  <body>
+    <div id="graph-container"></div>
+    <div class="controls">
+      <form id="user-select">
+        <label for="users">User</label>
+        <input
+          name="from-node-select"
+          id="users"
+          class="clearable-input"
+          placeholder="Select"
+        />
+        <input type="submit" id="add" value="Add" />
+      </form>
+    </div>
+    <script src="dist/index-bundle.js"></script>
+  </body>
+</html>

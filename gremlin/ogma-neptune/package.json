@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "gremlin": "3.4.6",
+    "@linkurious/ogma": "~4.1.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^13.2.1",
+    "rollup": "^2.70.2"
+  },
+  "name": "ogma-neptune",
+  "description": "This GitHub lab will take you through hands-on exercise of visualizing graph data in Amazon Neptune using VIS.js library. Amazon Neptune is a fast, reliable, fully managed graph database service available from AWS. With Amazon Neptune you can use open source and popular graph query languages such as Apache TinkerPop Gremlin for property graph databases or SPARQL for W3C RDF model graph databases.",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "author": "",
+  "license": "MIT"
+}
