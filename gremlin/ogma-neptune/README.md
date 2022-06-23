@@ -36,7 +36,7 @@ Once the proxy is exposed, we can access the APIs from Javascript code being exe
 
 ### 1. Provision Amazon Neptune Cluster
 
-Follow the procedure mentioned in [Amazon Neptune Documentation](https://docs.aws.amazon.com/neptune/latest/userguide/get-started-prerequisites.html) to provision a new Amazon Neptune Instance inside a VPC.<BR/>
+Follow the procedure mentioned in [Amazon Neptune Documentation](https://docs.aws.amazon.com/neptune/latest/userguide/neptune-setup.html) to provision a new Amazon Neptune Instance inside a VPC.<BR/>
 
 ### 2. Load sample data into Amazon Neptune
 
