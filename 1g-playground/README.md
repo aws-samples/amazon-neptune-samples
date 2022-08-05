@@ -10,7 +10,7 @@ The Amazon Neptune 1G Playground is a Java command line program used as an intro
 
 The Amazon Neptune 1G Playground is a Java Maven project and requires JDK 8 and Maven 3 to build from source. 
 
-First, change into the `Neptune1GPlaygroundCLI` folder and run `mvn clean package`, this will generate an executable `.jar` in the directory `\target`. Next, change into the `Neptune1GPlaygroundServer` folder and run `mvn clean package` again, an executable `.jar` will again be generated in the `\target` directory.
+First, change into the `1g-playground-cli` folder and run `mvn clean package`, this will generate an executable `.jar` in the directory `\target`. Next, change into the `1g-playground-server` folder and run `mvn clean package` again, an executable `.jar` will again be generated in the `\target` directory.
 
 Now we have generated two `.jar` files, one for both client and server. Next, open two different command prompts. Run `java -jar <path_to_generated_jar>` in each of them, passing the path to the generated `.jar` files. The server process should now be running in the one prompt, and the CLI in the other.
 
