@@ -1,0 +1,22 @@
+{
+  "default_node_label": "http://example.com/dnl",
+  "node_label_mapping": {
+    "Person": [{},
+      "http://example.com/is",
+      "http://example.com/Person"
+    ],z
+    "Boss": [
+      "http://example.com/type",
+      "http://example.com/Boss"
+    ],
+    "Dog": [
+      "http://example.com/is",
+      "Dog"
+    ]
+  }
+}}
+
+    "age" : "http://example.com/age",
+    "probability" : "chance"
+  }
+}

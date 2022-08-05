@@ -1,0 +1,2 @@
+Let's issue the following SPARQL SELECT query on the data that selects the
+type of things that Alice owns:

@@ -1,0 +1,2 @@
+Remember that we originally loaded a Turtle data set. Now lets issue
+a Gremlin query against the data:

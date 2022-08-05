@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xml:base="food://bla/persons/"
+         xmlns="food://bla/meta#">
+    <Person rdf:about="john">
+        <name>John</name>
+        <age>35</age>
+        <child>
+            <Person rdf:about="Alice">
+                <name>Alice</name>
+                <age>10</age>
+            </Person>
+        </child>
+        <child rdf:resource="Elizabeth"/>
+    </Person>
+    <Person rdf:about="Test">
+        <name>Test</name>
+        <age>8</age>
+    </Person>
+</rdf:RDF>

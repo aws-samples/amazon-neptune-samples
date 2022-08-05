@@ -1,0 +1,8 @@
+Welcome to scenario 1.
+
+This scenario will show you how to \u001b[1mload\u001b[0m, \u001b[1mview\u001b[0m and \u001b[1mclear\u001b[0m data in the tool.
+The 1GPlayground allows data to be loaded in several data formats. This includes:
+
+- RDF/XML, NTriples, NQuads, Turtle, and TriG for RDF data.
+- Neptune CSV, GraphSON, and GraphML for Labeled Property Graph(LPG) data.
+- A custom 'OneGraph' data format.

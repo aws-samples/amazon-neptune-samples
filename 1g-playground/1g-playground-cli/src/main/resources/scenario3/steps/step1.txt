@@ -1,0 +1,2 @@
+Let's load the following RDF Turtle data about a person
+named Alice who owns a house;

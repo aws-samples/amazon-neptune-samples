@@ -1,0 +1,10 @@
+_:thisIsALongBlankNode1345LoremIpsumDolorSitAmet <http://example.com/thisIsALongPredicateLoremIpsumDolorSitAmet> _:anotherBNode in _:aBnodeGraph .
+_:1thisBlankNodeWillBePrefixed <http://example.com/thisIsALongPredicateLoremIpsumDolorSitAmet> _:anotherBNode __:S124 in _:aBnodeGraph,_:aBnodeGraph2 , _:aBnodeGraph2        .
+#
+#
+#
+#
+<http://example.com/s><http://example.com/p> "2"^^<http://www.w3.org/2001/XMLSchema#integer> __:1234 . # Here starts a comment.
+<http://example.com/s> <http://example.com/p> <http://example.com/o> __:124      \    U   .
+
+

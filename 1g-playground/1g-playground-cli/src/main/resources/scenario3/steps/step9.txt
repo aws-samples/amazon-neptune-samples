@@ -1,0 +1,2 @@
+We can now use the same SPARQL select query we ran earlier to
+obtain new information from the property graph we added:

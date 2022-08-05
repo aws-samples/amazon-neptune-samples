@@ -1,0 +1,3 @@
+~id,~from,~to,~label, since:Date, probability:Float
+1,1,2,knows, 1958-06-12T00:00:00Z,0.6
+2,2,3,likes, 1904-09-09T00:00:00Z,

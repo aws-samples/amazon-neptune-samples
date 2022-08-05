@@ -1,0 +1,7 @@
+Queries are not ran on the OneGraph data directly; the derivative
+RDF and LPG data is obtained from the OneGraph every time new data
+is loaded. These derivative data sets are then used to query against.
+
+Thus, to understand the Gremlin query output a little better, it helps
+to view what data it was actually executed on, which we can obtain by
+simply running:

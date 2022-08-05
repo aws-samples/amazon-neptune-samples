@@ -1,0 +1,2 @@
+Finally, let's issue a SPARQL ASK query to find out if Alice is 39 years old
+by running the following command:

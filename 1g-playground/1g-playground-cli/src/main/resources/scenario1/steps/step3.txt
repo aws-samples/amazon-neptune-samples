@@ -1,0 +1,4 @@
+The data is now loaded and stored on the server component of the playground.
+We can view what data is currently stored on the server at any time using the \u001b[1mview\u001b[0m command.
+The \u001b[1mview\u001b[0m command takes a \u001b[1m-t\u001b[0m parameter just like \u001b[1mload\u001b[0m, specifying the format the user wants to view the data in.
+Let's run the following command to view the data:

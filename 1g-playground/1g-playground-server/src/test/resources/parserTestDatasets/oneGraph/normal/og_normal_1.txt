@@ -1,0 +1,18 @@
+#
+<http://example.com/s> <http://example.com/p> <http://example.com/o> __:123 in <http://example.com/g1> .
+_:bnode<http://example.com/p> <http://example.com/o> in <http://example.com/g1>, <http://example.com/g2> .
+__:126<http://example.com/p> <http://example.com/o> in <http://example.com/g1>, <http://example.com/g2> .
+<http://example.com/s> <http://example.com/p> <http://example.com/o> __:124 \ U.
+<http://example.com/s> <http://example.com/p> "hello"@en-US __:124 in _:aGraph .
+<http://example.com/s> <http://example.com/p> <http://example.com/o> __:124 in _:aGraph, <http://example.com/g1> .
+<http://example.com/s><http://example.com/p> __:123 . # comment
+# comment
+#
+<http://example.com/s> <http://example.com/p> <http://example.com/o> __:126 in <http://example.com/g1> , <http://example.com/g2> , <http://example.com/g2> .
+<http://example.com/s><http://example.com/p> "2"^^<http://www.w3.org/2001/XMLSchema#integer> __:1234 .
+
+
+
+
+
+

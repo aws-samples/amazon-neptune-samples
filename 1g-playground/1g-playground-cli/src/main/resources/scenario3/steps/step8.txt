@@ -1,0 +1,2 @@
+Now let's load the following property graph on top of the existing data that
+lets Alice own more stuff:

@@ -1,0 +1,3 @@
+~id,~label,name:String,age:Int,weight:Float
+A,Person,Alice,25,170.6
+B,Person,Bob,28,197.9

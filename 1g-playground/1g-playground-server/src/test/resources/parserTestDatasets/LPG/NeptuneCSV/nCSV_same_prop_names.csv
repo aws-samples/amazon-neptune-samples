@@ -1,0 +1,3 @@
+~id, ~label, age:Double[]
+1,Person;Queen, 75.00;85.00
+

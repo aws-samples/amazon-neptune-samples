@@ -1,0 +1,13 @@
+@prefix rel: <http://aws.amazon.com/neptune/ogplayground/data/edge/> .
+@prefix prop: <http://aws.amazon.com/neptune/ogplayground/data/propertyName/> .
+@prefix label: <http://aws.amazon.com/neptune/ogplayground/data/label/> .
+@prefix id: <http://aws.amazon.com/neptune/ogplayground/data/id/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> .
+
+id:A
+    a label:Person ;
+    prop:age "44"^^<http://www.w3.org/2001/XMLSchema#integer> ;
+    prop:name "Alice" ;
+    rel:owns id:B .
+id:B
+    a label:House .

@@ -1,0 +1,3 @@
+PREFIX prop: <http://aws.amazon.com/neptune/ogplayground/data/propertyName>
+
+ASK { ?x prop:age "44" }

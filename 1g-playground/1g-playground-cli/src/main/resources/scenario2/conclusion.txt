@@ -1,0 +1,11 @@
+Recap: We have been introduced to the idea of OneGraph and have
+seen that a 1G data set is made up of 5 elements:
+
+- relationship, property, and membership statements.
+- simple nodes.
+- graphs.
+
+Finally, we have seen how to view this internal representation using the
+\u001b[1mview -t formal\u001b[0m and \u001b[1mview -t og\u001b[0m commands.
+
+To learn about cross-model querying, take scenario 3.

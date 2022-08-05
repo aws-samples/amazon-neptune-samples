@@ -1,0 +1,7 @@
+<http://example.com/A> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/Person> .
+<http://example.com/A> <http://example.com/age> "25"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.com/A> <http://example.com/height> "1.72"^^<http://www.w3.org/2001/XMLSchema#float> .
+<http://example.com/A> <http://example.com/name> "Alice" .
+<http://example.com/B> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.com/Person> .
+<http://example.com/B> <http://example.com/name> "Bob" .
+<http://example.com/B> <http://example.com/age> "28"^^<http://www.w3.org/2001/XMLSchema#integer> .

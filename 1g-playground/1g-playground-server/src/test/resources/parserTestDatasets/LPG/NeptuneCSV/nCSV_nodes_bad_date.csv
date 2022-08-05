@@ -1,0 +1,6 @@
+~id, ~label, age:Int, name:String[], birthDate:Date
+1,Person;Queen, 96, "Elizabeth;Alexandra;Mary;Windsor",1234556-132451-ZZ
+2,Person, 39, Harry
+3,Person, 22,
+4,Dog,5,
+5,,3,

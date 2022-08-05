@@ -1,0 +1,3 @@
+We will discuss the OneGraph data model in more detail in the next scenario.
+The data loaded currently in the tool can also be exported to disk. For this you
+can use the following command (but we will not run it now):

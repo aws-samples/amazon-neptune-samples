@@ -1,0 +1,16 @@
+{
+  "default_node_label" : "this should be an iri",
+  "node_label_mapping" : {
+    "Person" : ["this should be an iri", "http://example.com/Person"],
+    "Boss" : ["http://example.com/type", "http://example.com/Boss"],
+    "Dog" : ["http://example.com/is", "Dog"]
+  },
+  "edge_label_mapping" : {
+    "knows" : "http://example.com/knows",
+    "connected" : "Connected to"
+  },
+  "property_name_mapping" : {
+    "age" : "http://example.com/age",
+    "probability" : "chance"
+  }
+}

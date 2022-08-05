@@ -1,0 +1,24 @@
+ @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+ @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+ @prefix swp: <http://www.w3.org/2004/03/trix/swp-1/> .
+ @prefix dc: <http://purl.org/dc/elements/1.1/> .
+ @prefix ex: <http://www.example.org/vocabulary#> .
+ @prefix : <http://www.example.org/exampleDocument#> .
+ 
+ :G1 { :Bob ex:name "Bob Bobson" .
+       :Bob ex:homepage <http://www.example.com/bob> .
+       :Bob ex:email <mailto:bob@example.com> .
+       :Bob ex:hasSkill ex:Management }
+ 
+ :G2 { :Bob rdf:type ex:Person .
+       :Bob ex:hasSkill ex:Programming }
+ 
+ :G3 { :G1 swp:assertedBy _:w1 .
+       _:w1 swp:authority :Tom .
+       _:w1 dc:date "2003-10-02"^^xsd:date .   
+       :G2 swp:quotedBy _:w2 .
+       :G3 swp:assertedBy _:w2 .
+       _:w2 dc:date "2003-09-03"^^xsd:date .
+       _:w2 swp:authority :Tom .
+       :Tom rdf:type ex:Person .
+       :Tom ex:email <mailto:tom@example.com> }

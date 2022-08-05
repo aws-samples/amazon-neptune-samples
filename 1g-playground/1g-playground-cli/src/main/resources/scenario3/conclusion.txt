@@ -1,0 +1,8 @@
+Recap: We have been introduced to the idea of cross-model querying
+and have issued both SPARQL and Gremlin queries on the same data set.
+Finally, we learned that the \u001b[1mquery\u001b[0m command takes one of 4 different forms:
+
+    - \u001b[1mquery -gremlin "g.V()"\u001b[0m
+    - \u001b[1mquery -sparql "SELECT ?s ?p ?o WHERE { ?s ?p ?o }"\u001b[0m
+    - \u001b[1mquery -gremlin -f <path_to_gremlin_query>\u001b[0m
+    - \u001b[1mquery -sparql -f <path_to_SPARQL_query>\u001b[0m

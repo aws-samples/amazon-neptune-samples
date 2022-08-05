@@ -1,0 +1,11 @@
+To achieve interoperability between RDF and LPG data, all data loaded
+into to the tool is converted into the overarching OneGraph data model.
+
+Hence, the property graph we just loaded is not represented as a property
+graph internally. When the \u001b[1mview\u001b[0m command is run, the data is converted
+from the internal OneGraph representation to the specified RDF or LPG
+format on the fly.
+
+This allows us to \u001b[1mview\u001b[0m the data currently loaded in an RDF format, even though
+the data was originally loaded as a property graph. Let's run the following
+command to view the current data in N-Quads:
