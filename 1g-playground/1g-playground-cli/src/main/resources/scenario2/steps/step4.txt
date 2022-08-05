@@ -1,0 +1,4 @@
+To view the internal OneGraph representation of the data, we can specify
+the value \u001b[1mformal\u001b[0m for the \u001b[1m-t\u001b[0m flag of the view command.
+
+First let's load the following Turtle into the tool;

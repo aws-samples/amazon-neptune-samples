@@ -1,0 +1,6 @@
+<http://example.com/s> <http://example.com/p> __:sid3 __:sid1 .
+__:sid6 <http://example.com/p> __:sid1 __:sid2 .
+<http://example.com/s> <http://example.com/p> __:sid4 __:sid3 .
+<http://example.com/s> <http://example.com/p> __:sid5 __:sid4 .
+__:sid2 <http://example.com/p> <http://example.com/o> __:sid5 .
+<http://example.com/s> <http://example.com/p> <http://example.com/o> __:sid6 .

@@ -1,0 +1,7 @@
+Welcome to scenario 3.
+
+In this scenario we will explore cross-model querying using the query command.
+The playground supports the following queries:
+
+    - Gremlin traversals such as g.V()
+    - SPARQL SELECT, ASK and, CONSTRUCT queries.

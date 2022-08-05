@@ -1,0 +1,10 @@
+PREFIX rel: <http://aws.amazon.com/neptune/ogplayground/data/edge/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX label: <http://aws.amazon.com/neptune/ogplayground/data/label/>
+
+SELECT ?s ?t
+WHERE {
+    ?s rdf:type label:Person .
+    ?s rel:owns ?o .
+    ?o rdf:type ?t .
+}

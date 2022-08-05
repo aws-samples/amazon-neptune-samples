@@ -1,0 +1,6 @@
+<http://example.com/s> <http://example.com/p> <http://example.com/o> in <http://example.com/g1>, <http://example.com/g2>, <http://example.com/g3> .
+<http://example.com/s> <http://example.com/p> <http://example.com/o> in <http://example.com/g1>,<http://example.com/g2>,<http://example.com/g3> .
+<http://example.com/s> <http://example.com/p> <http://example.com/o> in _:graph1,<http://example.com/g2>, <http://example.com/g3> , _:graph4 .
+<http://example.com/s> <http://example.com/p> <http://example.com/o> __:sid3 in _:graph1,<http://example.com/g2>, <http://example.com/g3> , _:graph4 .
+<http://example.com/shouldnotbe> <http://example.com/in> <http://example.com/defgraph> __:sid1 \ U .
+<http://example.com/shouldbe> <http://example.com/in> <http://example.com/defgraph> __:sid2 .

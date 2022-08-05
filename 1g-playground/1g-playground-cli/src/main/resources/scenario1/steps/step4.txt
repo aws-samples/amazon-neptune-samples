@@ -1,0 +1,3 @@
+Although we originally loaded N-Triples data, we can view the data stored
+on the server in any of the supported data formats.
+Let's run the following command to view the data in Turtle:

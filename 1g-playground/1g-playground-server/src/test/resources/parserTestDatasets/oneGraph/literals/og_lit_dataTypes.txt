@@ -1,0 +1,3 @@
+<http://example.com/s> <http://example.com/p> "2"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.com/s> <http://example.com/p> "1.663E-4"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://example.com/s> <http://example.com/p> "this is a string"^^<http://www.w3.org/2001/XMLSchema#string> .

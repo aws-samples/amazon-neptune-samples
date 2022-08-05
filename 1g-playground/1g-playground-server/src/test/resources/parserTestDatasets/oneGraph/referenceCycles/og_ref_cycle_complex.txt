@@ -1,0 +1,16 @@
+<http://example.com/s> <http://example.com/p> __:sid2 __:sid1 .
+<http://example.com/s> <http://example.com/p> __:sid3 __:sid2 .
+<http://example.com/s> <http://example.com/p> __:sid4 __:sid3 .
+<http://example.com/s> <http://example.com/p> __:sid5 __:sid4 .
+<http://example.com/s> <http://example.com/p> __:sid6 __:sid5 .
+<http://example.com/s> <http://example.com/p> __:sid7 __:sid6 .
+<http://example.com/s> <http://example.com/p> __:sid8 __:sid7 .
+<http://example.com/s> <http://example.com/p> __:sid9 __:sid8 .
+<http://example.com/s> <http://example.com/p> __:sid10 __:sid9 .
+<http://example.com/s> <http://example.com/p> __:sid11 __:sid10 .
+<http://example.com/s> <http://example.com/p> __:sid12 __:sid11 .
+<http://example.com/s> <http://example.com/p> __:sid13 __:sid12 .
+<http://example.com/s> <http://example.com/p> __:sid14 __:sid13 .
+<http://example.com/s> <http://example.com/p> __:sid15 __:sid14 .
+<http://example.com/s> <http://example.com/p> __:sid16 __:sid15 .
+__:sid1 <http://example.com/p> "literal"  __:sid16 .

@@ -1,0 +1,16 @@
+{
+  "default_node_label" : "http://example.com/dnl",
+  "node_label_mapping" : {
+    "Person" : ["http://example.com/is", "http://example.com/Person"],
+    "Boss" : ["http://example.com/type"],
+    "Dog" : ["http://example.com/is", "Dog"]
+  },
+  "edge_label_mapping" : {
+    "knows" : "http://example.com/knows",
+    "connected" : "Connected to"
+  },
+  "property_name_mapping" : {
+    "age" : "http://example.com/age",
+    "probability" : "chance"
+  }
+}

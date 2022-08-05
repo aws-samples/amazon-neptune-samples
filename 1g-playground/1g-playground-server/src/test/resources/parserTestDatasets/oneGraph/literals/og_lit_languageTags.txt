@@ -1,0 +1,4 @@
+<http://example.com/s> <http://example.com/p> "hello"@en .
+<http://example.com/s> <http://example.com/p> "au revoir"@fr-be .
+<http://example.com/s> <http://example.com/p> "12345"@nl .
+<http://example.com/s> <http://example.com/p> "auf wiedersehen"@de .

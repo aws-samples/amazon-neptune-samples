@@ -1,0 +1,8 @@
+Welcome to scenario 2.
+
+In this scenario the OneGraph data model will be explained in more detail.
+We will take a look at how data is represented internally after it has been loaded.
+
+The \u001b[1m-t\u001b[0m parameter values of \u001b[1mformal\u001b[0m and \u001b[1mog\u001b[0m will be introduced for the \u001b[1mload\u001b[0m, \u001b[1mview\u001b[0m,
+and \u001b[1mexport\u001b[0m commands, specifying the formal or serialized OneGraph representations,
+respectively.

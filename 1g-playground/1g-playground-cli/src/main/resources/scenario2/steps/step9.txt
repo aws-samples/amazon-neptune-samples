@@ -1,0 +1,8 @@
+As you can see, the RDF data set and property graph are now
+both contained within the same OneGraph data set. The property names and
+labels from the property graph are prefixed by a default IRI, we will
+explore this in more detail in scenario 5.
+
+Finally, let's use the \u001b[1mview -t og\u001b[0m command to examine the data
+in the OneGraph serialization format. This format will make it
+easier to interpret the data.

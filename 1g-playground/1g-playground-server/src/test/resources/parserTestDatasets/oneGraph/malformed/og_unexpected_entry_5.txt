@@ -1,0 +1,1 @@
+example.com <http://example.com/p> <http://example.com/o> .

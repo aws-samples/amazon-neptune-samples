@@ -1,0 +1,9 @@
+Recap: We have seen how to use the \u001b[1mload\u001b[0m, \u001b[1mview\u001b[0m and \u001b[1mclear-data\u001b[0m commands.
+
+- The \u001b[1mload\u001b[0m command allows us to load RDF or property graph data into the tool,
+  it is important to note that data loading is additive, this allows several
+  datasets to be loaded on top of each other.
+- The \u001b[1mview\u001b[0m command allows us to view what data is currently loaded.
+- The \u001b[1mclear-data\u001b[0m command clears all data previously loaded.
+
+To learn more about the OneGraph data model, please take scenario 2.

@@ -1,0 +1,9 @@
+Finally, there are simple nodes and graphs:
+
+- Simple nodes: These represent basic elements from LPG or RDF.
+  This includes: IRIs and Blank Nodes from RDF, and vertices
+  from LPG.
+
+- Graphs: These are similar to RDF Graphs. They appear in
+  membership statements, but can also appear in
+  relationship or property statements.

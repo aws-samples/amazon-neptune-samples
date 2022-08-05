@@ -1,0 +1,18 @@
+The 1G data model consists of so-called statements, simple nodes, and
+graphs. We call these 3 building blocks 1g elements. With these,
+any LPG or RDF data can be represented.
+
+- Statements: statements in 1G come in 3 different forms:
+    - Relationship statements: These statements signify a relation
+    between 2 other elements with an accompanying predicate.
+    RDF statements with a resource in object position, and edges
+    in LPG are represented in 1G as such statements.
+
+    - Property statements: These statements allow elements to carry
+    named values. RDF statements with a literal in object position, and
+    properties on vertices and edges in LPG are represented in 1G using such
+    statements.
+
+    - Membership statements: These statements specify graph membership of
+     relationship and property statements. This allows graph membership of
+     RDF statements to be modeled this way.

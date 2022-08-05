@@ -1,0 +1,5 @@
+<http://one.example/subject1> <http://one.example/predicate1> <http://one.example/object1> <http://example.org/graph3> .
+<http://example.org/subject1> <http://an.example/predicate1> "object1" <http://example.org/graph1> .
+<http://example.org/subject1> <http://an.example/predicate1> "2"^^<http://www.w3.org/2001/XMLSchema#integer> <http://example.org/graph1> .
+<http://example.org/subject1> <http://an.example/predicate1> "3"^^<http://www.w3.org/2001/XMLSchema#int> <http://example.org/graph1> .
+_:subject2 <http://an.example/predicate2> "object2" <http://example.org/graph5> .

@@ -1,0 +1,8 @@
+As previously mentioned, data loaded into the tool gets
+converted into the OneGraph(1G) data format. OneGraph is an overarching
+data model for both RDF data and property graphs(LPG). Any RDF or LPG
+data can be converted into OneGraph without loss of information.
+
+Although conversion to 1G from RDF or LPG is always lossless, not every 1G
+data set can be converted without loss of information in the opposite
+direction. We will explore this in more detail in scenario 4.

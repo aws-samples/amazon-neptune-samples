@@ -1,0 +1,8 @@
+We can achieve this using the \u001b[1mload\u001b[0m command.
+The load command has a required flag \u001b[1m-t\u001b[0m, specifying the format of the data to load.
+It can take one of the following values:
+
+\u001b[1mntriples, nquads, rdfxml, turtle, trig, neptunecsv, graphml, graphson, og.\u001b[0m
+
+After that, \u001b[1mload\u001b[0m takes up to two additional parameters, specifying the path to the file(s) to load.
+Let's run the following command to load the data:
