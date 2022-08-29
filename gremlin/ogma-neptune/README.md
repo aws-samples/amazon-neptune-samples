@@ -178,9 +178,32 @@ aws lambda add-permission --function-name <lambda-function-name> \
 
 We have now created an API Gateway proxy for the AWS Lambda function.
 
-### 5. Configure Amazon S3 bucket for hosting a static website
+### 5. Configure the hosting for the static website
+
+#### Option 1: AWS CloudFront
+
+First, create a CloudFront Origin Access Id using the following command:
+
+```bash
+aws cloudfront create-cloud-front-origin-access-identity --cloud-front-origin-access-identity-config CallerReference="linkurious example",Comment="linkurious example"
+```
+
+Make a note of the value of the "`Id`" field.
+
+Next, create a CloudFront distribution to the newly created S3 bucket, using the following command.
+**NOTE:** Make sure to replace the `<bucket-name>` and `<origin-id>` placeholders with your own values.
+
+```bash
+aws cloudfront create-distribution --distribution-config file://cloudfront-create-distribution-config.txt
+```
+
+You can find an example of config file in `cloudfront-create-distribution-config.txt`. Make a note of the value of the `DomainName` field.
+
+#### Option 2: Amazon S3 bucket
 
 Now that we have all the backend infrastructure ready for handling the API requests to get data out from Amazon Neptune, let's create an Amazon S3 bucket that will be used to host a static website.<br/>
+
+https://github.com/aws-samples/amazon-cloudfront-secure-static-site#user-content-amazon-cloudfront-secure-static-website
 
 Run below commands to create an Amazon S3 bucket as a static website and upload the `visualize-graph.html` into it.
 
@@ -199,7 +222,22 @@ aws s3api put-bucket-website --bucket <bucket-name> --website-configuration '{
 }'
 ```
 
-### 6. Upload HTML file to Amazon S3
+### 6. Build the static website
+
+In order to build the example website, you will need [`Node.js`](https://nodejs.org/en/) and `npm` (comes together with t Node.js).
+
+Then you will need to get your copy of Ogma library. You can copy the private `npm` link at `https://get.linkurio.us`. If you don't have access to it, you can get the evaluation version by contacting Linkurious team at `sales@linkurious.com`.
+
+The private npm link will look like that: `https://get.linkurio.us/api/get/npm/ogma/<VERSION>/?secret=<YOUR_API_KEY>`, you can add it to your `package.json` file.
+
+Then, you can install all the other dependencies and build the project:
+
+```bash
+npm install
+npm run build
+```
+
+### 7. Upload HTML file to Amazon S3
 
 The visualize-graph.html file that we have as a part of this GitHub repository has to be updated to reflect the API Gateway Endpoint that we created in the steps above.
 
@@ -227,6 +265,12 @@ e.g.
 find . -type f -name index.html | xargs sed -i '' 's/PROXY_API_URL/https:\/\/7brms4lx43.execute-api.us-east-2.amazonaws.com\/test/g'
 ```
 
+For Windows:
+
+- Open "index.html"
+- Locate the line where the "PROXY_API_URL" variable is set.
+- Update the value to `https://<API-Gateway-Endpoint>/test`
+
 Once you have replace the value of placeholder `PROXY_API_URL` in visualize-graph.html file, upload the file to S3 using below command.
 
 ```
@@ -238,7 +282,9 @@ And, you are all set!
 
 Visualize the graph data through this application from below URL.
 
-http://\<bucket-name\>.s3-website.\<aws-region-code\>.amazonaws.com
+`http://<domain-name>.s3-website.<aws-region-code>.amazonaws.com`
+
+Here `<domain-name>` is the value copied from creating a CloudFront distribution.
 
 ![](image.png)
 
