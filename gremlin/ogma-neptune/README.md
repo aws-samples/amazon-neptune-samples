@@ -182,6 +182,8 @@ We have now created an API Gateway proxy for the AWS Lambda function.
 
 #### Option 1: AWS CloudFront
 
+You can find more detailed instructions on how to set up Amazon CloudFront at https://github.com/aws-samples/amazon-cloudfront-secure-static-site#user-content-amazon-cloudfront-secure-static-website.
+
 First, create a CloudFront Origin Access Id using the following command:
 
 ```bash
