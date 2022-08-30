@@ -32,7 +32,7 @@ Once the proxy is exposed, we can access the APIs from Javascript code being exe
 2. [Load sample data into Amazon Neptune](#2-load-sample-data-into-amazon-neptune)
 3. [Create and Configure AWS Lambda Function](#3-create-and-configure-aws-lambda-function)
 4. [Create and Configure Amazon API Gateway - Proxy API](#4-create-and-configure-amazon-api-gateway---proxy-api)
-5. [Configure Amazon S3 bucket for hosting a static website](#5-configure-amazon-s3-bucket-for-hosting-a-static-website)
+5. [Configure the hosting for the static website](#5-configure-the-hosting-for-the-static-website)
 
 ### 1. Provision Amazon Neptune Cluster
 
