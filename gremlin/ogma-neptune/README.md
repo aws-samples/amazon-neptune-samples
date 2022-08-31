@@ -10,7 +10,7 @@ Ogma is a Javascript library for large-scale interactive graph visualizations. O
 ## PREREQUISITES:
 
 1. Amazon Neptune Cluster
-2. Access to AWS IAM Permissions for
+2. Access to [AWS IAM Permissions](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-prereqs.html#getting-started-prereqs-iam) for
    -> creating AWS Lambda functions
    -> creating IAM roles for Amazon Neptune cluster to access S3 and, for API Gateway to access AWS Lambda functions
    -> APIs in Amazon API Gateway
@@ -70,6 +70,7 @@ zip lambdapackage.zip -r node_modules/ indexLambda.js
 
 ```
 
+https://docs.aws.amazon.com/cli/latest/userguide/getting-started-prereqs.html#getting-started-prereqs-iam
 Once AWS Lambda deployment package (.zip file) is ready, we can create the Lambda function using [AWS CLI](https://aws.amazon.com/cli/).<br/>
 To install and configure AWS CLI on your operating system, please refer to - https://docs.aws.amazon.com/cli/latest/userguide/installing.html <br/>
 After installing AWS CLI, run `aws configure` to set the access_key, secret_key and AWS region.
