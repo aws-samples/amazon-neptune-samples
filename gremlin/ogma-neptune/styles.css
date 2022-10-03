@@ -1,0 +1,37 @@
+html,
+body {
+  font: 10pt arial;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#graph-container {
+  width: 100%;
+  height: 100%;
+}
+
+.ui-widget,
+.controls {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+  padding: 2em;
+  border-radius: 1em;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.controls .awesomplete > ul {
+  max-height: 500px;
+  overflow-y: auto;
+  width: 300px;
+  left: 0;
+  right: auto;
+  transform-origin: 50% 0;
+}
+
+.ui-widget {
+  display: none;
+}
