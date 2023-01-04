@@ -127,7 +127,7 @@
     "NeptuneDBClusterParameterGroup": {
       "Type": "AWS::Neptune::DBClusterParameterGroup",
       "Properties": {
-        "Family": "neptune1",
+        "Family": "neptune1.2",
         "Description": {
           "Fn::Sub": "${ApplicationID} DB cluster parameter group"
         },
@@ -150,7 +150,7 @@
     "NeptuneDBParameterGroup": {
       "Type": "AWS::Neptune::DBParameterGroup",
       "Properties": {
-        "Family": "neptune1",
+        "Family": "neptune1.2",
         "Description": {
           "Fn::Sub": "${ApplicationID} DB parameter group"
         },
