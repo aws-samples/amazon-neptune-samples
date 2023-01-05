@@ -494,6 +494,17 @@
         }
       }
     },
+    "PublicSubnet1": {
+      "Description": "Public subnet",
+      "Value": {
+        "Ref": "PublicSubnetOne"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-PublicSubnetOne"
+        }
+      }
+    },
     "PrivateSubnetIDs": {
       "Description": "Private subnet IDs",
       "Value": {

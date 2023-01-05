@@ -213,6 +213,7 @@
 						"Ref": "SQLScriptS3Key"
 					}
 				},
+        "GlueVersion": "4.0",
 				"Connections": {
 					"Connections": [
 						{
@@ -278,7 +279,7 @@
 				"DefaultArguments": {
 					"--job-language": "python",
 					"--extra-py-files": {
-						"Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/bin/neptune-python-utils/neptune_python_utils.zip"
+						"Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/bin/neptune-python-utils-v2/neptune_python_utils.zip"
 					},
 					"--job-bookmark-option": "job-bookmark-disable",
 					"--S3_OUTPUT_PATH": {
@@ -299,6 +300,7 @@
 						}
 					}
 				},
+        "GlueVersion": "4.0",
 				"Connections": {
 					"Connections": [
 						{
@@ -321,8 +323,7 @@
 				},
 				"Name": {
 					"Fn::Sub": "${ApplicationID}_export_from_mysql_to_s3"
-				},
-				"GlueVersion": "1.0"
+				}
 			}
 		},
 		"ExportFromMySQLToNeptuneJob": {
@@ -336,7 +337,7 @@
 				"DefaultArguments": {
 					"--job-language": "python",
 					"--extra-py-files": {
-						"Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/bin/neptune-python-utils/neptune_python_utils.zip"
+						"Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/bin/neptune-python-utils-v2/neptune_python_utils.zip"
 					},
 					"--job-bookmark-option": "job-bookmark-disable",
 					"--DATABASE_NAME": {
@@ -357,6 +358,7 @@
 						}
 					}
 				},
+        "GlueVersion": "4.0",
 				"Connections": {
 					"Connections": [
 						{
@@ -382,8 +384,7 @@
 				},
 				"Name": {
 					"Fn::Sub": "${ApplicationID}_export_from_mysql_to_neptune"
-				},
-				"GlueVersion": "1.0"
+				}
 			}
 		},
 		"ExportFromMySQLToNeptuneIncrementalJob": {
@@ -397,7 +398,7 @@
 				"DefaultArguments": {
 					"--job-language": "python",
 					"--extra-py-files": {
-						"Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/bin/neptune-python-utils/neptune_python_utils.zip"
+						"Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/bin/neptune-python-utils-v2/neptune_python_utils.zip"
 					},
 					"--job-bookmark-option": "job-bookmark-disable",
 					"--DATABASE_NAME": {
@@ -418,6 +419,7 @@
 						}
 					}
 				},
+        "GlueVersion": "4.0",
 				"Connections": {
 					"Connections": [
 						{
@@ -443,8 +445,7 @@
 				},
 				"Name": {
 					"Fn::Sub": "${ApplicationID}_export_from_mysql_to_neptune_incremental"
-				},
-				"GlueVersion": "1.0"
+				}
 			}
 		}
 	},
