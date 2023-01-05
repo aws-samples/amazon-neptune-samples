@@ -1,0 +1,56 @@
+{
+  "Description": "Export from MySQL to Amazon Neptune using AWS Glue",
+  "Parameters": {
+    "ApplicationID": {
+      "Description": "Application ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50,
+      "Default": "demo"
+    }
+  },
+  "Resources": {
+   
+    "IAMStackGlueAssumeRole": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/glue-neptune/iam-glue-assume-role-stack.json",
+        "Parameters": {
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          }
+        },
+        "TimeoutInMinutes": "10",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          }
+        ]
+      }
+    },
+    "IAMStackGlue": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": "IAMStackGlueAssumeRole",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates/glue-neptune/iam-glue-stack.json",
+        "Parameters": {
+          "InfrastructureID": {
+            "Ref": "AWS::StackName"
+          }
+        },
+        "TimeoutInMinutes": "10",
+        "Tags": [
+          {
+            "Key": "InfrastructureID",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

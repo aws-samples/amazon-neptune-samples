@@ -3,7 +3,7 @@ import os
 import boto3
 import botocore
 import pymysql.cursors
-from urlparse import urlsplit
+from urllib.parse import urlsplit
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 from awsglue.context import GlueContext

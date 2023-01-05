@@ -42,7 +42,7 @@
 							"Statement": [
 								{
 									"Effect": "Allow",
-									"Action": "neptune-db:connect",
+									"Action": "neptune-db:*",
 									"Resource": {
 										"Fn::Sub": [
 											"arn:${AWS::Partition}:neptune-db:${AWS::Region}:${AWS::AccountId}:${DBClusterResourceID}/*",
