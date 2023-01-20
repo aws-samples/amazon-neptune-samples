@@ -57,6 +57,14 @@ Parameters:
     Type: String
     Default: '8182'
 
+  NeptuneClusterAuthMode:
+    Description: 'The IAM authentication mode on the specified Neptune cluster.'
+    Type: String
+    Default: DEFAULT
+    AllowedValues:
+      - DEFAULT
+      - IAM
+
   NeptuneClusterSecurityGroups:
     Description: The VPC security group IDs. The security groups must be for the same VPC as specified in the subnet.
     Type: List<AWS::EC2::SecurityGroup::Id>
@@ -107,7 +115,8 @@ Resources:
               - sudo -u ec2-user -i << 'EOF'
               - "\n"
               - echo 'export GRAPH_NOTEBOOK_AUTH_MODE=
-              - "DEFAULT' >> ~/.bashrc\n"
+              - !Ref NeptuneClusterAuthMode
+              - "' >> ~/.bashrc\n"
               - echo 'export GRAPH_NOTEBOOK_HOST=
               - !Ref NeptuneClusterEndpoint
               - "' >> ~/.bashrc\n"
