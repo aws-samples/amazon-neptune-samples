@@ -192,13 +192,13 @@ CREATE (a:airport {code: 'FOO'})
 ```
 #### <a name='Createrelationship'></a>Create relationship
 ```
-MATCH (a:airport {code:'SEA'}), (b:airport {code:'ANC'}),
+MATCH (a:airport {code:'SEA'}), (b:airport {code:'ANC'})
 CREATE (a)-[r:route]->(b)
 RETURN r
 ```
 #### <a name='Createrelationshipwithproperties'></a>Create relationship with properties
 ```
-MATCH (a:airport {code:'SEA'}), (b:airport {code:'ANC'}),
+MATCH (a:airport {code:'SEA'}), (b:airport {code:'ANC'})
 CREATE (a)-[r:route {dist: 1000}]->(b)
 RETURN r
 ```
