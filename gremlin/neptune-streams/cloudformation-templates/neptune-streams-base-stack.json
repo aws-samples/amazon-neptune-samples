@@ -184,7 +184,7 @@
         ]
       }
     },
-    "SageMakerStack": {
+    "NeptuneSagemakerNotebook": {
       "Type": "AWS::CloudFormation::Stack",
       "DependsOn": [
         "IAMStack",
@@ -193,30 +193,33 @@
       ],
       "Properties": {
         "TemplateURL": {
-          "Fn::Sub": [
-            "${cfnRoot}/neptune-streams/services-sagemaker-stack.json",
-            {
-              "cfnRoot": {
-                "Fn::FindInMap": [
-                  "CfnMap",
-                  "config",
-                  "cfnRoot"
-                ]
-              }
-            }
+          "Fn::Join": [
+            "",
+            [
+              "https://s3.amazonaws.com/aws-neptune-customer-samples/v2/cloudformation-templates/neptune-sagemaker-notebook-stack.json"
+            ]
           ]
         },
+        "TimeoutInMinutes": "30",
         "Parameters": {
+          "Env": {
+            "Fn::Join": [
+              "",
+              {
+                "Fn::Split": [
+                  "-",
+                  {
+                    "Ref": "ApplicationID"
+                  }
+                ]
+              }
+            ]
+          },
+          "NotebookInstanceType": "ml.t3.large",
           "NeptuneClusterEndpoint": {
             "Fn::GetAtt": [
               "NeptuneStack",
               "Outputs.NeptuneDBClusterEndpoint"
-            ]
-          },
-          "NeptuneReaderEndpoint": {
-            "Fn::GetAtt": [
-              "NeptuneStack",
-              "Outputs.NeptuneDBClusterReadEndpoint"
             ]
           },
           "NeptuneClusterPort": {
@@ -225,64 +228,161 @@
               "Outputs.NeptuneDBClusterPort"
             ]
           },
-          "NotebookContentS3Locations": {
-            "Fn::Sub": [
-              "${notebookContent}|neptune-streams/*",
-              {
-                "notebookContent": {
-                  "Fn::FindInMap": [
-                    "CfnMap",
-                    "config",
-                    "notebookContent"
+          "NeptuneClusterVpc": {
+            "Fn::GetAtt": [
+              "NetworkStack",
+              "Outputs.VPC"
+            ]
+          },
+          "NeptuneClusterSubnetId": {
+            "Fn::GetAtt": [
+              "NetworkStack",
+              "Outputs.PublicSubnet1"
+            ]
+          },
+          "NeptuneClientSecurityGroup": {
+            "Fn::GetAtt": [
+              "NetworkStack",
+              "Outputs.NeptuneAndElastiCacheClientSecurityGroup"
+            ]
+          },
+          "NeptuneLoadFromS3RoleArn": {
+            "Fn::GetAtt": [
+              "IAMStack",
+              "Outputs.NeptuneLoadFromS3RoleARN"
+            ]
+          },
+          "StartupScript": {
+            "Fn::Join": [
+              "",
+              [
+                "/home/ec2-user/anaconda3/bin/python3 -m  pip install --target /home/ec2-user/anaconda3/envs/JupyterSystemEnv/lib/python3.7/site-packages/ ipython_unittest\n",
+                "/home/ec2-user/anaconda3/bin/python3 -m  pip install --target /home/ec2-user/anaconda3/envs/JupyterSystemEnv/lib/python3.7/site-packages/ redis\n",
+                "echo 'export ELASTICACHE_ENDPOINT=",
+                {
+                  "Fn::GetAtt": [
+                    "ElastiCacheStack",
+                    "Outputs.ElastiCacheEndpoint"
                   ]
-                }
-              }
+                },
+                "' >> /home/ec2-user/.bashrc\n",
+                "aws s3 cp s3://aws-neptune-customer-samples-",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "/neptune-sagemaker/bin/neptune-python-utils-v2/neptune_python_utils.zip /home/ec2-user/anaconda3/envs/JupyterSystemEnv/lib/python3.7/site-packages/\n",
+                "unzip -n /home/ec2-user/anaconda3/envs/JupyterSystemEnv/lib/python3.7/site-packages/neptune_python_utils.zip -d /home/ec2-user/anaconda3/envs/JupyterSystemEnv/lib/python3.7/site-packages/\n",
+                "echo 'export NEPTUNE_CLUSTER_ENDPOINT=",
+                {
+                  "Fn::GetAtt": [
+                    "NeptuneStack",
+                    "Outputs.NeptuneDBClusterEndpoint"
+                  ]
+                },
+                "' >> ~/.bashrc\n",
+                "echo 'export NEPTUNE_CLUSTER_PORT=",
+                {
+                  "Fn::GetAtt": [
+                    "NeptuneStack",
+                    "Outputs.NeptuneDBClusterPort"
+                  ]
+                },
+                "' >> ~/.bashrc\n",
+                "echo 'export NEPTUNE_LOAD_FROM_S3_ROLE_ARN=",
+                {
+                  "Fn::GetAtt": [
+                    "IAMStack",
+                    "Outputs.NeptuneLoadFromS3RoleARN"
+                  ]
+                },
+                "' >> ~/.bashrc\n",
+                "echo 'export AWS_REGION=",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "' >> ~/.bashrc\n",
+                "sed -i '$d' /home/ec2-user/anaconda3/envs/JupyterSystemEnv/share/jupyter/kernels/python3/kernel.json\n",
+                "sed -i '$d' /home/ec2-user/anaconda3/envs/JupyterSystemEnv/share/jupyter/kernels/python3/kernel.json\n",
+                "echo ' \"language\": \"python\",' >> /home/ec2-user/anaconda3/envs/JupyterSystemEnv/share/jupyter/kernels/python3/kernel.json\n",
+                "echo ' \"env\": {' >> /home/ec2-user/anaconda3/envs/JupyterSystemEnv/share/jupyter/kernels/python3/kernel.json\n",
+                "echo '  \"NEPTUNE_CLUSTER_ENDPOINT\": \"",
+                {
+                  "Fn::GetAtt": [
+                    "NeptuneStack",
+                    "Outputs.NeptuneDBClusterEndpoint"
+                  ]
+                },
+                "\",' >> /home/ec2-user/anaconda3/envs/JupyterSystemEnv/share/jupyter/kernels/python3/kernel.json\n",
+                "echo '  \"NEPTUNE_CLUSTER_PORT\": \"",
+                {
+                  "Fn::GetAtt": [
+                    "NeptuneStack",
+                    "Outputs.NeptuneDBClusterPort"
+                  ]
+                },
+                "\",' >> /home/ec2-user/anaconda3/envs/JupyterSystemEnv/share/jupyter/kernels/python3/kernel.json\n",
+                "echo '  \"NEPTUNE_LOAD_FROM_S3_ROLE_ARN\": \"",
+                {
+                  "Fn::GetAtt": [
+                    "IAMStack",
+                    "Outputs.NeptuneLoadFromS3RoleARN"
+                  ]
+                },
+                "\",' >> /home/ec2-user/anaconda3/envs/JupyterSystemEnv/share/jupyter/kernels/python3/kernel.json\n",
+                "echo '  \"ELASTICACHE_ENDPOINT\": \"",
+                {
+                  "Fn::GetAtt": [
+                    "ElastiCacheStack",
+                    "Outputs.ElastiCacheEndpoint"
+                  ]
+                },
+                "\",' >> /home/ec2-user/anaconda3/envs/JupyterSystemEnv/share/jupyter/kernels/python3/kernel.json\n",
+                "echo '  \"AWS_REGION\": \"",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\"' >> /home/ec2-user/anaconda3/envs/JupyterSystemEnv/share/jupyter/kernels/python3/kernel.json\n",
+                "echo ' }' >> /home/ec2-user/anaconda3/envs/JupyterSystemEnv/share/jupyter/kernels/python3/kernel.json\n",
+                "echo '}' >> /home/ec2-user/anaconda3/envs/JupyterSystemEnv/share/jupyter/kernels/python3/kernel.json\n",
+                "aws s3 cp ",
+                {
+                  "Fn::Sub": [
+                    "${notebookContent}/neptune-streams/",
+                    {
+                      "notebookContent": {
+                        "Fn::FindInMap": [
+                          "CfnMap",
+                          "config",
+                          "notebookContent"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                " /home/ec2-user/SageMaker/Neptune/neptune-streams/ --recursive\n"
+              ]
             ]
           },
-          "StartupScript": "",
-          "InfrastructureID": {
-            "Ref": "AWS::StackName"
-          },
-          "ApplicationID": {
-            "Ref": "ApplicationID"
-          },
-          "LambdaS3BucketPrefix": {
-            "Fn::FindInMap": [
-              "CfnMap",
-              "config",
-              "lambdaS3BucketPrefix"
+          "DBClusterId": {
+            "Fn::GetAtt": [
+              "NeptuneStack",
+              "Outputs.NeptuneDBClusterID"
             ]
           },
-          "LambdaS3KeyPrefix": {
-            "Fn::FindInMap": [
-              "CfnMap",
-              "config",
-              "lambdaS3KeyPrefix"
+          "NeptuneClusterResourceId": {
+            "Fn::GetAtt": [
+              "NeptuneStack",
+              "Outputs.NeptuneDBClusterResourceID"
             ]
           },
-          "Scripts": {
-            "Fn::FindInMap": [
-              "CfnMap",
-              "config",
-              "scripts"
+          "EnableIamAuthOnNeptune": "false",
+          "CustomPolicyArn": {
+            "Fn::GetAtt": [
+              "IAMStack",
+              "Outputs.SageMakerCustomPolicyARN"
             ]
           }
-        },
-        "TimeoutInMinutes": "30",
-        "Tags": [
-          {
-            "Key": "InfrastructureID",
-            "Value": {
-              "Ref": "AWS::StackName"
-            }
-          },
-          {
-            "Key": "ApplicationID",
-            "Value": {
-              "Ref": "ApplicationID"
-            }
-          }
-        ]
+        }
       }
     },
     "NeptuneWorkloadLambdaStack": {
@@ -429,13 +529,7 @@
                 {
                   "Fn::GetAtt": [
                     "NetworkStack",
-                    "Outputs.NeptuneClientSecurityGroup"
-                  ]
-                },
-                {
-                  "Fn::GetAtt": [
-                    "NetworkStack",
-                    "Outputs.ElastiCacheClientSecurityGroup"
+                    "Outputs.NeptuneAndElastiCacheClientSecurityGroup"
                   ]
                 }
               ]
@@ -503,8 +597,8 @@
       "Description": "SageMaker notebook",
       "Value": {
         "Fn::GetAtt": [
-          "SageMakerStack",
-          "Outputs.NeptuneNotebook"
+          "NeptuneSagemakerNotebook",
+          "Outputs.NeptuneSagemakerNotebook"
         ]
       }
     },
@@ -521,7 +615,7 @@
                 "Outputs.NeptuneWorkloadManagerLambdaArn"
               ]
             },
-            " --payload '{\"operation\": \"start\"}' --region ",
+            " --payload '{\"operation\": \"start\"}' --cli-binary-format raw-in-base64-out --region ",
             {
               "Ref": "AWS::Region"
             },
@@ -543,7 +637,7 @@
                 "Outputs.NeptuneWorkloadManagerLambdaArn"
               ]
             },
-            " --payload '{\"operation\": \"stop\"}' --region ",
+            " --payload '{\"operation\": \"stop\"}' --cli-binary-format raw-in-base64-out --region ",
             {
               "Ref": "AWS::Region"
             },

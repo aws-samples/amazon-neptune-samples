@@ -4,13 +4,13 @@
     "DBInstanceType": {
       "Description": "Neptune DB instance type",
       "Type": "String",
-      "Default": "db.r4.xlarge",
+      "Default": "db.r5.large",
       "AllowedValues": [
-        "db.r4.large",
-        "db.r4.xlarge",
-        "db.r4.2xlarge",
-        "db.r4.4xlarge",
-        "db.r4.8xlarge"
+        "db.r5.large",
+        "db.r5.xlarge",
+        "db.r5.2xlarge",
+        "db.r5.4xlarge",
+        "db.r5.8xlarge"
       ],
       "ConstraintDescription": "Must be a valid Neptune instance type."
     },
@@ -100,7 +100,7 @@
     "NeptuneDBClusterParameterGroup": {
       "Type": "AWS::Neptune::DBClusterParameterGroup",
       "Properties": {
-        "Family": "neptune1",
+        "Family": "neptune1.2",
         "Description": {
           "Fn::Sub": "${ApplicationID} DB cluster parameter group"
         },
@@ -111,7 +111,7 @@
           "neptune_enable_audit_log": {
             "Ref": "NeptuneEnableAuditLog"
           },
-          "neptune_streams": "1"
+          "neptune_streams":1
         },
         "Tags": [
           {
@@ -124,7 +124,7 @@
     "NeptuneDBParameterGroup": {
       "Type": "AWS::Neptune::DBParameterGroup",
       "Properties": {
-        "Family": "neptune1",
+        "Family": "neptune1.2",
         "Description": {
           "Fn::Sub": "${ApplicationID} DB parameter group"
         },
