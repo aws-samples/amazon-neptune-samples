@@ -170,12 +170,6 @@
                     "/home/ec2-user/anaconda3/bin/python3 -m  pip install --target /home/ec2-user/anaconda3/envs/python3/lib/python3.6/site-packages/ ipython_unittest\n",
                     "/home/ec2-user/anaconda3/bin/python3 -m  pip install --target /home/ec2-user/anaconda3/envs/python3/lib/python3.6/site-packages/ --upgrade tornado==4.5.1\n",
                     "/home/ec2-user/anaconda3/bin/python3 -m  pip install --target /home/ec2-user/anaconda3/envs/python3/lib/python3.6/site-packages/ redis\n",
-					"aws s3 cp s3://aws-neptune-customer-samples-",
-					{
-						"Ref": "AWS::Region"
-					},
-					"/neptune-sagemaker/bin/neptune-python-utils/neptune_python_utils.zip /home/ec2-user/anaconda3/envs/python3/lib/python3.6/site-packages/\n",
-					"unzip -n /home/ec2-user/anaconda3/envs/python3/lib/python3.6/site-packages/neptune_python_utils.zip -d /home/ec2-user/anaconda3/envs/python3/lib/python3.6/site-packages/\n",
                     "aws s3 cp s3://",
                     {
                       "Ref": "LambdaS3BucketPrefix"

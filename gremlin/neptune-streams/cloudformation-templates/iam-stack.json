@@ -84,6 +84,57 @@
         ]
       }
     },
+    "SageMakerCustomPolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "sagemaker:*",
+                "cloudwatch:PutMetricData",
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:DescribeLogStreams",
+                "logs:PutLogEvents",
+                "logs:GetLogEvents"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:GetObject"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub": "arn:aws:s3:::${LambdaS3BucketPrefix}/*"
+                },
+                {
+                  "Fn::Sub": "arn:aws:s3:::${LambdaS3BucketPrefix}-${AWS::Region}/*"
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:ListBucket"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub": "arn:aws:s3:::${LambdaS3BucketPrefix}"
+                },
+                {
+                  "Fn::Sub": "arn:aws:s3:::${LambdaS3BucketPrefix}-${AWS::Region}"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
     "SageMakerExecutionRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
@@ -104,55 +155,9 @@
           ]
         },
         "Path": "/",
-        "Policies": [
+        "ManagedPolicyArns": [
           {
-            "PolicyName": "sagemakerpolicy",
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "sagemaker:*",
-                    "cloudwatch:PutMetricData",
-                    "logs:CreateLogGroup",
-                    "logs:CreateLogStream",
-                    "logs:DescribeLogStreams",
-                    "logs:PutLogEvents",
-                    "logs:GetLogEvents"
-                  ],
-                  "Resource": "*"
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "s3:GetObject"
-                  ],
-                  "Resource": [
-                    {
-                      "Fn::Sub": "arn:aws:s3:::${LambdaS3BucketPrefix}/*"
-                    },
-                    {
-                      "Fn::Sub": "arn:aws:s3:::${LambdaS3BucketPrefix}-${AWS::Region}/*"
-                    }
-                  ]
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "s3:ListBucket"
-                  ],
-                  "Resource": [
-                    {
-                      "Fn::Sub": "arn:aws:s3:::${LambdaS3BucketPrefix}"
-                    },
-                    {
-                      "Fn::Sub": "arn:aws:s3:::${LambdaS3BucketPrefix}-${AWS::Region}"
-                    }
-                  ]
-                }
-              ]
-            }
+            "Ref": "SageMakerCustomPolicy"
           }
         ]
       }
@@ -220,6 +225,51 @@
           }
         ]
       }
+    },
+    "NeptuneLoadFromS3Role": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "rds.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "NeptuneLoadFromS3Policy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "NeptuneLoadFromS3Policy",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:Get*",
+                "s3:List*"
+              ],
+              "Resource": "*"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "NeptuneLoadFromS3Role"
+          }
+        ]
+      }
     }
   },
   "Outputs": {
@@ -262,6 +312,31 @@
       "Export": {
         "Name": {
           "Fn::Sub": "${InfrastructureID}-SageMakerExecutionRoleARN"
+        }
+      }
+    },
+    "SageMakerCustomPolicyARN": {
+      "Description": "SageMaker IAM execution role",
+      "Value": {
+        "Ref": "SageMakerCustomPolicy"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-SageMakerCustomPolicyARN"
+        }
+      }
+    },
+    "NeptuneLoadFromS3RoleARN": {
+      "Description": "Neptune IAM role for loading data from S3",
+      "Value": {
+        "Fn::GetAtt": [
+          "NeptuneLoadFromS3Role",
+          "Arn"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${InfrastructureID}-NeptuneLoadFromS3RoleARN"
         }
       }
     }

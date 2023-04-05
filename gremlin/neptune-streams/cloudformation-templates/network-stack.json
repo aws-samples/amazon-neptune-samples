@@ -470,41 +470,10 @@
         }
       }
     },
-    "ElastiCacheClientSecurityGroup": {
-      "Type": "AWS::EC2::SecurityGroup",
-      "Properties": {
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "GroupDescription": "Allow Access",
-        "SecurityGroupIngress": [
-          {
-            "FromPort": "22",
-            "ToPort": "22",
-            "IpProtocol": "tcp",
-            "CidrIp": "0.0.0.0/0",
-            "Description": "SSH from anywhere"
-          },
-          {
-            "FromPort": "6379",
-            "ToPort": "6379",
-            "IpProtocol": "tcp",
-            "CidrIp": "0.0.0.0/0",
-            "Description": "TCP access"
-          }
-        ],
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "ElastiCache client security group"
-          }
-        ]
-      }
-    },
     "ElastiCacheSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "DependsOn": [
-        "ElastiCacheClientSecurityGroup"
+        "NeptuneAndElastiCacheClientSecurityGroup"
       ],
       "Properties": {
         "VpcId": {
@@ -517,7 +486,7 @@
             "ToPort": "6379",
             "IpProtocol": "tcp",
             "SourceSecurityGroupId": {
-              "Ref": "ElastiCacheClientSecurityGroup"
+              "Ref": "NeptuneAndElastiCacheClientSecurityGroup"
             },
             "Description": "TCP access from ElastiCache client security group"
           }
@@ -598,7 +567,7 @@
         }
       }
     },
-    "NeptuneClientSecurityGroup": {
+    "NeptuneAndElastiCacheClientSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
         "VpcId": {
@@ -619,6 +588,20 @@
             "IpProtocol": "tcp",
             "CidrIp": "0.0.0.0/0",
             "Description": "WebSocket and HTTP access to Neptune"
+          },
+          {
+            "FromPort": "22",
+            "ToPort": "22",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "Description": "SSH from anywhere"
+          },
+          {
+            "FromPort": "6379",
+            "ToPort": "6379",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "Description": "TCP access"
           }
         ],
         "Tags": [
@@ -632,7 +615,7 @@
     "NeptuneSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "DependsOn": [
-        "NeptuneClientSecurityGroup"
+        "NeptuneAndElastiCacheClientSecurityGroup"
       ],
       "Properties": {
         "VpcId": {
@@ -645,7 +628,7 @@
             "ToPort": "22",
             "IpProtocol": "tcp",
             "SourceSecurityGroupId": {
-              "Ref": "NeptuneClientSecurityGroup"
+              "Ref": "NeptuneAndElastiCacheClientSecurityGroup"
             },
             "Description": "SSH from Neptune client security group"
           },
@@ -654,7 +637,7 @@
             "ToPort": "8182",
             "IpProtocol": "tcp",
             "SourceSecurityGroupId": {
-              "Ref": "NeptuneClientSecurityGroup"
+              "Ref": "NeptuneAndElastiCacheClientSecurityGroup"
             },
             "Description": "WebSocket and HTTP access from Neptune client security group"
           }
@@ -724,6 +707,12 @@
         }
       }
     },
+    "PublicSubnet1": {
+      "Description": "Public subnet 1",
+      "Value": {
+        "Ref": "PublicSubnetOne"
+      }
+    },
     "PrivateRouteTableIDs": {
       "Description": "Private route table IDs",
       "Value": {
@@ -787,17 +776,6 @@
         }
       }
     },
-    "ElastiCacheClientSecurityGroup": {
-      "Description": "ElastiCache client security group",
-      "Value": {
-        "Ref": "ElastiCacheClientSecurityGroup"
-      },
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${InfrastructureID}-ElastiCacheClientSecurityGroup"
-        }
-      }
-    },
     "LambdaSecurityGroup": {
       "Description": "Lambda security group",
       "Value": {
@@ -820,14 +798,14 @@
         }
       }
     },
-    "NeptuneClientSecurityGroup": {
+    "NeptuneAndElastiCacheClientSecurityGroup": {
       "Description": "Neptune client security group",
       "Value": {
-        "Ref": "NeptuneClientSecurityGroup"
+        "Ref": "NeptuneAndElastiCacheClientSecurityGroup"
       },
       "Export": {
         "Name": {
-          "Fn::Sub": "${InfrastructureID}-NeptuneClientSecurityGroup"
+          "Fn::Sub": "${InfrastructureID}-NeptuneAndElastiCacheClientSecurityGroup"
         }
       }
     },

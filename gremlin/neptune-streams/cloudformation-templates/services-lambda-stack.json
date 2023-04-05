@@ -62,11 +62,11 @@
               }
             },
             "BATCH_SIZE": "1000",
-            "IS_ACTIVE": "False"
+            "IS_ACTIVE": "True"
           }
         },
         "MemorySize": 512,
-        "Runtime": "python3.7",
+        "Runtime": "python3.8",
         "Timeout": "180",
         "ReservedConcurrentExecutions": 1,
         "VpcConfig": {
@@ -78,12 +78,7 @@
             },
             {
               "Fn::ImportValue": {
-                "Fn::Sub": "${InfrastructureID}-ElastiCacheClientSecurityGroup"
-              }
-            },
-            {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${InfrastructureID}-NeptuneClientSecurityGroup"
+                "Fn::Sub": "${InfrastructureID}-NeptuneAndElastiCacheClientSecurityGroup"
               }
             }
           ],
@@ -142,7 +137,7 @@
           }
         },
         "MemorySize": 512,
-        "Runtime": "python3.7",
+        "Runtime": "python3.8",
         "Timeout": "15",
         "ReservedConcurrentExecutions": 1
       }

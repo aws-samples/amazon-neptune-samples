@@ -53,8 +53,12 @@ def lambda_handler(event, context):
     
     batch_size = int(os.environ['BATCH_SIZE'])
     index = 0
+    is_active = os.environ['IS_ACTIVE']
     
-    while os.environ['IS_ACTIVE'] == 'True' and index < batch_size:
+    print('batch_size: {}'.format(batch_size))
+    print('is_active: {}'.format(is_active))
+    
+    while is_active == 'True' and index < batch_size:
         
         if (highest_vertex_id < 1000):
             highest_vertex_id += 1
@@ -71,6 +75,7 @@ def lambda_handler(event, context):
                 message_network.user_messaged_user(MessageNetwork.user_id(from_id), MessageNetwork.user_id(to_id))
             
         index += 1
+        is_active = os.environ['IS_ACTIVE']
     
     message_network.set_highest_vertex_id(highest_vertex_id)
     message_network.close()
