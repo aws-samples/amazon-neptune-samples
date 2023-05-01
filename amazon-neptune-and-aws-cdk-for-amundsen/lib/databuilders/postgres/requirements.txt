@@ -4,7 +4,7 @@ amundsen-rds==0.0.3
 boto3==1.17.43
 botocore==1.20.43
 elasticsearch==6.8.2
-Flask==1.1.4
+Flask==2.3.2
 gremlinpython==3.4.10
 overrides==3.1.0
 psycopg2-binary==2.8.6
