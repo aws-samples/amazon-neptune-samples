@@ -442,8 +442,8 @@
                 {
                   "Ref": "AWS::Region"
                 },
-                "/neptune-sagemaker/bin/neptune-python-utils-v2/neptune_python_utils.zip /home/ec2-user/anaconda3/envs/JupyterSystemEnv/lib/python3.7/site-packages/\n",
-                "unzip -n /home/ec2-user/anaconda3/envs/JupyterSystemEnv/lib/python3.7/site-packages/neptune_python_utils.zip -d /home/ec2-user/anaconda3/envs/JupyterSystemEnv/lib/python3.7/site-packages/\n",
+                "/neptune-sagemaker/bin/neptune-python-utils-v2/neptune_python_utils.zip /home/ec2-user/anaconda3/envs/JupyterSystemEnv/lib/python3.10/site-packages/\n",
+                "unzip -n /home/ec2-user/anaconda3/envs/JupyterSystemEnv/lib/python3.10/site-packages/neptune_python_utils.zip -d /home/ec2-user/anaconda3/envs/JupyterSystemEnv/lib/python3.10/site-packages/\n",
                 "echo 'export NEPTUNE_CLUSTER_ENDPOINT=",
                 {
                   "Fn::GetAtt": [
