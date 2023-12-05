@@ -24,8 +24,7 @@ class QueryHandler:
         Fetches and processes data for the top ten companies with the largest holdings,
         returning nodes and edges for a graph.
         """
-        graph = VSSIntegration()
-        query_result = graph.fetch_top_ten_companies_with_largest_holding()
+        query_result = self.graph.fetch_top_ten_companies_with_largest_holding()
         data_list = json.loads(query_result)
 
         nodes = []
@@ -44,8 +43,7 @@ class QueryHandler:
         """
         Fetches and displays data for the top ten companies with the largest holdings in a table.
         """
-        graph = VSSIntegration()
-        query_result = graph.fetch_top_ten_companies_with_largest_holding()
+        query_result = self.graph.fetch_top_ten_companies_with_largest_holding()
         data_list = json.loads(query_result)
 
         df = pd.DataFrame(data_list)
@@ -57,8 +55,7 @@ class QueryHandler:
         """
         Fetches and displays data for investor holdings in a table.
         """
-        graph = VSSIntegration()
-        query_result = graph.fetch_investor_holdings()
+        query_result = self.graph.fetch_investor_holdings()
         data_list = json.loads(query_result)
 
         df = pd.DataFrame(data_list)
@@ -69,8 +66,7 @@ class QueryHandler:
         """
         Fetches and displays data for the top ten investments in a table.
         """
-        graph = VSSIntegration()
-        query_result = graph.fetch_top_ten_investments()
+        query_result = self.graph.fetch_top_ten_investments()
         data_list = json.loads(query_result)
 
         df = pd.DataFrame(data_list)
@@ -82,8 +78,7 @@ class QueryHandler:
         """
         Fetches and displays data for investments greater than one billion in a table.
         """
-        graph = VSSIntegration()
-        query_result = graph.fetch_investments_greater_than_billion()
+        query_result = self.graph.fetch_investments_greater_than_billion()
         data_list = json.loads(query_result)
 
         df = pd.DataFrame(data_list)
@@ -94,8 +89,7 @@ class QueryHandler:
         """
         Fetches and displays data for shared investments greater than one billion in a table.
         """
-        graph = VSSIntegration()
-        query_result = graph.fetch_shared_investments_greater_than_billion()
+        query_result = self.graph.fetch_shared_investments_greater_than_billion()
         data_list = json.loads(query_result)
 
         df = pd.DataFrame(data_list)
@@ -106,8 +100,7 @@ class QueryHandler:
         """
         Fetches and processes data to generate a graph comparing stocks and investments for the top ten holders.
         """
-        graph = VSSIntegration()
-        query_result = graph.js_compare_stocks_and_investments_for_top_ten()
+        query_result = self.graph.js_compare_stocks_and_investments_for_top_ten()
         data_list = json.loads(query_result)
 
         # Use a set to remove duplicates
@@ -146,8 +139,7 @@ class QueryHandler:
         """
         Fetches and displays data for comparing stocks and investments across the entire portfolio in a table.
         """
-        graph = VSSIntegration()
-        query_result = graph.js_compare_stocks_and_investments_for_entire_portfolio()
+        query_result = self.graph.js_compare_stocks_and_investments_for_entire_portfolio()
         data_list = json.loads(query_result)
 
         df = pd.DataFrame(data_list)
@@ -158,8 +150,7 @@ class QueryHandler:
         """
         Fetches and processes data to generate a graph of the top ten similar holders.
         """
-        graph = VSSIntegration()
-        query_result = graph.fetch_top_ten_similar_holders()
+        query_result = self.graph.fetch_top_ten_similar_holders()
         data_list = json.loads(query_result)
 
         # Use a set to remove duplicates
@@ -181,8 +172,7 @@ class QueryHandler:
         """
         Fetches and displays data for the top ten similar holders in a table.
         """
-        graph = VSSIntegration()
-        query_result = graph.fetch_top_ten_similar_holders()
+        query_result = self.graph.fetch_top_ten_similar_holders()
         data_list = json.loads(query_result)
 
         df = pd.DataFrame(data_list)
@@ -193,8 +183,7 @@ class QueryHandler:
         """
         Fetches and processes data to generate a graph of shared holders with holdings greater than one billion.
         """
-        graph = VSSIntegration()
-        query_result = graph.fetch_shared_holders_greater_than_billion()
+        query_result = self.graph.fetch_shared_holders_greater_than_billion()
         data_list = json.loads(query_result)
 
         nodes = []
@@ -219,8 +208,7 @@ class QueryHandler:
         """
         Fetches and displays data on identified competitors in a table.
         """
-        graph = VSSIntegration()
-        query_result = graph.js_on_identified_competitors()
+        query_result = self.graph.js_on_identified_competitors()
         data_list = json.loads(query_result)
 
         df = pd.DataFrame(data_list)

@@ -12,7 +12,6 @@ import json
 import uuid
 import pandas as pd
 from streamlit_agraph import agraph, Node, Edge, Config
-from neptune_analytics_integration.vss_integration import VSSIntegration
 from kg_query_data_handler import QueryHandler
 from knowledge_graph_updater import KnowledgeGraphUpdater
 

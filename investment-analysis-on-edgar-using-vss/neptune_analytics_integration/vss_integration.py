@@ -2,32 +2,7 @@ import boto3
 import json
 import pandas as pd
 
-# from settings import graphId
-graphId = "g-sqmear9347" #alpha-9 with VSS WORKING GRAPH
-
-
-# Create a Graph
-# alpha environment
-
-# Working Graph creation
-'''
-aws neptune-graph create-graph --graph-name 'edgar-vss-3'  --region us-east-1 --provisioned-memory 128 --allow-from-public --replica-count 0 --vector-search '{"dimension": 384}' --endpoint https://svc.us-east-1-alpha.p8.neptune.aws.dev --region us-east-1
-'''
-
-# check graph create status
-'''
-aws neptune-graph get-graph \
---graph-id g-sqmear9347 \
---endpoint https://svc.us-east-1-alpha.p8.neptune.aws.dev \
---region us-east-1
-'''
-
-# Load KG using:
-'''
-CALL neptune.load({format: "csv", 
-source: "s3://aws-neptune-customer-samples-us-east-1/sample-datasets/gremlin/edgar/", 
-region : "us-east-1"})
-'''
+from settings import graphId
 
 class VSSIntegration:
     client = None
@@ -41,23 +16,30 @@ class VSSIntegration:
         """
         self.client = boto3.client(
             "neptune-graph",
-            endpoint_url="https://data.us-east-1-alpha.p8.neptune.aws.dev",
             region_name="us-east-1",
         )
+        # self.lst = [{"h.name": "RAYMOND JAMES & ASSOCIATES", "hq_id": "20231024_1084208", "total_value": 1170740000000.0}, {"h.name": "Raymond James Financial Services Advisors, Inc.", "hq_id": "20231024_1462284", "total_value": 1151900000000.0}, {"h.name": "CONCOURSE FINANCIAL GROUP SECURITIES, INC.", "hq_id": "20231025_752798", "total_value": 1111670000000.0}, {"h.name": "PATHSTONE FAMILY OFFICE, LLC", "hq_id": "20231024_1511137", "total_value": 1102170000000.0}, {"h.name": "BROWN ADVISORY INC", "hq_id": "20231025_1345929", "total_value": 1099560000000.0}, {"h.name": "Stratos Wealth Partners, LTD.", "hq_id": "20231024_1612865", "total_value": 1065569999999.9999}, {"h.name": "FinTrust Capital Advisors, LLC", "hq_id": "20231024_1622001", "total_value": 1052160000000.0}, {"h.name": "MACKENZIE FINANCIAL CORP", "hq_id": "20231025_919859", "total_value": 1028419999999.9999}, {"h.name": "Concord Wealth Partners", "hq_id": "20231025_1814214", "total_value": 1008690000000.0001}, {"h.name": "PINNACLE ASSOCIATES LTD", "hq_id": "20231024_743127", "total_value": 993753000000.0}]
+        self.lst = []
         self.graphId = graphId
         pass
 
-    def load_data(self):
+    def load_data(self, source, region):
         """
         Loads data into the graph from a specified S3 source.
+
+        Args:
+        - source (str): The S3 source URL.
+        - region (str): The AWS region of the S3 bucket.
 
         Returns:
         - str: JSON representation of the query results.
         """
-        query = """
-        CALL neptune.load({format: "csv", 
-        source: "s3://aws-neptune-customer-samples-us-east-1/sample-datasets/gremlin/edgar/", 
-        region : "us-east-1"})
+        query = f"""
+        CALL neptune.load({{
+            format: "csv", 
+            source: "{source}", 
+            region: "{region}"
+        }})
         """
         resp = self.client.execute_open_cypher_query(
             openCypherQuery=query, graphId=self.graphId
@@ -85,6 +67,7 @@ class VSSIntegration:
             openCypherQuery=query, graphId=self.graphId
         )
         if resp["ResponseMetadata"]["HTTPStatusCode"] == 200:
+            self.lst = resp["results"]
             return json.dumps(resp["results"])
         else:
             print("An error occurred fetching the company nodes")
@@ -97,8 +80,7 @@ class VSSIntegration:
         Returns:
         - str: JSON representation of the query results.
         """
-        lst = [{"h.name": "RAYMOND JAMES & ASSOCIATES", "hq_id": "20231024_1084208", "total_value": 1170740000000.0}, {"h.name": "Raymond James Financial Services Advisors, Inc.", "hq_id": "20231024_1462284", "total_value": 1151900000000.0}, {"h.name": "CONCOURSE FINANCIAL GROUP SECURITIES, INC.", "hq_id": "20231025_752798", "total_value": 1111670000000.0}, {"h.name": "PATHSTONE FAMILY OFFICE, LLC", "hq_id": "20231024_1511137", "total_value": 1102170000000.0}, {"h.name": "BROWN ADVISORY INC", "hq_id": "20231025_1345929", "total_value": 1099560000000.0}, {"h.name": "Stratos Wealth Partners, LTD.", "hq_id": "20231024_1612865", "total_value": 1065569999999.9999}, {"h.name": "FinTrust Capital Advisors, LLC", "hq_id": "20231024_1622001", "total_value": 1052160000000.0}, {"h.name": "MACKENZIE FINANCIAL CORP", "hq_id": "20231025_919859", "total_value": 1028419999999.9999}, {"h.name": "Concord Wealth Partners", "hq_id": "20231025_1814214", "total_value": 1008690000000.0001}, {"h.name": "PINNACLE ASSOCIATES LTD", "hq_id": "20231024_743127", "total_value": 993753000000.0}]
-        params = {'hq_id': lst[0]['hq_id'], 'competitors': [l['hq_id'] for l in lst[-9:]]}
+        params = {'hq_id':  self.lst[0]['hq_id'], 'competitors': [l['hq_id'] for l in  self.lst[-9:]]}
         query = """
         MATCH (hq:HolderQuarter)-[:owns]->(h:Holding)
         WHERE id(hq) = $hq_id
@@ -120,8 +102,7 @@ class VSSIntegration:
         Returns:
         - str: JSON representation of the query results.
         """
-        lst = [{"h.name": "RAYMOND JAMES & ASSOCIATES", "hq_id": "20231024_1084208", "total_value": 1170740000000.0}, {"h.name": "Raymond James Financial Services Advisors, Inc.", "hq_id": "20231024_1462284", "total_value": 1151900000000.0}, {"h.name": "CONCOURSE FINANCIAL GROUP SECURITIES, INC.", "hq_id": "20231025_752798", "total_value": 1111670000000.0}, {"h.name": "PATHSTONE FAMILY OFFICE, LLC", "hq_id": "20231024_1511137", "total_value": 1102170000000.0}, {"h.name": "BROWN ADVISORY INC", "hq_id": "20231025_1345929", "total_value": 1099560000000.0}, {"h.name": "Stratos Wealth Partners, LTD.", "hq_id": "20231024_1612865", "total_value": 1065569999999.9999}, {"h.name": "FinTrust Capital Advisors, LLC", "hq_id": "20231024_1622001", "total_value": 1052160000000.0}, {"h.name": "MACKENZIE FINANCIAL CORP", "hq_id": "20231025_919859", "total_value": 1028419999999.9999}, {"h.name": "Concord Wealth Partners", "hq_id": "20231025_1814214", "total_value": 1008690000000.0001}, {"h.name": "PINNACLE ASSOCIATES LTD", "hq_id": "20231024_743127", "total_value": 993753000000.0}]
-        params = {'hq_id': lst[0]['hq_id'], 'competitors': [l['hq_id'] for l in lst[-9:]]}
+        params = {'hq_id':  self.lst[0]['hq_id'], 'competitors': [l['hq_id'] for l in  self.lst[-9:]]}
         query = """
         MATCH (hq:HolderQuarter)-[o:owns]->(h:Holding)
         WHERE id(hq) = $hq_id
@@ -144,8 +125,7 @@ class VSSIntegration:
         Returns:
         - str: JSON representation of the query results.
         """
-        lst = [{"h.name": "RAYMOND JAMES & ASSOCIATES", "hq_id": "20231024_1084208", "total_value": 1170740000000.0}, {"h.name": "Raymond James Financial Services Advisors, Inc.", "hq_id": "20231024_1462284", "total_value": 1151900000000.0}, {"h.name": "CONCOURSE FINANCIAL GROUP SECURITIES, INC.", "hq_id": "20231025_752798", "total_value": 1111670000000.0}, {"h.name": "PATHSTONE FAMILY OFFICE, LLC", "hq_id": "20231024_1511137", "total_value": 1102170000000.0}, {"h.name": "BROWN ADVISORY INC", "hq_id": "20231025_1345929", "total_value": 1099560000000.0}, {"h.name": "Stratos Wealth Partners, LTD.", "hq_id": "20231024_1612865", "total_value": 1065569999999.9999}, {"h.name": "FinTrust Capital Advisors, LLC", "hq_id": "20231024_1622001", "total_value": 1052160000000.0}, {"h.name": "MACKENZIE FINANCIAL CORP", "hq_id": "20231025_919859", "total_value": 1028419999999.9999}, {"h.name": "Concord Wealth Partners", "hq_id": "20231025_1814214", "total_value": 1008690000000.0001}, {"h.name": "PINNACLE ASSOCIATES LTD", "hq_id": "20231024_743127", "total_value": 993753000000.0}]
-        params = {'hq_id': lst[0]['hq_id'], 'competitors': [l['hq_id'] for l in lst[-9:]]}
+        params = {'hq_id':  self.lst[0]['hq_id'], 'competitors': [l['hq_id'] for l in  self.lst[-9:]]}
         query = """
         MATCH (hq:HolderQuarter)-[o:owns]->(h:Holding)
         WHERE id(hq) = $hq_id
@@ -170,8 +150,7 @@ class VSSIntegration:
         Returns:
         - str: JSON representation of the query results.
         """
-        lst = [{"h.name": "RAYMOND JAMES & ASSOCIATES", "hq_id": "20231024_1084208", "total_value": 1170740000000.0}, {"h.name": "Raymond James Financial Services Advisors, Inc.", "hq_id": "20231024_1462284", "total_value": 1151900000000.0}, {"h.name": "CONCOURSE FINANCIAL GROUP SECURITIES, INC.", "hq_id": "20231025_752798", "total_value": 1111670000000.0}, {"h.name": "PATHSTONE FAMILY OFFICE, LLC", "hq_id": "20231024_1511137", "total_value": 1102170000000.0}, {"h.name": "BROWN ADVISORY INC", "hq_id": "20231025_1345929", "total_value": 1099560000000.0}, {"h.name": "Stratos Wealth Partners, LTD.", "hq_id": "20231024_1612865", "total_value": 1065569999999.9999}, {"h.name": "FinTrust Capital Advisors, LLC", "hq_id": "20231024_1622001", "total_value": 1052160000000.0}, {"h.name": "MACKENZIE FINANCIAL CORP", "hq_id": "20231025_919859", "total_value": 1028419999999.9999}, {"h.name": "Concord Wealth Partners", "hq_id": "20231025_1814214", "total_value": 1008690000000.0001}, {"h.name": "PINNACLE ASSOCIATES LTD", "hq_id": "20231024_743127", "total_value": 993753000000.0}]
-        params = {'hq_id': lst[0]['hq_id'], 'competitors': [l['hq_id'] for l in lst[-9:]]}
+        params = {'hq_id':  self.lst[0]['hq_id'], 'competitors': [l['hq_id'] for l in  self.lst[-9:]]}
         query = """
         MATCH (hq:HolderQuarter)-[o:owns]->(h:Holding)
         WHERE id(hq) = $hq_id
@@ -200,8 +179,7 @@ class VSSIntegration:
         Returns:
         - str: JSON representation of the query results.
         """
-        lst = [{"h.name": "RAYMOND JAMES & ASSOCIATES", "hq_id": "20231024_1084208", "total_value": 1170740000000.0}, {"h.name": "Raymond James Financial Services Advisors, Inc.", "hq_id": "20231024_1462284", "total_value": 1151900000000.0}, {"h.name": "CONCOURSE FINANCIAL GROUP SECURITIES, INC.", "hq_id": "20231025_752798", "total_value": 1111670000000.0}, {"h.name": "PATHSTONE FAMILY OFFICE, LLC", "hq_id": "20231024_1511137", "total_value": 1102170000000.0}, {"h.name": "BROWN ADVISORY INC", "hq_id": "20231025_1345929", "total_value": 1099560000000.0}, {"h.name": "Stratos Wealth Partners, LTD.", "hq_id": "20231024_1612865", "total_value": 1065569999999.9999}, {"h.name": "FinTrust Capital Advisors, LLC", "hq_id": "20231024_1622001", "total_value": 1052160000000.0}, {"h.name": "MACKENZIE FINANCIAL CORP", "hq_id": "20231025_919859", "total_value": 1028419999999.9999}, {"h.name": "Concord Wealth Partners", "hq_id": "20231025_1814214", "total_value": 1008690000000.0001}, {"h.name": "PINNACLE ASSOCIATES LTD", "hq_id": "20231024_743127", "total_value": 993753000000.0}]
-        params = {'hq_id': lst[0]['hq_id'], 'competitors': [l['hq_id'] for l in lst[-9:]]}
+        params = {'hq_id':  self.lst[0]['hq_id'], 'competitors': [l['hq_id'] for l in  self.lst[-9:]]}
         query = """
         MATCH (hq:HolderQuarter)<--(holder:Holder)
         WHERE id(hq) = $hq_id
@@ -228,8 +206,7 @@ class VSSIntegration:
         Returns:
         - str: JSON representation of the query results.
         """
-        lst = [{"h.name": "RAYMOND JAMES & ASSOCIATES", "hq_id": "20231024_1084208", "total_value": 1170740000000.0}, {"h.name": "Raymond James Financial Services Advisors, Inc.", "hq_id": "20231024_1462284", "total_value": 1151900000000.0}, {"h.name": "CONCOURSE FINANCIAL GROUP SECURITIES, INC.", "hq_id": "20231025_752798", "total_value": 1111670000000.0}, {"h.name": "PATHSTONE FAMILY OFFICE, LLC", "hq_id": "20231024_1511137", "total_value": 1102170000000.0}, {"h.name": "BROWN ADVISORY INC", "hq_id": "20231025_1345929", "total_value": 1099560000000.0}, {"h.name": "Stratos Wealth Partners, LTD.", "hq_id": "20231024_1612865", "total_value": 1065569999999.9999}, {"h.name": "FinTrust Capital Advisors, LLC", "hq_id": "20231024_1622001", "total_value": 1052160000000.0}, {"h.name": "MACKENZIE FINANCIAL CORP", "hq_id": "20231025_919859", "total_value": 1028419999999.9999}, {"h.name": "Concord Wealth Partners", "hq_id": "20231025_1814214", "total_value": 1008690000000.0001}, {"h.name": "PINNACLE ASSOCIATES LTD", "hq_id": "20231024_743127", "total_value": 993753000000.0}]
-        params = {'hq_id': lst[0]['hq_id'], 'competitors': [l['hq_id'] for l in lst[-9:]]}
+        params = {'hq_id':  self.lst[0]['hq_id'], 'competitors': [l['hq_id'] for l in  self.lst[-9:]]}
         query = """
         MATCH (hq:HolderQuarter)<--(holder:Holder)
         WHERE id(hq) = $hq_id
@@ -257,8 +234,7 @@ class VSSIntegration:
         Returns:
         - str: JSON representation of the query results.
         """
-        lst = [{"h.name": "RAYMOND JAMES & ASSOCIATES", "hq_id": "20231024_1084208", "total_value": 1170740000000.0}, {"h.name": "Raymond James Financial Services Advisors, Inc.", "hq_id": "20231024_1462284", "total_value": 1151900000000.0}, {"h.name": "CONCOURSE FINANCIAL GROUP SECURITIES, INC.", "hq_id": "20231025_752798", "total_value": 1111670000000.0}, {"h.name": "PATHSTONE FAMILY OFFICE, LLC", "hq_id": "20231024_1511137", "total_value": 1102170000000.0}, {"h.name": "BROWN ADVISORY INC", "hq_id": "20231025_1345929", "total_value": 1099560000000.0}, {"h.name": "Stratos Wealth Partners, LTD.", "hq_id": "20231024_1612865", "total_value": 1065569999999.9999}, {"h.name": "FinTrust Capital Advisors, LLC", "hq_id": "20231024_1622001", "total_value": 1052160000000.0}, {"h.name": "MACKENZIE FINANCIAL CORP", "hq_id": "20231025_919859", "total_value": 1028419999999.9999}, {"h.name": "Concord Wealth Partners", "hq_id": "20231025_1814214", "total_value": 1008690000000.0001}, {"h.name": "PINNACLE ASSOCIATES LTD", "hq_id": "20231024_743127", "total_value": 993753000000.0}]
-        params = {'hq_id': lst[0]['hq_id'], 'competitors': [l['hq_id'] for l in lst[-9:]]}
+        params = {'hq_id':  self.lst[0]['hq_id'], 'competitors': [l['hq_id'] for l in  self.lst[-9:]]}
         query = """
         MATCH (n:Holder)-->(hq)
         WHERE id(hq) = $hq_id
@@ -283,8 +259,7 @@ class VSSIntegration:
         Returns:
         - str: JSON representation of the query results.
         """
-        lst = [{"h.name": "RAYMOND JAMES & ASSOCIATES", "hq_id": "20231024_1084208", "total_value": 1170740000000.0}, {"h.name": "Raymond James Financial Services Advisors, Inc.", "hq_id": "20231024_1462284", "total_value": 1151900000000.0}, {"h.name": "CONCOURSE FINANCIAL GROUP SECURITIES, INC.", "hq_id": "20231025_752798", "total_value": 1111670000000.0}, {"h.name": "PATHSTONE FAMILY OFFICE, LLC", "hq_id": "20231024_1511137", "total_value": 1102170000000.0}, {"h.name": "BROWN ADVISORY INC", "hq_id": "20231025_1345929", "total_value": 1099560000000.0}, {"h.name": "Stratos Wealth Partners, LTD.", "hq_id": "20231024_1612865", "total_value": 1065569999999.9999}, {"h.name": "FinTrust Capital Advisors, LLC", "hq_id": "20231024_1622001", "total_value": 1052160000000.0}, {"h.name": "MACKENZIE FINANCIAL CORP", "hq_id": "20231025_919859", "total_value": 1028419999999.9999}, {"h.name": "Concord Wealth Partners", "hq_id": "20231025_1814214", "total_value": 1008690000000.0001}, {"h.name": "PINNACLE ASSOCIATES LTD", "hq_id": "20231024_743127", "total_value": 993753000000.0}]
-        params = {'hq_id': lst[0]['hq_id'], 'competitors': [l['hq_id'] for l in lst[-9:]]}
+        params = {'hq_id':  self.lst[0]['hq_id'], 'competitors': [l['hq_id'] for l in  self.lst[-9:]]}
         query = """
         MATCH (h:Holder)-->(hq)
         WHERE id(hq) = $hq_id
@@ -316,8 +291,7 @@ class VSSIntegration:
         Returns:
         - str: JSON representation of the query results.
         """
-        lst = [{"h.name": "RAYMOND JAMES & ASSOCIATES", "hq_id": "20231024_1084208", "total_value": 1170740000000.0}, {"h.name": "Raymond James Financial Services Advisors, Inc.", "hq_id": "20231024_1462284", "total_value": 1151900000000.0}, {"h.name": "CONCOURSE FINANCIAL GROUP SECURITIES, INC.", "hq_id": "20231025_752798", "total_value": 1111670000000.0}, {"h.name": "PATHSTONE FAMILY OFFICE, LLC", "hq_id": "20231024_1511137", "total_value": 1102170000000.0}, {"h.name": "BROWN ADVISORY INC", "hq_id": "20231025_1345929", "total_value": 1099560000000.0}, {"h.name": "Stratos Wealth Partners, LTD.", "hq_id": "20231024_1612865", "total_value": 1065569999999.9999}, {"h.name": "FinTrust Capital Advisors, LLC", "hq_id": "20231024_1622001", "total_value": 1052160000000.0}, {"h.name": "MACKENZIE FINANCIAL CORP", "hq_id": "20231025_919859", "total_value": 1028419999999.9999}, {"h.name": "Concord Wealth Partners", "hq_id": "20231025_1814214", "total_value": 1008690000000.0001}, {"h.name": "PINNACLE ASSOCIATES LTD", "hq_id": "20231024_743127", "total_value": 993753000000.0}]
-        params = {'hq_id': lst[0]['hq_id'], 'competitors': [l['hq_id'] for l in lst[-9:]]}
+        params = {'hq_id':  self.lst[0]['hq_id'], 'competitors': [l['hq_id'] for l in  self.lst[-9:]]}
         query = """
         MATCH (holder:Holder)-->(hq)
         WHERE id(hq) = $hq_id
