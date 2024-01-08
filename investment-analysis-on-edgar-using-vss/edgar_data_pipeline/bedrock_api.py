@@ -1,3 +1,6 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+
 import json
 import boto3
 import pandas as pd
@@ -26,8 +29,17 @@ class BedrockAPI:
     Usage:
     - Initialize an instance of BedrockAPI and use its methods to interact with different models.
     """
-    def __init__(self):
-        pass
+    def __init__(self, profile_name='default', region_name='us-east-1'):
+        """
+        Initializes the BedrockAPI instance with a Neptune client and graphId.
+
+        Parameters:
+        - profile_name (str): The name of the AWS profile. Defaults to "default".
+        - region_name (str): The AWS region name. Defaults to "us-east-1".
+        """
+        self.session = boto3.Session(profile_name=profile_name)
+        self.bedrock = self.session.client(service_name='bedrock-runtime', region_name=region_name)
+
 
     def call_claude_v2_model(self, question):
         """
@@ -39,12 +51,9 @@ class BedrockAPI:
         Returns:
         - str: The model's response for the given question.
         """
-        # Initialize the AWS session and Bedrock client
-        session = boto3.Session(profile_name='default')
-        bedrock = session.client(service_name='bedrock-runtime', region_name='us-east-1')
         llm = Bedrock(model_id="anthropic.claude-v2", region_name='us-east-1', 
-                        client=bedrock, 
-                        model_kwargs={"max_tokens_to_sample": 1000, "temperature": 0.9})
+                        client=self.bedrock, 
+                        model_kwargs={"max_tokens_to_sample": 1000, "temperature": 0.0})
         conversation = ConversationChain(
             llm=llm, verbose=True, memory=ConversationBufferMemory()
         )
@@ -62,9 +71,6 @@ class BedrockAPI:
         Returns:
         - str: The model's response for the given question.
         """
-        # Initialize the AWS session and Bedrock client
-        session = boto3.Session(profile_name='default')
-        bedrock = session.client(service_name='bedrock-runtime', region_name='us-east-1')
         prompt = self.generate_custom_prompt(question)
 
         bedrock_model_id = "ai21.j2-ultra-v1"  # Set the foundation model
@@ -81,7 +87,7 @@ class BedrockAPI:
             "frequencyPenalty": {"scale": 0}
         })  # Build the request payload
 
-        response = bedrock.invoke_model(body=body, modelId=bedrock_model_id, accept='application/json', contentType='application/json')  # Send the payload to Bedrock
+        response = self.bedrock.invoke_model(body=body, modelId=bedrock_model_id, accept='application/json', contentType='application/json')  # Send the payload to Bedrock
 
         response_body = json.loads(response.get('body').read())  # Read the response
         response_text = response_body.get("completions")[0].get("data").get("text")  # Extract the text from the JSON response

@@ -1,3 +1,6 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+
 import os
 import logging
 import pandas as pd
@@ -341,7 +344,9 @@ class EdgarDataProcessor:
         holder_node_df = pd.read_csv(holder_node_data_root + source_holder_file, sep=',')
 
         # Initialize the Bedrock API for accessing language models
-        bedrock_api = BedrockAPI()
+        profile_name ='default'
+        region_name ='us-east-1'
+        bedrock_api = BedrockAPI(profile_name, region_name)
 
         # Iterate over each row in the Holder Node DataFrame
         for index, row in holder_node_df.iterrows():

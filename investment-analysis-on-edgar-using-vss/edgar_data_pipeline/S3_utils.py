@@ -1,22 +1,24 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+
 import boto3
 import os
 import numpy as np
 import pandas as pd
 
 class S3Utils:
-    def __init__(self, s3_bucket):
+    def __init__(self, s3_bucket, profile_name):
         """
         Initializes the S3Utils class with the specified S3 bucket.
 
         Args:
         - s3_bucket (str): The name of the S3 bucket.
-
-        Initializes the S3 client using the 'benchmark' profile from the AWS credentials file.
+        - profile_name (str): The name of the AWS profile.
         """
         self.s3_bucket = s3_bucket
 
         # Initialize the S3 client
-        self.session = boto3.Session(profile_name='benchmark')
+        self.session = boto3.Session(profile_name=profile_name)
         self.s3 = self.session.client(service_name='s3')
 
     def upload_to_s3(self, local_file, s3_object_key):
@@ -59,12 +61,13 @@ class S3Utils:
         except Exception as e:
             print(f'Error downloading file from S3: {str(e)}')
 
-    def list_files_with_keyword(self, keyword):
+    def list_files_with_keyword(self, keyword, prefix):
         """
         Lists all files in the S3 bucket with a specified keyword in their object key.
 
         Args:
         - keyword (str): The keyword to search for in S3 object keys.
+        - prefix (str): The prefix to filter files in the S3 directory.
 
         Returns:
         - list: A list of filenames containing the specified keyword.
@@ -76,7 +79,7 @@ class S3Utils:
         """
         try:
             # List all objects in the S3 bucket
-            objects = self.s3.list_objects_v2(Bucket=self.s3_bucket, Prefix="data/CP/SemOpenAlex/v6/")
+            objects = self.s3.list_objects_v2(Bucket=self.s3_bucket, Prefix=prefix)
             if 'Contents' in objects:
                 matching_files = [obj['Key'] for obj in objects['Contents'] if keyword in obj['Key']]
                 csv_filenames = [path.split('/')[-1] for path in matching_files]
@@ -87,9 +90,12 @@ class S3Utils:
             print(f'Error listing files in S3: {str(e)}')
             return
 
-    def list_all_files(self):
+    def list_all_files(self, prefix):
         """
         Lists all files in the specified S3 bucket and directory.
+
+        Args:
+        - prefix (str): The prefix to filter files in the S3 directory.
 
         Returns:
         - list: A list of filenames in the specified S3 directory.
@@ -101,7 +107,7 @@ class S3Utils:
         """
         try:
             # List all objects in the S3 bucket
-            objects = self.s3.list_objects_v2(Bucket=self.s3_bucket, Prefix="neptune-formatted/imdb-minimized/")
+            objects = self.s3.list_objects_v2(Bucket=self.s3_bucket, Prefix=prefix)
             if 'Contents' in objects:
                 matching_files = [obj['Key'] for obj in objects['Contents']]
                 csv_filenames = [path.split('/')[-1] for path in matching_files]

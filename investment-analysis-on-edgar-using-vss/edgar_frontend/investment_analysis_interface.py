@@ -1,4 +1,6 @@
-# Import necessary libraries and modules
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+
 import streamlit as st
 import numpy as np
 import sys
