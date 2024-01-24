@@ -3,7 +3,7 @@
 This repository contains a practical demo showcasing the concepts discussed in the "Investment Analysis using Vector Similarity in Amazon Neptune Analytics" blog series. The demo covers setting up a data pipeline to convert the raw EDGAR dataset to a Knowledge Graph, running Vector Similarity Search (VSS) combined with graph traversal queries, and provides a frontend for visualization.
 
 ## Source of Original Data
-The original data can be accessed from the U.S. Securities and Exchange Commission's EDGAR database at SEC's EDGAR Search and Access.
+The original data can be accessed from the U.S. Securities and Exchange Commission's EDGAR database at SEC's EDGAR Search and Access. Link: https://www.sec.gov/edgar/search-and-access
 
 ## Sourcing Descriptions for Holder Vertex
 The descriptions for the holder vertex in the knowledge graph are sourced using the BedrockAPI class. This involves generating detailed descriptions for each business entity within the holder vertex using advanced language models on Bedrock. Specifically, the Claude-v2 model is leveraged to provide rich, contextual descriptions that are then added to a new column labeled 'description:string'. These descriptions enrich the knowledge graph, aiding in deep analysis, trend identification, investment decision-making, and the discovery of unique business strategies.
@@ -19,13 +19,13 @@ The raw data obtained from EDGAR is structured in a tabular format with the foll
 |-------|---------|----------------------------------|-------|------------|----------------|-------|-----------|---------|-------|------|
 | 1     | 1007295 | BRIDGES INVESTMENT MANAGEMENT INC | 13F-HR | 20231024   | ABBOTT LABS COM | COM   | 002824100 | 2005279 | 20705 | SH   |
 
-This table includes critical information such as the company's Central Index Key (CIK), the holding company name (HOLDER), the form type (FORM), the date the form was filed (DATE_FILED), the holding details (HOLDING), the class of shares (CLASS), the Committee on Uniform Securities Identification Procedures number (CUSIP), the value of the holding (VALUE), the quantity of shares (QTY), and the type of security (TYPE)【128†source】.
+This table includes critical information such as the company's Central Index Key (CIK), the holding company name (HOLDER), the form type (FORM), the date the form was filed (DATE_FILED), the holding details (HOLDING), the class of shares (CLASS), the Committee on Uniform Securities Identification Procedures number (CUSIP), the value of the holding (VALUE), the quantity of shares (QTY), and the type of security (TYPE).
 
 ## Preprocessed Knowledge Graph
 
 For your convenience, we have already prepared the processed and ready-to-use EDGAR Knowledge Graph, which is stored at:
 
-`s3://aws-neptune-customer-samples-us-east-1/sample-datasets/gremlin/edgar/`
+`s3://aws-neptune-customer-samples-{REGION-NAME}/sample-datasets/gremlin/edgar/`
 
 ## Steps to Spin Up the Demo
 
@@ -38,7 +38,8 @@ pip install -r requirements.txt
 ### Step 2: Create a Graph on Neptune
 
 ```bash
-aws neptune-graph create-graph --graph-name 'edgar-vss'  --region us-east-1 --provisioned-memory 128 --allow-from-public --replica-count 0 --vector-search '{"dimension": 384}'
+aws neptune-graph create-graph --graph-name 'edgar-vss'  --region us-east-1 --provisioned-memory 128 --public-connectivity --replica-count 0 --vector-search '{"dimension": 384}' --region us-east-1
+
 ```
 
 Check the status of the graph. Once the graph status is "AVAILABLE," proceed to bulk load the Knowledge Graph with embeddings.
