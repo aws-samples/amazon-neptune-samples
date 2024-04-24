@@ -6,12 +6,16 @@ Once presented, material from [Ora Lassila](https://www.lassila.org/)'s talk at 
 
 ## Installation
 
-To play with _PG-Schema for RDF_, you need Python 3.10 (or newer), clone or fork the repository, and then:
+To play with _PG-Schema for RDF_, you need Python 3.10 (or newer), clone or fork the [amazon-neptune-samples](https://github.com/aws-samples/amazon-neptune-samples) repository, and then:
 ```shell
-cd pgschema
+cd pg-schema-for-rdf
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
 
 See the file [test/demo.py](./test/demo.py) for an example of how the system translates PG-Schema expressions to SHACL.
+
+## License
+
+See [LICENSE](../LICENSE) for license and copyright information.
