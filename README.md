@@ -43,9 +43,13 @@ These [examples](gremlin/property-graph-data-modelling) demonstrate a "working b
 
 The design process here is shown in "slow motion", with each use case triggering a revision to the data model, the introduction of new queries, and updates to existing queries. In many real-world design sessions you would compress these activities and address several use cases at once, converging on a model more immediately. The intention here is to unpack the iterative and evolutionary nature of the many modelling processes that often complete in the "blink of an eye".
 
-### SPARQL
+### RDF & SPARQL
 
-**Coming soon!**
+#### PG-Schema for RDF
+
+An [experiment](./pg-schema-for-rdf) to extend the PG-Schema proposal to work with RDF also.
+
+**More coming soon!**
 
 ### Related samples
 
