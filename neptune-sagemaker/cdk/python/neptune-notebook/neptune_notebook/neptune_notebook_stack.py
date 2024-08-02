@@ -114,7 +114,7 @@ EOF
             instance_type='ml.t3.medium',
             role_arn=notebook_role.role_arn,
             lifecycle_config_name=notebook_lifecycle_config.notebook_instance_lifecycle_config_name,
-            notebook_instance_name='cdk-neptune-workbench',
+            notebook_instance_name='aws-neptune-workbench',
             root_access='Disabled',
             security_group_ids=[neptune_security_group_id],
             subnet_id=neptune_subnet_id,
