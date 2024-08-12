@@ -67,6 +67,43 @@
       ]
     }
   },
+  "Mappings": {
+    "RegionMap": {
+      "us-east-1": {
+        "bucket": "aws-neptune-customer-samples-us-east-1"
+      },
+      "us-east-2": {
+        "bucket": "aws-neptune-customer-samples-us-east-2"
+      },
+      "us-west-2": {
+        "bucket": "aws-neptune-customer-samples-us-west-2"
+      },
+      "eu-west-1": {
+        "bucket": "aws-neptune-customer-samples-eu-west-1"
+      },
+      "eu-west-2": {
+        "bucket": "aws-neptune-customer-samples-eu-west-2"
+      },
+      "eu-central-1": {
+        "bucket": "aws-neptune-customer-samples-eu-central-1"
+      },
+      "us-west-1": {
+        "bucket": "aws-neptune-customer-samples-us-west-1"
+      },
+      "ap-southeast-2": {
+        "bucket": "aws-neptune-customer-samples-ap-southeast-2"
+      },
+      "ap-southeast-1": {
+        "bucket": "aws-neptune-customer-samples-ap-southeast-1"
+      },
+      "ap-south-1": {
+        "bucket": "aws-neptune-customer-samples-ap-south-1"
+      },
+      "ap-northeast-1": {
+        "bucket": "aws-neptune-customer-samples-ap-northeast-1"
+      }
+    }
+  },
   "Resources": {
     "NeptuneNotebookInstance": {
       "Type": "AWS::SageMaker::NotebookInstance",
@@ -159,13 +196,19 @@
                     "/home/ec2-user/anaconda3/bin/python3 -m  pip install --target /home/ec2-user/anaconda3/envs/python3/lib/python3.8/site-packages/ sparqlwrapper\n",
                     "/home/ec2-user/anaconda3/bin/python3 -m  pip install --target /home/ec2-user/anaconda3/envs/python3/lib/python3.8/site-packages/ ipython-sparql\n",
                     "/home/ec2-user/anaconda3/bin/python3 -m  pip install --target /home/ec2-user/anaconda3/envs/python3/lib/python3.8/site-packages/ ipywidgets\n",
-					"aws s3 cp s3://aws-neptune-customer-samples-",
-					{
-						"Ref": "AWS::Region"
-					},
-					"/neptune-sagemaker/bin/neptune-python-utils/neptune_python_utils.zip /home/ec2-user/anaconda3/envs/python3/lib/python3.8/site-packages/\n",
-					"unzip -n /home/ec2-user/anaconda3/envs/python3/lib/python3.8/site-packages/neptune_python_utils.zip -d /home/ec2-user/anaconda3/envs/python3/lib/python3.8/site-packages/\n",
-					"echo 'export NEPTUNE_CLUSTER_ENDPOINT=",
+                    "aws s3 cp s3://",
+                    {
+                      "Fn::FindInMap": [
+                        "RegionMap",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        "bucket"
+                      ]
+                    },
+                    "/neptune-sagemaker/bin/neptune-python-utils/neptune_python_utils.zip /home/ec2-user/anaconda3/envs/python3/lib/python3.8/site-packages/\n",
+                    "unzip -n /home/ec2-user/anaconda3/envs/python3/lib/python3.8/site-packages/neptune_python_utils.zip -d /home/ec2-user/anaconda3/envs/python3/lib/python3.8/site-packages/\n",
+                    "echo 'export NEPTUNE_CLUSTER_ENDPOINT=",
                     {
                       "Ref": "NeptuneClusterEndpoint"
                     },

@@ -3,37 +3,48 @@
   "Mappings": {
     "RegionMap": {
       "us-east-1": {
-        "AMI": "ami-14c5486b"
+        "AMI": "ami-14c5486b",
+        "bucket": "aws-neptune-customer-samples-us-east-1"
       },
       "us-east-2": {
-        "AMI": "ami-922914f7"
+        "AMI": "ami-922914f7",
+        "bucket": "aws-neptune-customer-samples-us-east-2"
       },
       "us-west-2": {
-        "AMI": "ami-e251209a"
+        "AMI": "ami-e251209a",
+        "bucket": "aws-neptune-customer-samples-us-west-2"
       },
       "eu-west-1": {
-        "AMI": "ami-ca0135b3"
+        "AMI": "ami-ca0135b3",
+        "bucket": "aws-neptune-customer-samples-eu-west-1"
       },
       "eu-west-2": {
-        "AMI": "ami-f976839e"
+        "AMI": "ami-f976839e",
+        "bucket": "aws-neptune-customer-samples-eu-west-2"
       },
       "eu-central-1": {
-        "AMI": "ami-9a91b371"
+        "AMI": "ami-9a91b371",
+        "bucket": "aws-neptune-customer-samples-eu-central-1"
       },
       "us-west-1": {
-        "AMI": "ami-25110f45"
+        "AMI": "ami-25110f45",
+        "bucket": "aws-neptune-customer-samples-us-west-1"
       },
       "ap-southeast-2": {
-        "AMI": "ami-423bec20"
+        "AMI": "ami-423bec20",
+        "bucket": "aws-neptune-customer-samples-ap-southeast-2"
       },
       "ap-southeast-1": {
-        "AMI": "ami-de90a5a2"
+        "AMI": "ami-de90a5a2",
+        "bucket": "aws-neptune-customer-samples-ap-southeast-1"
       },
       "ap-south-1": {
-        "AMI": "ami-76d6f519"
+        "AMI": "ami-76d6f519",
+        "bucket": "aws-neptune-customer-samples-ap-south-1"
       },
       "ap-northeast-1": {
-        "AMI": "ami-92df37ed"
+        "AMI": "ami-92df37ed",
+        "bucket": "aws-neptune-customer-samples-ap-northeast-1"
       }
     }
   },
@@ -246,9 +257,15 @@
                 "cur_dir=$PWD\n",
                 "cd /home/ec2-user/\n",
                 "pip install --upgrade awscli\n",
-                "aws s3 cp s3://aws-neptune-customer-samples-",
+                "aws s3 cp s3://",
                 {
-                  "Ref": "AWS::Region"
+                  "Fn::FindInMap": [
+                    "RegionMap",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "bucket"
+                  ]
                 },
                 "/neptune-sagemaker/bin/social-app-driver.jar .\n",
                 "aws s3 cp ",

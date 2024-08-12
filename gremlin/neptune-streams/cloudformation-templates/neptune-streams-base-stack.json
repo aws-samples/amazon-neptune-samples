@@ -1,6 +1,41 @@
 {
   "Description": "Neptune Streams example",
   "Mappings": {
+    "RegionMap": {
+      "us-east-1": {
+        "bucket": "aws-neptune-customer-samples-us-east-1"
+      },
+      "us-east-2": {
+        "bucket": "aws-neptune-customer-samples-us-east-2"
+      },
+      "us-west-2": {
+        "bucket": "aws-neptune-customer-samples-us-west-2"
+      },
+      "eu-west-1": {
+        "bucket": "aws-neptune-customer-samples-eu-west-1"
+      },
+      "eu-west-2": {
+        "bucket": "aws-neptune-customer-samples-eu-west-2"
+      },
+      "eu-central-1": {
+        "bucket": "aws-neptune-customer-samples-eu-central-1"
+      },
+      "us-west-1": {
+        "bucket": "aws-neptune-customer-samples-us-west-1"
+      },
+      "ap-southeast-2": {
+        "bucket": "aws-neptune-customer-samples-ap-southeast-2"
+      },
+      "ap-southeast-1": {
+        "bucket": "aws-neptune-customer-samples-ap-southeast-1"
+      },
+      "ap-south-1": {
+        "bucket": "aws-neptune-customer-samples-ap-south-1"
+      },
+      "ap-northeast-1": {
+        "bucket": "aws-neptune-customer-samples-ap-northeast-1"
+      }
+    },
     "CfnMap": {
       "config": {
         "cfnRoot": "https://s3.amazonaws.com/aws-neptune-customer-samples/neptune-sagemaker/cloudformation-templates",
@@ -77,9 +112,11 @@
           },
           "LambdaS3BucketPrefix": {
             "Fn::FindInMap": [
-              "CfnMap",
-              "config",
-              "lambdaS3BucketPrefix"
+              "RegionMap",
+              {
+                "Ref": "AWS::Region"
+              },
+              "bucket"
             ]
           }
         },
@@ -266,9 +303,15 @@
                   ]
                 },
                 "' >> /home/ec2-user/.bashrc\n",
-                "aws s3 cp s3://aws-neptune-customer-samples-",
+                "aws s3 cp s3://",
                 {
-                  "Ref": "AWS::Region"
+                  "Fn::FindInMap": [
+                    "RegionMap",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "bucket"
+                  ]
                 },
                 "/neptune-sagemaker/bin/neptune-python-utils-v2/neptune_python_utils.zip /home/ec2-user/anaconda3/envs/JupyterSystemEnv/lib/python3.7/site-packages/\n",
                 "unzip -n /home/ec2-user/anaconda3/envs/JupyterSystemEnv/lib/python3.7/site-packages/neptune_python_utils.zip -d /home/ec2-user/anaconda3/envs/JupyterSystemEnv/lib/python3.7/site-packages/\n",
@@ -416,9 +459,11 @@
           },
           "LambdaS3BucketPrefix": {
             "Fn::FindInMap": [
-              "CfnMap",
-              "config",
-              "lambdaS3BucketPrefix"
+              "RegionMap",
+              {
+                "Ref": "AWS::Region"
+              },
+              "bucket"
             ]
           },
           "LambdaS3KeyPrefix": {
@@ -544,13 +589,15 @@
           "CreateCloudWatchAlarm": "false",
           "LambdaS3Bucket": {
             "Fn::Sub": [
-              "${lambdaS3BucketPrefix}-${AWS::Region}",
+              "${bucket_name}",
               {
-                "lambdaS3BucketPrefix": {
+                "bucket_name": {
                   "Fn::FindInMap": [
-                    "CfnMap",
-                    "config",
-                    "lambdaS3BucketPrefix"
+                    "RegionMap",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "bucket"
                   ]
                 }
               }
