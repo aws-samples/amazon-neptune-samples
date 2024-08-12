@@ -99,6 +99,43 @@
       ]
     }
   },
+  "Mappings": {
+    "RegionMap": {
+      "us-east-1": {
+        "bucket": "aws-neptune-customer-samples-us-east-1"
+      },
+      "us-east-2": {
+        "bucket": "aws-neptune-customer-samples-us-east-2"
+      },
+      "us-west-2": {
+        "bucket": "aws-neptune-customer-samples-us-west-2"
+      },
+      "eu-west-1": {
+        "bucket": "aws-neptune-customer-samples-eu-west-1"
+      },
+      "eu-west-2": {
+        "bucket": "aws-neptune-customer-samples-eu-west-2"
+      },
+      "eu-central-1": {
+        "bucket": "aws-neptune-customer-samples-eu-central-1"
+      },
+      "us-west-1": {
+        "bucket": "aws-neptune-customer-samples-us-west-1"
+      },
+      "ap-southeast-2": {
+        "bucket": "aws-neptune-customer-samples-ap-southeast-2"
+      },
+      "ap-southeast-1": {
+        "bucket": "aws-neptune-customer-samples-ap-southeast-1"
+      },
+      "ap-south-1": {
+        "bucket": "aws-neptune-customer-samples-ap-south-1"
+      },
+      "ap-northeast-1": {
+        "bucket": "aws-neptune-customer-samples-ap-northeast-1"
+      }
+    }
+  },
   "Resources": {
     "LambdaSelfReferencingSecurityGroup": {
       "Properties": {
@@ -200,9 +237,14 @@
             "Fn::Join": [
               "",
               [
-                "aws-neptune-customer-samples-",
                 {
-                  "Ref": "AWS::Region"
+                  "Fn::FindInMap": [
+                    "RegionMap",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "bucket"
+                  ]
                 }
               ]
             ]

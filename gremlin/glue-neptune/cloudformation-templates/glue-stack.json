@@ -1,454 +1,582 @@
 {
-	"Description": " - AWS Glue connections and jobs",
-	"Parameters": {
-		"ApplicationID": {
-			"Description": "Application ID",
-			"Type": "String",
-			"AllowedPattern": "[-a-z0-9]+",
-			"MaxLength": 50
-		},
-		"InfrastructureID": {
-			"Description": "Infrastructure ID",
-			"Type": "String",
-			"AllowedPattern": "[-a-z0-9]+",
-			"MaxLength": 50
-		},
-		"DBUser": {
-			"Description": "Aurora MySQL database master user",
-			"Type": "String"
-		},
-		"DBPassword": {
-			"Description": "Aurora MySQL database master user password",
-			"Type": "String",
-			"MinLength": 8
-		},
-		"SQLScriptS3BucketName": {
-			"Description": "Bucket containing SQL script",
-			"Type": "String"
-		},
-		"SQLScriptS3Key": {
-			"Description": "SQL script S3 key",
-			"Type": "String"
-		},
-		"S3ExportPath": {
-			"Description": "S3 output path for exported CSV files",
-			"Type": "String",
-			"AllowedPattern": "^s3://.*/$"
-		}
-	},
-	"Resources": {
-		"SalesDatabase": {
-			"Type": "AWS::Glue::Database",
-			"Properties": {
-				"DatabaseInput": {
-					"Name": {
-						"Fn::Sub": "${ApplicationID}_salesdb"
-					}
-				},
-				"CatalogId": {
-					"Ref": "AWS::AccountId"
-				}
-			}
-		},
-		"AuroraMySQLConnection": {
-			"Type": "AWS::Glue::Connection",
-			"Properties": {
-				"ConnectionInput": {
-					"Description": "Aurora MySQL Connection",
-					"ConnectionType": "JDBC",
-					"MatchCriteria": [
+  "Description": " - AWS Glue connections and jobs",
+  "Parameters": {
+    "ApplicationID": {
+      "Description": "Application ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50
+    },
+    "InfrastructureID": {
+      "Description": "Infrastructure ID",
+      "Type": "String",
+      "AllowedPattern": "[-a-z0-9]+",
+      "MaxLength": 50
+    },
+    "DBUser": {
+      "Description": "Aurora MySQL database master user",
+      "Type": "String"
+    },
+    "DBPassword": {
+      "Description": "Aurora MySQL database master user password",
+      "Type": "String",
+      "MinLength": 8
+    },
+    "SQLScriptS3BucketName": {
+      "Description": "Bucket containing SQL script",
+      "Type": "String"
+    },
+    "SQLScriptS3Key": {
+      "Description": "SQL script S3 key",
+      "Type": "String"
+    },
+    "S3ExportPath": {
+      "Description": "S3 output path for exported CSV files",
+      "Type": "String",
+      "AllowedPattern": "^s3://.*/$"
+    }
+  },
+  "Mappings": {
+    "RegionMap": {
+      "us-east-1": {
+        "bucket": "aws-neptune-customer-samples-us-east-1"
+      },
+      "us-east-2": {
+        "bucket": "aws-neptune-customer-samples-us-east-2"
+      },
+      "us-west-2": {
+        "bucket": "aws-neptune-customer-samples-us-west-2"
+      },
+      "eu-west-1": {
+        "bucket": "aws-neptune-customer-samples-eu-west-1"
+      },
+      "eu-west-2": {
+        "bucket": "aws-neptune-customer-samples-eu-west-2"
+      },
+      "eu-central-1": {
+        "bucket": "aws-neptune-customer-samples-eu-central-1"
+      },
+      "us-west-1": {
+        "bucket": "aws-neptune-customer-samples-us-west-1"
+      },
+      "ap-southeast-2": {
+        "bucket": "aws-neptune-customer-samples-ap-southeast-2"
+      },
+      "ap-southeast-1": {
+        "bucket": "aws-neptune-customer-samples-ap-southeast-1"
+      },
+      "ap-south-1": {
+        "bucket": "aws-neptune-customer-samples-ap-south-1"
+      },
+      "ap-northeast-1": {
+        "bucket": "aws-neptune-customer-samples-ap-northeast-1"
+      }
+    }
+  },
+  "Resources": {
+    "SalesDatabase": {
+      "Type": "AWS::Glue::Database",
+      "Properties": {
+        "DatabaseInput": {
+          "Name": {
+            "Fn::Sub": "${ApplicationID}_salesdb"
+          }
+        },
+        "CatalogId": {
+          "Ref": "AWS::AccountId"
+        }
+      }
+    },
+    "AuroraMySQLConnection": {
+      "Type": "AWS::Glue::Connection",
+      "Properties": {
+        "ConnectionInput": {
+          "Description": "Aurora MySQL Connection",
+          "ConnectionType": "JDBC",
+          "MatchCriteria": [
 
-					],
-					"PhysicalConnectionRequirements": {
-						"AvailabilityZone": {
-							"Fn::Select": [
-								0,
-								{
-									"Fn::GetAZs": ""
-								}
-							]
-						},
-						"SecurityGroupIdList": [
-							{
-								"Fn::ImportValue": {
-									"Fn::Sub": "${InfrastructureID}-DefaultSecurityGroup"
-								}
-							},
-							{
-								"Fn::ImportValue": {
-									"Fn::Sub": "${InfrastructureID}-RDSSecurityGroup"
-								}
-							}
-						],
-						"SubnetId": {
-							"Fn::Select": [
-								0,
-								{
-									"Fn::Split": [
-										",",
-										{
-											"Fn::ImportValue": {
-												"Fn::Sub": "${InfrastructureID}-PrivateSubnetIDs"
-											}
-										}
-									]
-								}
-							]
-						}
-					},
-					"ConnectionProperties": {
-						"USERNAME": {
-							"Ref": "DBUser"
-						},
-						"JDBC_ENFORCE_SSL": "true",
-						"PASSWORD": {
-							"Ref": "DBPassword"
-						},
-						"JDBC_CONNECTION_URL": {
-							"Fn::ImportValue": {
-								"Fn::Sub": "${ApplicationID}-AuroraMySQLJDBCURL"
-							}
-						}
-					},
-					"Name": {
-						"Fn::Sub": "${ApplicationID}-mysql-connection"
-					}
-				},
-				"CatalogId": {
-					"Ref": "AWS::AccountId"
-				}
-			}
-		},
-		"NeptuneConnection": {
-			"Type": "AWS::Glue::Connection",
-			"Properties": {
-				"ConnectionInput": {
-					"Description": "Neptune Connection",
-					"ConnectionType": "JDBC",
-					"MatchCriteria": [
+          ],
+          "PhysicalConnectionRequirements": {
+            "AvailabilityZone": {
+              "Fn::Select": [
+                0,
+                {
+                  "Fn::GetAZs": ""
+                }
+              ]
+            },
+            "SecurityGroupIdList": [
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${InfrastructureID}-DefaultSecurityGroup"
+                }
+              },
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${InfrastructureID}-RDSSecurityGroup"
+                }
+              }
+            ],
+            "SubnetId": {
+              "Fn::Select": [
+                0,
+                {
+                  "Fn::Split": [
+                    ",",
+                    {
+                      "Fn::ImportValue": {
+                        "Fn::Sub": "${InfrastructureID}-PrivateSubnetIDs"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "ConnectionProperties": {
+            "USERNAME": {
+              "Ref": "DBUser"
+            },
+            "JDBC_ENFORCE_SSL": "true",
+            "PASSWORD": {
+              "Ref": "DBPassword"
+            },
+            "JDBC_CONNECTION_URL": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${ApplicationID}-AuroraMySQLJDBCURL"
+              }
+            }
+          },
+          "Name": {
+            "Fn::Sub": "${ApplicationID}-mysql-connection"
+          }
+        },
+        "CatalogId": {
+          "Ref": "AWS::AccountId"
+        }
+      }
+    },
+    "NeptuneConnection": {
+      "Type": "AWS::Glue::Connection",
+      "Properties": {
+        "ConnectionInput": {
+          "Description": "Neptune Connection",
+          "ConnectionType": "JDBC",
+          "MatchCriteria": [
 
-					],
-					"PhysicalConnectionRequirements": {
-						"AvailabilityZone": {
-							"Fn::Select": [
-								0,
-								{
-									"Fn::GetAZs": ""
-								}
-							]
-						},
-						"SecurityGroupIdList": [
-							{
-								"Fn::ImportValue": {
-									"Fn::Sub": "${InfrastructureID}-DefaultSecurityGroup"
-								}
-							},
-							{
-								"Fn::ImportValue": {
-									"Fn::Sub": "${InfrastructureID}-NeptuneSecurityGroup"
-								}
-							}
-						],
-						"SubnetId": {
-							"Fn::Select": [
-								0,
-								{
-									"Fn::Split": [
-										",",
-										{
-											"Fn::ImportValue": {
-												"Fn::Sub": "${InfrastructureID}-PrivateSubnetIDs"
-											}
-										}
-									]
-								}
-							]
-						}
-					},
-					"ConnectionProperties": {
-						"USERNAME": "neptune",
-						"JDBC_ENFORCE_SSL": "true",
-						"PASSWORD": "neptune",
-						"JDBC_CONNECTION_URL": {
-							"Fn::Join": [
-								"",
-								[
-									"jdbc:",
-									{
-										"Fn::ImportValue": {
-											"Fn::Sub": "${ApplicationID}-NeptuneGremlinEndpoint"
-										}
-									}
-								]
-							]
-						}
-					},
-					"Name": {
-						"Fn::Sub": "${ApplicationID}-neptune-connection"
-					}
-				},
-				"CatalogId": {
-					"Ref": "AWS::AccountId"
-				}
-			}
-		},
-		"LoadMySQLJob": {
-			"Type": "AWS::Glue::Job",
-			"Properties": {
-				"Role": {
-					"Fn::ImportValue": {
-						"Fn::Sub": "${InfrastructureID}-GlueRoleARN"
-					}
-				},
-				"DefaultArguments": {
-					"--job-language": "python",
-					"--job-bookmark-option": "job-bookmark-disable",
-					"--CONNECTION_NAME": {
-						"Ref": "AuroraMySQLConnection"
-					},
-					"--BUCKET_NAME": {
-						"Ref": "SQLScriptS3BucketName"
-					},
-					"--KEY": {
-						"Ref": "SQLScriptS3Key"
-					}
-				},
+          ],
+          "PhysicalConnectionRequirements": {
+            "AvailabilityZone": {
+              "Fn::Select": [
+                0,
+                {
+                  "Fn::GetAZs": ""
+                }
+              ]
+            },
+            "SecurityGroupIdList": [
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${InfrastructureID}-DefaultSecurityGroup"
+                }
+              },
+              {
+                "Fn::ImportValue": {
+                  "Fn::Sub": "${InfrastructureID}-NeptuneSecurityGroup"
+                }
+              }
+            ],
+            "SubnetId": {
+              "Fn::Select": [
+                0,
+                {
+                  "Fn::Split": [
+                    ",",
+                    {
+                      "Fn::ImportValue": {
+                        "Fn::Sub": "${InfrastructureID}-PrivateSubnetIDs"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "ConnectionProperties": {
+            "USERNAME": "neptune",
+            "JDBC_ENFORCE_SSL": "true",
+            "PASSWORD": "neptune",
+            "JDBC_CONNECTION_URL": {
+              "Fn::Join": [
+                "",
+                [
+                  "jdbc:",
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${ApplicationID}-NeptuneGremlinEndpoint"
+                    }
+                  }
+                ]
+              ]
+            }
+          },
+          "Name": {
+            "Fn::Sub": "${ApplicationID}-neptune-connection"
+          }
+        },
+        "CatalogId": {
+          "Ref": "AWS::AccountId"
+        }
+      }
+    },
+    "LoadMySQLJob": {
+      "Type": "AWS::Glue::Job",
+      "Properties": {
+        "Role": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-GlueRoleARN"
+          }
+        },
+        "DefaultArguments": {
+          "--job-language": "python",
+          "--job-bookmark-option": "job-bookmark-disable",
+          "--CONNECTION_NAME": {
+            "Ref": "AuroraMySQLConnection"
+          },
+          "--BUCKET_NAME": {
+            "Ref": "SQLScriptS3BucketName"
+          },
+          "--KEY": {
+            "Ref": "SQLScriptS3Key"
+          }
+        },
         "GlueVersion": "4.0",
-				"Connections": {
-					"Connections": [
-						{
-							"Ref": "AuroraMySQLConnection"
-						}
-					]
-				},
-				"MaxRetries": 0,
-				"Description": "Load Aurora MySQL with salesdb data",
-				"Command": {
-					"ScriptLocation": {
-						"Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/etl/common/load_mysql.py"
-					},
-					"Name": "glueetl"
-				},
-				"AllocatedCapacity": 2,
-				"ExecutionProperty": {
-					"MaxConcurrentRuns": 1
-				},
-				"Name": {
-					"Fn::Sub": "${ApplicationID}_load_salesdb"
-				}
-			}
-		},
-		"SalesDatabaseCrawler": {
-			"Type": "AWS::Glue::Crawler",
-			"Properties": {
-				"Role": {
-					"Fn::ImportValue": {
-						"Fn::Sub": "${InfrastructureID}-GlueRoleARN"
-					}
-				},
-				"Description": "Sales DB crawler",
-				"DatabaseName": {
-					"Ref": "SalesDatabase"
-				},
-				"Targets": {
-					"JdbcTargets": [
-						{
-							"ConnectionName": {
-								"Ref": "AuroraMySQLConnection"
-							},
-							"Path": "salesdb/%"
-						}
-					]
-				},
-				"TablePrefix": {
-					"Fn::Sub": "${ApplicationID}_"
-				},
-				"Name": {
-					"Fn::Sub": "${ApplicationID}_salesdb_crawler"
-				}
-			}
-		},
-		"ExportFromMySQLToS3Job": {
-			"Type": "AWS::Glue::Job",
-			"Properties": {
-				"Role": {
-					"Fn::ImportValue": {
-						"Fn::Sub": "${InfrastructureID}-GlueRoleARN"
-					}
-				},
-				"DefaultArguments": {
-					"--job-language": "python",
-					"--extra-py-files": {
-						"Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/bin/neptune-python-utils-v2/neptune_python_utils.zip"
-					},
-					"--job-bookmark-option": "job-bookmark-disable",
-					"--S3_OUTPUT_PATH": {
-						"Ref": "S3ExportPath"
-					},
-					"--DATABASE_NAME": {
-						"Ref": "SalesDatabase"
-					},
-					"--TABLE_PREFIX": {
-						"Fn::Sub": "${ApplicationID}_"
-					},
-					"--AWS_REGION": {
-						"Ref": "AWS::Region"
-					},
-					"--CONNECT_TO_NEPTUNE_ROLE_ARN": {
-						"Fn::ImportValue": {
-							"Fn::Sub": "${InfrastructureID}-GlueConnectToNeptuneRoleARN"
-						}
-					}
-				},
+        "Connections": {
+          "Connections": [
+            {
+              "Ref": "AuroraMySQLConnection"
+            }
+          ]
+        },
+        "MaxRetries": 0,
+        "Description": "Load Aurora MySQL with salesdb data",
+        "Command": {
+          "ScriptLocation": {
+            "Fn::Sub": [
+              "s3://${bucket_name}/neptune-sagemaker/etl/common/load_mysql.py",
+              {
+                "bucket_name": {
+                  "Fn::FindInMap": [
+                    "RegionMap",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "bucket"
+                  ]
+                }
+              }
+            ]
+          },
+          "Name": "glueetl"
+        },
+        "AllocatedCapacity": 2,
+        "ExecutionProperty": {
+          "MaxConcurrentRuns": 1
+        },
+        "Name": {
+          "Fn::Sub": "${ApplicationID}_load_salesdb"
+        }
+      }
+    },
+    "SalesDatabaseCrawler": {
+      "Type": "AWS::Glue::Crawler",
+      "Properties": {
+        "Role": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-GlueRoleARN"
+          }
+        },
+        "Description": "Sales DB crawler",
+        "DatabaseName": {
+          "Ref": "SalesDatabase"
+        },
+        "Targets": {
+          "JdbcTargets": [
+            {
+              "ConnectionName": {
+                "Ref": "AuroraMySQLConnection"
+              },
+              "Path": "salesdb/%"
+            }
+          ]
+        },
+        "TablePrefix": {
+          "Fn::Sub": "${ApplicationID}_"
+        },
+        "Name": {
+          "Fn::Sub": "${ApplicationID}_salesdb_crawler"
+        }
+      }
+    },
+    "ExportFromMySQLToS3Job": {
+      "Type": "AWS::Glue::Job",
+      "Properties": {
+        "Role": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-GlueRoleARN"
+          }
+        },
+        "DefaultArguments": {
+          "--job-language": "python",
+          "--extra-py-files": {
+            "Fn::Sub": [
+              "s3://${bucket_name}/neptune-sagemaker/bin/neptune-python-utils-v2/neptune_python_utils.zip",
+              {
+                "bucket_name": {
+                  "Fn::FindInMap": [
+                    "RegionMap",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "bucket"
+                  ]
+                }
+              }
+            ]
+          },
+          "--job-bookmark-option": "job-bookmark-disable",
+          "--S3_OUTPUT_PATH": {
+            "Ref": "S3ExportPath"
+          },
+          "--DATABASE_NAME": {
+            "Ref": "SalesDatabase"
+          },
+          "--TABLE_PREFIX": {
+            "Fn::Sub": "${ApplicationID}_"
+          },
+          "--AWS_REGION": {
+            "Ref": "AWS::Region"
+          },
+          "--CONNECT_TO_NEPTUNE_ROLE_ARN": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${InfrastructureID}-GlueConnectToNeptuneRoleARN"
+            }
+          }
+        },
         "GlueVersion": "4.0",
-				"Connections": {
-					"Connections": [
-						{
-							"Ref": "AuroraMySQLConnection"
-						}
-					]
-				},
-				"MaxRetries": 0,
-				"Description": "Export CSV data from MySQL to S3",
-				"Command": {
-					"ScriptLocation": {
-						"Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/etl/mysql-neptune/export-from-mysql-to-s3.py"
-					},
-					"Name": "glueetl",
-					"PythonVersion": "3"
-				},
-				"AllocatedCapacity": 2,
-				"ExecutionProperty": {
-					"MaxConcurrentRuns": 1
-				},
-				"Name": {
-					"Fn::Sub": "${ApplicationID}_export_from_mysql_to_s3"
-				}
-			}
-		},
-		"ExportFromMySQLToNeptuneJob": {
-			"Type": "AWS::Glue::Job",
-			"Properties": {
-				"Role": {
-					"Fn::ImportValue": {
-						"Fn::Sub": "${InfrastructureID}-GlueRoleARN"
-					}
-				},
-				"DefaultArguments": {
-					"--job-language": "python",
-					"--extra-py-files": {
-						"Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/bin/neptune-python-utils-v2/neptune_python_utils.zip"
-					},
-					"--job-bookmark-option": "job-bookmark-disable",
-					"--DATABASE_NAME": {
-						"Ref": "SalesDatabase"
-					},
-					"--TABLE_PREFIX": {
-						"Fn::Sub": "${ApplicationID}_"
-					},
-					"--NEPTUNE_CONNECTION_NAME": {
-						"Ref": "NeptuneConnection"
-					},
-					"--AWS_REGION": {
-						"Ref": "AWS::Region"
-					},
-					"--CONNECT_TO_NEPTUNE_ROLE_ARN": {
-						"Fn::ImportValue": {
-							"Fn::Sub": "${InfrastructureID}-GlueConnectToNeptuneRoleARN"
-						}
-					}
-				},
+        "Connections": {
+          "Connections": [
+            {
+              "Ref": "AuroraMySQLConnection"
+            }
+          ]
+        },
+        "MaxRetries": 0,
+        "Description": "Export CSV data from MySQL to S3",
+        "Command": {
+          "ScriptLocation": {
+            "Fn::Sub": [
+              "s3://${bucket_name}/neptune-sagemaker/etl/mysql-neptune/export-from-mysql-to-s3.py",
+              {
+                "bucket_name": {
+                  "Fn::FindInMap": [
+                    "RegionMap",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "bucket"
+                  ]
+                }
+              }
+            ]
+          },
+          "Name": "glueetl",
+          "PythonVersion": "3"
+        },
+        "AllocatedCapacity": 2,
+        "ExecutionProperty": {
+          "MaxConcurrentRuns": 1
+        },
+        "Name": {
+          "Fn::Sub": "${ApplicationID}_export_from_mysql_to_s3"
+        }
+      }
+    },
+    "ExportFromMySQLToNeptuneJob": {
+      "Type": "AWS::Glue::Job",
+      "Properties": {
+        "Role": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-GlueRoleARN"
+          }
+        },
+        "DefaultArguments": {
+          "--job-language": "python",
+          "--extra-py-files": {
+            "Fn::Sub": [
+              "s3://${bucket_name}/neptune-sagemaker/bin/neptune-python-utils-v2/neptune_python_utils.zip",
+              {
+                "bucket_name": {
+                  "Fn::FindInMap": [
+                    "RegionMap",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "bucket"
+                  ]
+                }
+              }
+            ]
+          },
+          "--job-bookmark-option": "job-bookmark-disable",
+          "--DATABASE_NAME": {
+            "Ref": "SalesDatabase"
+          },
+          "--TABLE_PREFIX": {
+            "Fn::Sub": "${ApplicationID}_"
+          },
+          "--NEPTUNE_CONNECTION_NAME": {
+            "Ref": "NeptuneConnection"
+          },
+          "--AWS_REGION": {
+            "Ref": "AWS::Region"
+          },
+          "--CONNECT_TO_NEPTUNE_ROLE_ARN": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${InfrastructureID}-GlueConnectToNeptuneRoleARN"
+            }
+          }
+        },
         "GlueVersion": "4.0",
-				"Connections": {
-					"Connections": [
-						{
-							"Ref": "AuroraMySQLConnection"
-						},
-						{
-							"Ref": "NeptuneConnection"
-						}
-					]
-				},
-				"MaxRetries": 0,
-				"Description": "Export data from MySQL to Neptune",
-				"Command": {
-					"ScriptLocation": {
-						"Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/etl/mysql-neptune/export-from-mysql-to-neptune.py"
-					},
-					"Name": "glueetl",
-					"PythonVersion": "3"
-				},
-				"AllocatedCapacity": 2,
-				"ExecutionProperty": {
-					"MaxConcurrentRuns": 1
-				},
-				"Name": {
-					"Fn::Sub": "${ApplicationID}_export_from_mysql_to_neptune"
-				}
-			}
-		},
-		"ExportFromMySQLToNeptuneIncrementalJob": {
-			"Type": "AWS::Glue::Job",
-			"Properties": {
-				"Role": {
-					"Fn::ImportValue": {
-						"Fn::Sub": "${InfrastructureID}-GlueRoleARN"
-					}
-				},
-				"DefaultArguments": {
-					"--job-language": "python",
-					"--extra-py-files": {
-						"Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/bin/neptune-python-utils-v2/neptune_python_utils.zip"
-					},
-					"--job-bookmark-option": "job-bookmark-disable",
-					"--DATABASE_NAME": {
-						"Ref": "SalesDatabase"
-					},
-					"--TABLE_PREFIX": {
-						"Fn::Sub": "${ApplicationID}_"
-					},
-					"--NEPTUNE_CONNECTION_NAME": {
-						"Ref": "NeptuneConnection"
-					},
-					"--AWS_REGION": {
-						"Ref": "AWS::Region"
-					},
-					"--CONNECT_TO_NEPTUNE_ROLE_ARN": {
-						"Fn::ImportValue": {
-							"Fn::Sub": "${InfrastructureID}-GlueConnectToNeptuneRoleARN"
-						}
-					}
-				},
+        "Connections": {
+          "Connections": [
+            {
+              "Ref": "AuroraMySQLConnection"
+            },
+            {
+              "Ref": "NeptuneConnection"
+            }
+          ]
+        },
+        "MaxRetries": 0,
+        "Description": "Export data from MySQL to Neptune",
+        "Command": {
+          "ScriptLocation": {
+            "Fn::Sub": [
+              "s3://${bucket_name}/neptune-sagemaker/etl/mysql-neptune/export-from-mysql-to-neptune.py",
+              {
+                "bucket_name": {
+                  "Fn::FindInMap": [
+                    "RegionMap",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "bucket"
+                  ]
+                }
+              }
+            ]
+          },
+          "Name": "glueetl",
+          "PythonVersion": "3"
+        },
+        "AllocatedCapacity": 2,
+        "ExecutionProperty": {
+          "MaxConcurrentRuns": 1
+        },
+        "Name": {
+          "Fn::Sub": "${ApplicationID}_export_from_mysql_to_neptune"
+        }
+      }
+    },
+    "ExportFromMySQLToNeptuneIncrementalJob": {
+      "Type": "AWS::Glue::Job",
+      "Properties": {
+        "Role": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${InfrastructureID}-GlueRoleARN"
+          }
+        },
+        "DefaultArguments": {
+          "--job-language": "python",
+          "--extra-py-files": {
+            "Fn::Sub": [
+              "s3://${bucket_name}/neptune-sagemaker/bin/neptune-python-utils-v2/neptune_python_utils.zip",
+              {
+                "bucket_name": {
+                  "Fn::FindInMap": [
+                    "RegionMap",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "bucket"
+                  ]
+                }
+              }
+            ]
+          },
+          "--job-bookmark-option": "job-bookmark-disable",
+          "--DATABASE_NAME": {
+            "Ref": "SalesDatabase"
+          },
+          "--TABLE_PREFIX": {
+            "Fn::Sub": "${ApplicationID}_"
+          },
+          "--NEPTUNE_CONNECTION_NAME": {
+            "Ref": "NeptuneConnection"
+          },
+          "--AWS_REGION": {
+            "Ref": "AWS::Region"
+          },
+          "--CONNECT_TO_NEPTUNE_ROLE_ARN": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${InfrastructureID}-GlueConnectToNeptuneRoleARN"
+            }
+          }
+        },
         "GlueVersion": "4.0",
-				"Connections": {
-					"Connections": [
-						{
-							"Ref": "AuroraMySQLConnection"
-						},
-						{
-							"Ref": "NeptuneConnection"
-						}
-					]
-				},
-				"MaxRetries": 0,
-				"Description": "Incremental export of data from MySQL to Neptune",
-				"Command": {
-					"ScriptLocation": {
-						"Fn::Sub": "s3://aws-neptune-customer-samples-${AWS::Region}/neptune-sagemaker/etl/mysql-neptune/export-from-mysql-to-neptune-incremental.py"
-					},
-					"Name": "glueetl",
-					"PythonVersion": "3"
-				},
-				"AllocatedCapacity": 2,
-				"ExecutionProperty": {
-					"MaxConcurrentRuns": 1
-				},
-				"Name": {
-					"Fn::Sub": "${ApplicationID}_export_from_mysql_to_neptune_incremental"
-				}
-			}
-		}
-	},
-	"Outputs": {
-	}
+        "Connections": {
+          "Connections": [
+            {
+              "Ref": "AuroraMySQLConnection"
+            },
+            {
+              "Ref": "NeptuneConnection"
+            }
+          ]
+        },
+        "MaxRetries": 0,
+        "Description": "Incremental export of data from MySQL to Neptune",
+        "Command": {
+          "ScriptLocation": {
+            "Fn::Sub": [
+              "s3://${bucket_name}/neptune-sagemaker/etl/mysql-neptune/export-from-mysql-to-neptune-incremental.py",
+              {
+                "bucket_name": {
+                  "Fn::FindInMap": [
+                    "RegionMap",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "bucket"
+                  ]
+                }
+              }
+            ]
+          },
+          "Name": "glueetl",
+          "PythonVersion": "3"
+        },
+        "AllocatedCapacity": 2,
+        "ExecutionProperty": {
+          "MaxConcurrentRuns": 1
+        },
+        "Name": {
+          "Fn::Sub": "${ApplicationID}_export_from_mysql_to_neptune_incremental"
+        }
+      }
+    }
+  },
+  "Outputs": {
+  }
 }
