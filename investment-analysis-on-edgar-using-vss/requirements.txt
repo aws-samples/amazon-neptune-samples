@@ -14,6 +14,6 @@ scikit-learn==1.5.0
 scipy==1.10.1
 sentence-transformers==2.2.2
 sentencepiece==0.1.99
-streamlit==1.30.0
+streamlit==1.37.0
 streamlit-agraph==0.0.45
 transformers==4.38.0
