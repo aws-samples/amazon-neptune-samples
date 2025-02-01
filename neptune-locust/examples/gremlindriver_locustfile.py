@@ -9,6 +9,10 @@ class Example_GremlinDriver(GremlinDriverUser):
     # You can set the host explicitly here if you want to do this for debugging
     # host = "wss://<INSERT CLUSTER:PORT URL HERE>"
 
+    # Uncomment this if you want to use IAM auth
+    # def on_start(self):
+    #     os.environ["USE_IAM"] = "true"
+
     @task
     def task(self):
         resp = self.query(self.g.inject(1), name=self.__class__.__name__)
