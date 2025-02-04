@@ -18,5 +18,5 @@ class Example_Gremlin(NeptuneUser):
         # print(resp)
 
 
-# if __name__ == "__main__":
-#     run_single_user(OC)
+if __name__ == "__main__":
+    run_single_user(Example_Gremlin)

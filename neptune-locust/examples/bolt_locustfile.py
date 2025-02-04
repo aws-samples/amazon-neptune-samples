@@ -8,7 +8,7 @@ from neo4j import GraphDatabase
 
 class Example_Bolt(BoltUser):
     # You can set the host explicitly here if you want to do this for debugging
-    # host = "https://<INSERT CLUSTER:PORT URL HERE>"
+    # host = "bolt://<INSERT CLUSTER:PORT URL HERE>"
 
     def on_start(self):
         try:

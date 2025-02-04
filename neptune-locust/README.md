@@ -34,8 +34,22 @@ Both the `NeptuneUser` and `GremlinDriverUser` classes will automatically create
 The `BoltUser` requires that you create the `Driver` external to the class, such as using the `on_start` [Event Hook](https://docs.locust.io/en/stable/extending-locust.html) which is then passed to the `connect(driver)` method.  In addition to the `User` classes above we have also provided a `NeptuneBoltAuthToken` class which can be used in conjunction with the bolt driver to add SigV4 authorization headers to bolt requests as are required by IAM enabled clusters.  An example of how to achieve this is shown below.
 
 ```
-driver = GraphDatabase.driver(self.host, auth=NeptuneBoltAuthToken(self.host), encrypted=True)
-self.connect(driver)
+class Example_Bolt(BoltUser):
+    # You can set the host explicitly here if you want to do this for debugging
+    # host = "bolt://<INSERT CLUSTER:PORT URL HERE>"
+
+    def on_start(self):
+        try:
+            driver = GraphDatabase.driver(self.host, auth=NeptuneBoltAuthToken(self.host), encrypted=True)
+            self.connect(driver)
+        except ConnectionError as exception:
+            logging.info("Caught %s", exception)
+            self.user.environment.runner.quit()
+
+    @task
+    def task(self):
+        resp = self.query("RETURN 1", name=self.__class__.__name__)
+        print(resp)
 ```
 
 ## Examples

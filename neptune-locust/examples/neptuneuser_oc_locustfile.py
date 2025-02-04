@@ -15,7 +15,7 @@ class Example_OC(NeptuneUser):
             name=self.__class__.__name__,
             language=NeptuneLanguage.OPEN_CYPHER,
         )
-        print(resp)
+        # print(resp)
 
 
 if __name__ == "__main__":
