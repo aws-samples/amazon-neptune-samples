@@ -4,7 +4,7 @@
 
 The [User](https://docs.locust.io/en/stable/writing-a-locustfile.html#user-class) class in Locust represents a user/scenario for a test run.  While Locust provides base classes for HTTP based traffic it relies on third party libraries to support other protocols.
 
-This library helps you to performance tests on Amazon Neptune using Locust by providing rich User classes for testing using the [Amazon Boto3 SDK](https://boto3.amazonaws.com/), [Gremlin Python](https://pypi.org/project/gremlinpython/), and [Amazon Neptune Bolt](https://docs.aws.amazon.com/neptune/latest/userguide/access-graph-opencypher-bolt.html).
+This library helps you to create performance tests on Amazon Neptune when using Locust by providing rich User classes for testing using the [Amazon Boto3 SDK](https://boto3.amazonaws.com/), [Gremlin Python](https://pypi.org/project/gremlinpython/), and [Amazon Neptune Bolt](https://docs.aws.amazon.com/neptune/latest/userguide/access-graph-opencypher-bolt.html).
 
 ## Installation
 
