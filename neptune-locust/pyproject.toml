@@ -1,0 +1,33 @@
+[tool.black]
+line-length = 120
+
+[project]
+name = "neptune_locust"
+version = "1.0.0"
+authors = [
+  { name="Dave Bechberger" },
+]
+description = "Useful plugin for Locust when working with Amazon Neptune."
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "Apache 2"
+license-files = ["LICEN[CS]E*"]
+dependencies = [
+  "locust>=2.32.4",
+  "boto3>=1.35.78",
+  "gremlinpython>=3.7.3",
+  "neo4j>=5.27.0"
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.workspaces]
+packages = [
+    "neptune_plugin"
+]
