@@ -1,5 +1,7 @@
 # Visualize data in Amazon Neptune using VIS.js library
 
+> :trident: **[Update June 2025]:** Neptune now has it's own visualization tool called Graph Explorer.  If you're looking for an out-of-the-box utility for visualizing your Neptune Database or Neptune Analytics graph, consider using [Graph Explorer](https://github.com/aws/graph-explorer).  If you want to build an app that include a custom graph visualization component, this example provides a great starting point for doing so using [Vis.js](https://visjs.org/).
+
 This GitHub lab will take you through hands-on exercise of visualizing graph data in Amazon Neptune using VIS.js library.
 Amazon Neptune is a fast, reliable, fully managed graph database service available from AWS.
 With Amazon Neptune you can use open source and popular graph query languages such as Apache TinkerPop Gremlin for property graph databases or SPARQL for W3C RDF model graph databases.
@@ -296,7 +298,7 @@ And, you are all set!
 
 Visualize the graph data through this application from below URL.
 
-http://\<bucket-name\>.s3-website.\<aws-region-code\>.amazonaws.com
+https://\<cloudfront-distribution-endpoint\>/visualize-graph.html
 
 ![](images/visualization.png)
 
