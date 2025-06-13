@@ -180,25 +180,83 @@ aws lambda add-permission --function-name <lamnda-function-name> \
 
 We have now created an API Gateway proxy for the AWS Lambda function.
 
-### 5. Configure Amazon S3 bucket for hosting a static website
+### 5. Configure Amazon S3 bucket and a CloudFront Distribution to host the site
 
-Now that we have all the backend infrastructure ready for handling the API requests to get data out from Amazon Neptune, let's create an Amazon S3 bucket that will be used to host a static website.<br/>
+Now that we have all the backend infrastructure ready for handling the API requests to get data out from Amazon Neptune, let's create an Amazon S3 bucket that will be used to host a static website.  We don't want to use a public S3 bucket, so we'll use a CloudFront Distribution in front of the S3 bucket to provide access to our content via a browser.<br/>
 
 Run below commands to create an Amazon S3 bucket as a static website and upload the `visualize-graph.html` into it.
 
 ```
---create Amazon S3 bucket with public read access
-aws s3api create-bucket --bucket <bucket-name> --acl public-read --region <aws-region-code> --create-bucket-configuration LocationConstraint=<aws-region-code>
+# create Amazon S3 bucket
+aws s3 mb s3://<bucket-name> --region <aws-region-code>
 
---configure website hosting on S3 bucket
-aws s3api put-bucket-website --bucket <bucket-name> --website-configuration '{
-    "IndexDocument": {
-        "Suffix": "visualize-graph.html"
-    },
-    "ErrorDocument": {
-        "Key": "visualization-error.html"
-    }
-}'
+# create an Origin Access Control allowing the CloudFront distribution to access files in the S3 bucket
+aws cloudfront create-origin-access-control \
+    --origin-access-control-config '{
+        "Name": "<bucket-name>.s3.<region-name>.amazonaws.com",
+        "Description": "OAC for S3 bucket access",
+        "SigningProtocol": "sigv4",
+        "SigningBehavior": "always",
+        "OriginAccessControlOriginType": "s3"
+    }'
+# Save the Etag field from this commmand to use in the next command
+
+# create a CloudFront distribution
+aws cloudfront create-distribution \
+    --distribution-config '{
+        "CallerReference": "<bucket-name>",
+        "Origins": {
+            "Quantity": 1,
+            "Items": [{
+                "Id": "S3-<bucket-name>",
+                "DomainName": "<bucket-name>.s3.<aws-region-code>.amazonaws.com",
+                "OriginAccessControlId": "<Etag-field-from-OAC-create-command>",
+                "S3OriginConfig": {
+                    "OriginAccessIdentity": ""
+                }
+            }]
+        },
+        "DefaultCacheBehavior": {
+            "TargetOriginId": "S3-<bucket-name>",
+            "ViewerProtocolPolicy": "redirect-to-https",
+            "AllowedMethods": {
+                "Quantity": 2,
+                "Items": ["GET", "HEAD"]
+            },
+            "ForwardedValues": {
+                "QueryString": false,
+                "Cookies": {
+                    "Forward": "none"
+                }
+            }, 
+            "MinTTL": 0, 
+            "DefaultTTL": 86400, 
+            "MaxTTL": 31536000
+        },
+        "Comment": "",
+        "Enabled": true
+    }'
+
+# Add a bucket policy to the s3 bucket to allow access to objects by the CloudFront Distribution
+aws s3api put-bucket-policy \
+    --bucket <bucket-name> \
+    --policy '{
+        "Version": "2012-10-17",
+        "Statement": [{
+            "Sid": "AllowCloudFrontServicePrincipal",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "cloudfront.amazonaws.com"
+            },
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::<bucket-name>/*",
+            "Condition": {
+                "StringEquals": {
+                    "AWS:SourceArn": "arn:aws:cloudfront::<aws-account-id>:distribution/<distribution-id>"
+                }
+            }
+        }]
+    }'
 ```
 
 ### 6. Upload HTML file to Amazon S3
