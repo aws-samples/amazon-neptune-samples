@@ -16,6 +16,12 @@ Parameters:
   ClusterPort:
     Description: "The Neptune Cluster Port"
     Type: Number
+Mappings:
+  RegionMap:
+    us-east-1:
+      "bucket": "aws-neptune-customer-samples-us-east-1"
+    us-west-2:
+      "bucket": "aws-neptune-customer-samples-us-west-2"
 Resources:
   LambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -23,47 +29,47 @@ Resources:
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - lambda.amazonaws.com
-            Action:
-              - sts:AssumeRole
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
       Path: "/"
       ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
-        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      - "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+      - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
   LambdaLayer:
     Type: AWS::Lambda::LayerVersion
     Properties:
       CompatibleRuntimes:
-        - python3.7
+      - python3.8
       Content:
-        S3Bucket: 
-          Fn::Join:
-          - ''
-          - - 'aws-neptune-customer-samples-'
-            - Ref: AWS::Region
+        S3Bucket:
+          Fn::FindInMap:
+          - RegionMap
+          - Ref: AWS::Region
+          - bucket
         S3Key: chatbot-blog/gremlin-python-layer.zip
-      Description: Python 3.7 Lambda Layer with gremlinpython client
+      Description: Python 3.8 Lambda Layer with gremlinpython client
       LayerName: gremlin-python
   ChatBotValidation:
     Type: AWS::Lambda::Function
     Properties:
       Code:
-        S3Bucket: 
-          Fn::Join:
-          - ''
-          - - 'aws-neptune-customer-samples-'
-            - Ref: AWS::Region
+        S3Bucket:
+          Fn::FindInMap:
+          - RegionMap
+          - Ref: AWS::Region
+          - bucket
         S3Key: chatbot-blog/blog_chatbot_author_validation.zip
       Description: Chatbot validation code for authors
       FunctionName: chatbot-author-validation
       Handler: lambda_function.lambda_handler
       Layers:
-        - !Ref LambdaLayer
+      - !Ref LambdaLayer
       Role: !GetAtt LambdaExecutionRole.Arn
-      Runtime: python3.7
+      Runtime: python3.8
       Timeout: 30
       VpcConfig:
         SecurityGroupIds: !Ref SecurityGroupId
@@ -76,19 +82,19 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Code:
-        S3Bucket: 
-          Fn::Join:
-          - ''
-          - - 'aws-neptune-customer-samples-'
-            - Ref: AWS::Region
+        S3Bucket:
+          Fn::FindInMap:
+          - RegionMap
+          - Ref: AWS::Region
+          - bucket
         S3Key: chatbot-blog/blog_chatbot_gateway.zip
       Description: Lambda to handle the gateway requests
       FunctionName: chatbot-gateway
       Handler: lambda_function.lambda_handler
       Layers:
-        - !Ref LambdaLayer
+      - !Ref LambdaLayer
       Role: !GetAtt LambdaExecutionRole.Arn
-      Runtime: python3.7
+      Runtime: python3.8
       Timeout: 30
       VpcConfig:
         SecurityGroupIds: !Ref SecurityGroupId
@@ -101,19 +107,19 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Code:
-        S3Bucket: 
-          Fn::Join:
-          - ''
-          - - 'aws-neptune-customer-samples-'
-            - Ref: AWS::Region
+        S3Bucket:
+          Fn::FindInMap:
+          - RegionMap
+          - Ref: AWS::Region
+          - bucket
         S3Key: chatbot-blog/chatbot-database-loader.zip
       Description: Chatbot database loading code for authors
       FunctionName: chatbot-database-loader
       Handler: lambda_function.lambda_handler
       Layers:
-        - !Ref LambdaLayer
+      - !Ref LambdaLayer
       Role: !GetAtt LambdaExecutionRole.Arn
-      Runtime: python3.7
+      Runtime: python3.8
       Timeout: 30
       VpcConfig:
         SecurityGroupIds: !Ref SecurityGroupId
@@ -135,15 +141,15 @@ Resources:
       FunctionName: !GetAtt ChatBotGateway.Arn
       Principal: apigateway.amazonaws.com
       SourceArn:
-          Fn::Join:
-          - ''
-          - - 'arn:aws:execute-api:'
-            - Ref: AWS::Region
-            - ":"
-            - Ref: AWS::AccountId
-            - ":"
-            - Ref: ChatbotGatewayApi
-            - "/*"
+        Fn::Join:
+        - ''
+        - - 'arn:aws:execute-api:'
+          - Ref: AWS::Region
+          - ":"
+          - Ref: AWS::AccountId
+          - ":"
+          - Ref: ChatbotGatewayApi
+          - "/*"
   ChatbotGatewayApiStage:
     Type: AWS::ApiGateway::Stage
     Properties:
@@ -245,9 +251,9 @@ Resources:
         ResponseModels:
           application/json: 'Empty'
         ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: false
-            method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+          method.response.header.Access-Control-Allow-Headers: false
+          method.response.header.Access-Control-Allow-Methods: false
+          method.response.header.Access-Control-Allow-Origin: false
   PostsOptionsMethod:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -275,9 +281,9 @@ Resources:
         ResponseModels:
           application/json: 'Empty'
         ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: false
-            method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+          method.response.header.Access-Control-Allow-Headers: false
+          method.response.header.Access-Control-Allow-Methods: false
+          method.response.header.Access-Control-Allow-Origin: false
   AuthorsGet:
     DependsOn: LambdaPermission
     Type: AWS::ApiGateway::Method
@@ -351,27 +357,27 @@ Resources:
       MethodResponses:
       - StatusCode: 200
 
-# Creates a role that allows Cognito to send SNS messages
+  # Creates a role that allows Cognito to send SNS messages
   SNSRole:
     Type: "AWS::IAM::Role"
     Properties:
-      AssumeRolePolicyDocument: 
+      AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Effect: "Allow"
-            Principal: 
-              Service: 
-                - "cognito-idp.amazonaws.com"
-            Action: 
-              - "sts:AssumeRole"
+        - Effect: "Allow"
+          Principal:
+            Service:
+            - "cognito-idp.amazonaws.com"
+          Action:
+          - "sts:AssumeRole"
       Policies:
-        - PolicyName: "CognitoSNSPolicy"
-          PolicyDocument: 
-            Version: "2012-10-17"
-            Statement: 
-              - Effect: "Allow"
-                Action: "sns:publish"
-                Resource: "*"
+      - PolicyName: "CognitoSNSPolicy"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: "Allow"
+            Action: "sns:publish"
+            Resource: "*"
 
   # Creates a user pool in cognito for your app to auth against
   # This example requires MFA and validates the phone number to use as MFA
@@ -381,28 +387,28 @@ Resources:
     Properties:
       UserPoolName: blog-chatbot-user-pool
       AutoVerifiedAttributes:
-        - phone_number
+      - phone_number
       MfaConfiguration: "ON"
       SmsConfiguration:
         ExternalId: blog-chatbot-external
         SnsCallerArn: !GetAtt SNSRole.Arn
       Schema:
-        - Name: name
-          AttributeDataType: String
-          Mutable: true
-          Required: true
-        - Name: email
-          AttributeDataType: String
-          Mutable: false
-          Required: true
-        - Name: phone_number
-          AttributeDataType: String
-          Mutable: false
-          Required: true
-        - Name: slackId
-          AttributeDataType: String
-          Mutable: true
-  
+      - Name: name
+        AttributeDataType: String
+        Mutable: true
+        Required: true
+      - Name: email
+        AttributeDataType: String
+        Mutable: false
+        Required: true
+      - Name: phone_number
+        AttributeDataType: String
+        Mutable: false
+        Required: true
+      - Name: slackId
+        AttributeDataType: String
+        Mutable: true
+
   # Creates a User Pool Client to be used by the identity pool
   UserPoolClient:
     Type: "AWS::Cognito::UserPoolClient"
@@ -410,83 +416,83 @@ Resources:
       ClientName: blog-chatbot-client
       GenerateSecret: false
       UserPoolId: !Ref UserPool
-  
+
   # Creates a federeated Identity pool
   IdentityPool:
     Type: "AWS::Cognito::IdentityPool"
     Properties:
       IdentityPoolName: blog-chatbotIdentity
       AllowUnauthenticatedIdentities: true
-      CognitoIdentityProviders: 
-        - ClientId: !Ref UserPoolClient
-          ProviderName: !GetAtt UserPool.ProviderName
+      CognitoIdentityProviders:
+      - ClientId: !Ref UserPoolClient
+        ProviderName: !GetAtt UserPool.ProviderName
 
   # Create a role for unauthorized acces to AWS resources. Very limited access. Only allows users in the previously created Identity Pool
   CognitoUnAuthorizedRole:
     Type: "AWS::IAM::Role"
     Properties:
-      AssumeRolePolicyDocument: 
+      AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Effect: "Allow"
-            Principal: 
-              Federated: "cognito-identity.amazonaws.com"
-            Action: 
-              - "sts:AssumeRoleWithWebIdentity"
-            Condition:
-              StringEquals: 
-                "cognito-identity.amazonaws.com:aud": !Ref IdentityPool
-              "ForAnyValue:StringLike":
-                "cognito-identity.amazonaws.com:amr": unauthenticated
+        - Effect: "Allow"
+          Principal:
+            Federated: "cognito-identity.amazonaws.com"
+          Action:
+          - "sts:AssumeRoleWithWebIdentity"
+          Condition:
+            StringEquals:
+              "cognito-identity.amazonaws.com:aud": !Ref IdentityPool
+            "ForAnyValue:StringLike":
+              "cognito-identity.amazonaws.com:amr": unauthenticated
       Policies:
-        - PolicyName: "CognitoUnauthorizedPolicy"
-          PolicyDocument: 
-            Version: "2012-10-17"
-            Statement: 
-              - Effect: "Allow"
-                Action:
-                  - "mobileanalytics:PutEvents"
-                  - "cognito-sync:*"
-                Resource: "*"
+      - PolicyName: "CognitoUnauthorizedPolicy"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: "Allow"
+            Action:
+            - "mobileanalytics:PutEvents"
+            - "cognito-sync:*"
+            Resource: "*"
       ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/AmazonLexRunBotsOnly"
+      - "arn:aws:iam::aws:policy/AmazonLexRunBotsOnly"
 
   # Create a role for authorized acces to AWS resources. Control what your user can access. This example only allows Lambda invokation
   # Only allows users in the previously created Identity Pool
   CognitoAuthorizedRole:
     Type: "AWS::IAM::Role"
     Properties:
-      AssumeRolePolicyDocument: 
+      AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Effect: "Allow"
-            Principal: 
-              Federated: "cognito-identity.amazonaws.com"
-            Action: 
-              - "sts:AssumeRoleWithWebIdentity"
-            Condition:
-              StringEquals: 
-                "cognito-identity.amazonaws.com:aud": !Ref IdentityPool
-              "ForAnyValue:StringLike":
-                "cognito-identity.amazonaws.com:amr": authenticated
+        - Effect: "Allow"
+          Principal:
+            Federated: "cognito-identity.amazonaws.com"
+          Action:
+          - "sts:AssumeRoleWithWebIdentity"
+          Condition:
+            StringEquals:
+              "cognito-identity.amazonaws.com:aud": !Ref IdentityPool
+            "ForAnyValue:StringLike":
+              "cognito-identity.amazonaws.com:amr": authenticated
       ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/AmazonLexRunBotsOnly"
+      - "arn:aws:iam::aws:policy/AmazonLexRunBotsOnly"
       Policies:
-        - PolicyName: "CognitoAuthorizedPolicy"
-          PolicyDocument: 
-            Version: "2012-10-17"
-            Statement: 
-              - Effect: "Allow"
-                Action:
-                  - "mobileanalytics:PutEvents"
-                  - "cognito-sync:*"
-                  - "cognito-identity:*"
-                Resource: "*"
-              - Effect: "Allow"
-                Action:
-                  - "lambda:InvokeFunction"
-                Resource: "*"
-  
+      - PolicyName: "CognitoAuthorizedPolicy"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: "Allow"
+            Action:
+            - "mobileanalytics:PutEvents"
+            - "cognito-sync:*"
+            - "cognito-identity:*"
+            Resource: "*"
+          - Effect: "Allow"
+            Action:
+            - "lambda:InvokeFunction"
+            Resource: "*"
+
   # Assigns the roles to the Identity Pool
   IdentityPoolRoleMapping:
     Type: "AWS::Cognito::IdentityPoolRoleAttachment"
@@ -517,4 +523,4 @@ Outputs:
     Value: !Sub "https://${ChatbotGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/LATEST"
 
 
-      
+
