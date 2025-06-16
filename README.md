@@ -1,62 +1,129 @@
-## Amazon Neptune Samples
+# Amazon Neptune Samples
 
-Samples and documentation for using the Amazon Neptune graph database service
+The following repository contains application and code examples using Amazon Neptune Database and Amazon Neptune Analytics.  The projects contained here are provided as sample code and are maintained as "best-effort".  Further modifications may be necessary to deploy any of these samples in a production environment.
 
-## Tools and Utilities
+For a list of other utilities and open source projects maintained by the Amazon Neptune team, see the list of [Related Works](https://github.com/aws-samples/amazon-neptune-samples#related-works) further below.
 
-You may also be interested in the [Amazon Neptune Tools](https://github.com/awslabs/amazon-neptune-tools) github repository, which includes tools for data export, conversion, gremlin client load balancing, and more.
+## Sample Projects
+This repository contains the following sample projects:
+- [**1g-playground**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/1g-playground): A command line tool implementing the [OneGraph](https://arxiv.org/abs/2110.13348) data model . Acts as an in-memory data store for both RDF data and labeled property graphs.
+- [**Amazon Neptune with Amundsen**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/amazon-neptune-and-aws-cdk-for-amundsen): Amundsen is a data discovery and metadata engine for improving the productivity of data analysts, data scientists and engineers when interacting with data.  This project is to simplify the provisioning and configuration of an environment, using Amazon Neptune, for you to take advantage of Amundsen.
+- [**Investment Analysis on EDGAR Using Vector Similarity Search (VSS)**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/investment-analysis-on-edgar-using-vss): The demo covers setting up a data pipeline to convert the raw EDGAR dataset to a Knowledge Graph, running Vector Similarity Search (VSS) combined with graph traversal queries, and provides a frontend for visualization.
+- [**Neptune Locust**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/neptune-locust): A library to create performance tests on Amazon Neptune when using Locust by providing rich User classes for testing using the Amazon Boto3 SDK, Gremlin Python, and Amazon Neptune Bolt.
+- [**openCypher Cheatsheet**](https://github.com/aws-samples/amazon-neptune-samples/blob/master/opencypher/Cheatsheet.md): An non-comprehensive set of various graph query patterns using the openCypher query language.
+- [**Property Graph Schema for RDF**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/pg-schema-for-rdf): An experiment that adds an "RDF-friendly" syntax to the PG-Schema proposal to explore possibilities for better aligment between RDF and Labeled Property Graphs (LPGs).
+- **Apache TinkerPop Gremlin with Amazon Neptune related works**:
+    - [**Knowledge Graph Chatbot Full Stack Application Example**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/gremlin/chatbot-full-stack-application): A sample full stack application showing how to build a knowledge graph backed application with NLP and Natural Language search integration using Amazon Neptune, Amazon Comprehend, and Amazon Lex.
+    - [**Collaborative Filtering Using Gremlin**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/gremlin/collaborative-filtering):  This example is a gremlin tutorial that shows how to explore the graph with sample queries. It also shows how to make recommendations using collaborative filtering.
+    - [**An Example of an ETL Process for Transforming and Loading Data Into Amazon Neptune**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/gremlin/etl-from-relational-model):  This example shows how you can take data that was formerly in some form of relational data model, manipulate that data into a graph model, and then use other services in AWS to perform the data transformation into the data format supported for loading into Amazon Neptune.
+    - [**Migrating from MySQL to Amazon Neptune using AWS Glue**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/gremlin/glue-neptune): This demo shows how to use AWS Glue to migrate data to Amazon Neptune. The example shows migrating data from Amazon Aurora MySQL, but you can use the same approach to migrate from any source that you can access with AWS Glue.
+    - [**Gremlin Java Client Demo**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/gremlin/gremlin-java-client-demo): This app show how to use the Gremlin Java client to connect to Amazon Neptune via a Network Load Balancer (NLB) or Application Load Balancer (ALB), with or without SSL enabled, and with or without IAM DB Authentication enabled.
+    - [**Gremlin Node.js Client Demo**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/gremlin/gremlin-node.js-client-demo):  A Jupyter notebook containing examples of how to use Gremlin Node.js client driver.
+    - [**Neptune Gremlin Client Demo**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/gremlin/neptune-gremlin-client-demo):  CloudFormation templates and Jupyter notebooks containing examples for using the [Neptune Gremlin Client](https://github.com/aws/neptune-gremlin-client).
+    - [**Using Amazon Neptune for analysing social media feeds**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/gremlin/neptune-social-media-utils): An example that provides code for generating a social media feeds and loading this data into Neptune Database.
+    - [**Neptune Streams Demo**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/gremlin/neptune-streams):  Sample code for building custom workflows leveraging Neptune Streams.  Related to blog post: https://aws.amazon.com/blogs/database/capture-graph-changes-using-neptune-streams/.
+    - [**Visualize data in Amazon Neptune using Ogma library**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/gremlin/ogma-neptune): A hands-on exercise of visualizing graph data in Amazon Neptune using [Ogma](https://doc.linkurious.com/ogma/latest/) library.  Ogma is a Javascript library for large-scale interactive graph visualizations.
+    - [**Property Graph Data Modeling**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/gremlin/property-graph-data-modelling): A "working backwards" approach to designing and implementing an application graph data model and queries based on a backlog of use cases.
+    - [**Writing to Amazon Neptune from Amazon Kinesis Data Streams**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/gremlin/stream-2-neptune):  This example demonstrates using an Amazon Kinesis Data Stream and AWS Lambda to issue batch writes to Amazon Neptune.
+    - [**Visualize data in Amazon Neptune using VIS.js library**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/gremlin/visjs-neptune): A hands-on exercise of visualizing graph data in Amazon Neptune using VIS.js library.
 
-### Amazon Neptune Graphs and Jupyter Notebooks
 
-__[August 2021]__ The Neptune-SageMaker examples in this repository have been deprecated in favour of the [Amazon Neptune Workbench](https://docs.aws.amazon.com/neptune/latest/userguide/graph-notebooks.html). We recommend that you use the Workbench for all new Neptune notebook development. Alternatively, you can create your own notebooks using the [_neptune-python-utils_ library](https://github.com/awslabs/amazon-neptune-tools/tree/master/neptune-python-utils). Note that _neptune-python-utils_ supports Gremlin Python 3.5.x. As such, it is not compatible with the Neptune Workbench, which currently supports 3.4.x.
 
-<del>Whether you’re creating a new graph data model and queries, or exploring an existing graph dataset, it can be useful to have an interactive query environment that allows you to visualize the results. This [directory](neptune-sagemaker/README.md) has samples from two blog posts to show you how to achieve this by connecting an Amazon SageMaker notebook to an Amazon Neptune database. Using the notebook, you load data into the database, query it and visualize the results.</del>
+## Related Works
 
-- <del>[Blog Post: Analyze Amazon Neptune Graphs Using Amazon Sagemaker Jupyter Notebooks](https://aws.amazon.com/blogs/database/analyze-amazon-neptune-graphs-using-amazon-sagemaker-jupyter-notebooks/)</del>
-- <del>[Blog Post: Let Me Graph that for You - Part 1 - Air Routes](https://aws.amazon.com/blogs/database/let-me-graph-that-for-you-part-1-air-routes/)</del>
+Amazon Neptune maintains a number of production-ready utilities in the /aws GitHub organization, as well as semi-regular maintained utilities in the /awslabs GitHub organization.  A list of these other repos can be found here:
 
-### Writing to Amazon Neptune from Amazon Kinesis Data Streams
+### Aamzon Neptune Open Source Projects
+Projects fully maintained in the /aws GitHub organization:
+- [**Graph Notebook**](https://github.com/aws/graph-notebook): Integration with Jupyter Notebook and JupyterLab for interacting with graph databases, including Amazon Neptune.
+- [**Graph Explorer**](https://github.com/aws/graph-explorer): A React-based web application that enables users to visualize both property graph and RDF data and explore connections between data without having to write graph queries.
+- [**Amazon Neptune for GraphQL**](https://github.com/aws/amazon-neptune-for-graphql): The Amazon Neptune utility for GraphQL™ is a Node.js command-line utility to help with the creation and maintenance of a GraphQL API for the Amazon Neptune Database or Neptune Analytics graph.
+- [**Neptune Export**](https://github.com/aws/neptune-export): Exports Amazon Neptune property graph data to CSV or JSON, or RDF graph data to Turtle.
+- [**Neptune Gremlin Client**](https://github.com/aws/neptune-gremlin-client): A Java Gremlin client for Amazon Neptune that allows you to change the endpoints used by the client as it is running. Includes an endpoint refresh agent that can get cluster topology details, and update the client on a periodic basis. You can supply your own custom endpoint selectors to configure the client for a subset of instances in your cluster based on tags, instance types, instance IDs, Availability Zones, etc.
+- [**Neptune JDBC Driver**](https://github.com/aws/amazon-neptune-jdbc-driver): This driver provides read-only JDBC connectivity for the Amazon Neptune service using SQL, Gremlin, openCypher and SPARQL queries.
+- [**Amazon Neptune CSV-to-RDF Converter**](https://github.com/aws/amazon-neptune-csv-to-rdf-converter): A tool for Amazon Neptune that converts property graphs stored as comma separated values into RDF graphs.
+- [**Amazon Neptune SigV4 Signer**](https://github.com/aws/amazon-neptune-sigv4-signer): A library for sending AWS Signature Version 4 signed requests over HTTP to Amazon Neptune. 
+- [**Amazon Neptune Gremlin Java SigV4**](https://github.com/aws/amazon-neptune-gremlin-java-sigv4): An extension to GremlinDriver with a custom channelizer that enables AWS Signature Version 4 signed requests to Amazon Neptune.
+- [**Amazon Neptune SPARQL Java SigV4**](https://github.com/aws/amazon-neptune-sparql-java-sigv4): A SPARQL client for Amazon Neptune that includes AWS Signature Version 4 signing. Implemented as an RDF4J repository and Jena HTTP Client.
+- [**Amazon Neptune DotNet SigV4**](https://github.com/aws/amazon-neptune-gremlin-dotnet-sigv4): https://github.com/aws/amazon-neptune-gremlin-dotnet-sigv4
+- [**AWS SDK Pandas**](https://github.com/aws/aws-sdk-pandas): Pandas integration with various AWS services, include Amazon Neptune. Sample notebook showing Neptune integration is [here](https://github.com/aws/aws-sdk-pandas/blob/main/tutorials/033%20-%20Amazon%20Neptune.ipynb).
+- [**Amazon Athena Query Federation SDK**](https://github.com/awslabs/aws-athena-query-federation): Provides integration between varoius AWS services and Athena to allow query of datasets in other data stores through Athena. Documentation regarding Neptune's integration can be found [here](https://docs.aws.amazon.com/athena/latest/ug/connectors-neptune.html).
 
-This [example](gremlin/stream-2-neptune/) demonstrates using an Amazon Kinesis Data Stream and AWS Lambda to issue batch writes to Amazon Neptune. The code samples use the Gremlin API, but it can be readily adapted for RDF graphs as well.
+### Aamzon Neptune AWSLabs Tools
+Projects regularly maintained in the /awslabs GitHub organization:
+- [**Amazon Neptune Tools**]():
+    - [**CSV Gremlin**](https://github.com/awslabs/amazon-neptune-tools/tree/master/csv-gremlin): Convert Amazon Neptune format CSV files into Gremlin steps that can be used to load the data.
+    - [**CSV-to-Neptune Bulk Format**](https://github.com/awslabs/amazon-neptune-tools/tree/master/csv-to-neptune-bulk-format): A utility to identify nodes and edges in source CSV data file(s) and generate the Amazon Neptune gremlin load data format files. 
+    - [**Drop Graph**](https://github.com/awslabs/amazon-neptune-tools/tree/master/drop-graph): A Python script for performantly deleting all data from a Neptune Database.
+    - [**Dynamic Custom Endpoints**](https://github.com/awslabs/amazon-neptune-tools/tree/master/dynamic-custom-endpoints): Dynamic Custom Endpoints allows you to create Amazon Neptune custom endpoints for a Neptune cluster based on custom specifications with application-meaningful criteria.
+    - [**Export Neptune to Elasticsearch**](https://github.com/awslabs/amazon-neptune-tools/tree/master/export-neptune-to-elasticsearch): This solution allows you to index existing data in an Amazon Neptune database in Elasticsearch/OpenSearch before enabling Neptune's full-text search integration.
+    - [**GraphML-to-CSV**](https://github.com/awslabs/amazon-neptune-tools/tree/master/graphml2csv): A utility to convert GraphML files into the CSV format that is used by Amazon Neptune for Bulk Loading.
+    - [**Neo4j-to-Neptune**](https://github.com/awslabs/amazon-neptune-tools/tree/master/neo4j-to-neptune): A command-line utility for migrating data from Neo4j to Neptune.
+    - [**Neptune Gremlin JS**](https://github.com/awslabs/amazon-neptune-tools/tree/master/neptune-gremlin-js): An SDK for querying an Amazon Neptune graph database using gremlin-javascript.
+    - [**Neptune Python Utils**](https://github.com/awslabs/amazon-neptune-tools/tree/master/neptune-python-utils): A library that simplifies using Gremlin-Python to connect to Amazon Neptune.
+    - [**Neptune Serverless Evaluator**](https://github.com/awslabs/amazon-neptune-tools/tree/master/neptune-serverless-evaluator): Evaluates workloads to determine if Neptune Serverless is more cost effective versus using Neptune provisioned instances.
+    - [**Neptune Streams Utils**](https://github.com/awslabs/amazon-neptune-tools/tree/master/neptune-streams-utils): This project includes example Neptune Streams handlers and build scripts, and a command-line tool that installs a handler in the Neptune Streams polling framework.
+    - **Archived/moved projects**:
+        - [**Glue Neptune**]():  Now part of [neptune-python-utils](https://github.com/awslabs/amazon-neptune-tools/tree/master/neptune-python-utils).
+        - [**Neptune Export**](https://github.com/awslabs/amazon-neptune-tools/tree/master/neptune-export):  Now a standalone project, [neptune-export](https://github.com/aws/neptune-export) that is being fully maintained.
+        - [**Neptune Gremlin Client**](https://github.com/awslabs/amazon-neptune-tools/tree/master/neptune-gremlin-client):  Now a standalone project, [neptune-gremlin-client](https://github.com/aws/neptune-gremlin-client) that is being fully maintained.
+        - [**NeptuneML Toolkit**](https://github.com/awslabs/neptuneml-toolkit): A python library for developing models for machine learning on graphs with Amazon Neptune ML, a feature of Amazon Neptune.
 
-### ETL Process for Transforming and Loading Data Into Amazon Neptune
+### Other Example Projects Using Amazon Neptune
 
-The following [lab](gremlin/etl-from-relational-model) uses the open [IMDB dataset](https://www.imdb.com/interfaces/). This is a small subset of the full IMDB.com application. With this dataset, we want to develop an application that allows for us to find whether or not an actor or actress is no more than [six degrees separated from the actor Kevin Bacon](https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon). In this example, AWS Glue and Amazon Athena are used to discover and transform the relational model used by IMDB into a graph model that can be loaded into Amazon Neptune. This pattern can be used to transform other relational models into graph models for similar purposes.
+Projects hosted in other repositories:
 
-### Gremlin
+- Generative AI Examples:
+    - [**Amazon Neptune Generative AI Samples**](https://github.com/aws-samples/amazon-neptune-generative-ai-samples): This repository contains examples and sample code to help customers get started with using Amazon Neptune in Generative AI applications.
+    - [**Uncovering Hidden Connections in Unstructured Financial Data using Amazon Bedrock and Amazon Neptune**](https://github.com/aws-samples/uncovering-hidden-connections-in-unstructured-financial-data): This repository contains code to deploy a prototype solution that demonstrates how Generative AI and knowledge graph can be combined to create a scalable, event-driven, serverless system to process unstructured data for financial services.
+    - [**Text-to-SPARQL Generation for UniProt**](https://github.com/aws-samples/text-to-sparql-on-neptune-with-uniprot): In this repository, we demonstrate how to ask natural language questions about proteins on the Universal Protein Resource (UniProt) dataset.
 
-#### Chatbot Full Stack Application
+- Visualization Examples:
+    - [**CDK Neptune Knowledge Graph**](https://github.com/aws-samples/cdk-neptune-knowledge-graph): This CDK sample application deploys a Neptune cluster and a static web site to provide a convenient user interface for building a knowledge graph. It uses Cognito to provide authentication to the web site.
+    - [**Visualize your AWS Infrastructure with Amazon Neptune and AWS Config**](https://github.com/aws-samples/amazon-neptune-aws-config-visualization): This repository contains the resources referred in the blog post Visualize your AWS Infrastructure with Amazon Neptune and AWS Config. Follow the steps mentioned in the blog to deploy the infrastructure to visualize the AWS resources and their relationships using Amazon Neptune and AWS Config.
+    - [**Visualizing Amazon Textract output with Amazon Neptune**](https://github.com/aws-samples/visualize-amazon-textract-with-amazon-neptune): The output from Amazon Textract is a series of JSON documents representing words, lines, tables, and other document components. In this example notebook, we show how to ingest this output into an Amazon Neptune graph database and visualize some of the relationships.
+    - [**Visualize your AWS VPC with Neptune**](https://github.com/aws-samples/amazon-neptune-vpc-visualization): How you can view the peering and internet connections between VPC’s in your AWS accounts, assuming you have a star topology. Ensure that you have a VPC with private subnets and a security group that allows all inbound traffic from itself; input this info into the CLI commands. 
 
-This is an [example](gremlin/chatbot-full-stack-application/README.md) of using Amazon Neptune in combination with Amazon Comprehend and Amazon Lex to build a full stack knowledge graph application with NLP and Natural Language Search capabilities.
+- Graph Application Development:
+    - [**Automated testing of graph queries (Gremlin)**](https://github.com/aws-samples/automated-testing-graph-queries): This repository provides an approach to the automated testing of Gremlin queries that have been written to run against a property graph in Amazon Neptune. 
+    - [**Graph Virtualization in Amazon Neptune**](https://github.com/aws-samples/amazon-neptune-graph-virtualization): This repository demonstrates graph virtualization, specifically the ability to run a query against an Amazon Neptune graph database that brings in additional data residing outside the Neptune database in a data lake.
+    - [**Build a graph application with Amazon Neptune and AWS Amplify**](https://github.com/aws-samples/build-neptune-graphapp-cdk): This solution uses Amplify to host the application, and all access to Neptune is handled by Lambda functions that are invoked by AWS AppSync. The front end is created with React, and the backend is powered by Lambda functions built with Node.js. This application uses Apache TinkerPop Gremlin to access the graph data in Neptune. Related blog post: https://aws.amazon.com/blogs/database/build-a-graph-application-with-amazon-neptune-and-aws-amplify/
+    - [**Automated endpoint management for Amazon Neptune Global Database**](https://github.com/aws-samples/amazon-neptune-global-database-endpoint-automation): A solution for automating failover between resident clusters in a Neptune Global Database deployment.
+    - [**ObservableHQ Notebooks with AWS AppSync & Neptune**](https://github.com/aws-samples/appsync-observablehq-examples): This is meant as a code example to display custom visualization of Neptune graph database data, leveraging ObservableHQ notebooks inside a SPA.   
+    - [**Implement Time to Live in Amazon Neptune**](https://github.com/aws-samples/amazon-neptune-ttl-repo): How to implement time-to-live (TTL) for graph data hosted in Amazon Neptune.  Related blog post:  https://aws.amazon.com/blogs/database/implement-time-to-live-in-amazon-neptune-part-1-property-graph/
 
-#### Collaborative Filtering
 
-This is an [example](gremlin/collaborative-filtering/README.md) of using Gremlin and making recommendations using collaborative filtering. It includes examples of loading data and Gremlin traversals.
+- Graph Data Modeling:
+    - [**Amazon Neptune Ontology and Multimodel Blog Example**](https://github.com/aws-samples/amazon-neptune-ontology-example-blog): Using the example of a modern organization, how to build and validate the organizational graph of a fictional company from an organizational model described in OWL. We take a top-down, model-driven approach: from the model, we validate instances and create a template for populating new instances. Related blog post: https://aws.amazon.com/blogs/database/model-driven-graphs-using-owl-in-amazon-neptune/
 
-#### Visualize data in Amazon Neptune using VIS.js library
+- Graph Machine Learning:
+    - [**Amazon Neptune ML Use Cases Workshops**](https://github.com/aws-samples/amazon-neptune-ml-use-cases): This repository contains code examples for building machine learning on graphs using Neptune ML. The code example covers a few use cases including Fraud Detection and Recommendations.
+    - [**NeptuneML CDK Stack**](https://github.com/aws-samples/aws-cdk-wrapper-for-amazon-neptune-export-for-fake-news-detection): A version of the NeptuneML CloudFormation stack refactored into CDK.
+    - [**Build an event-driven knowledge graph with machine-learning**](https://github.com/aws-samples/build-an-event-driven-knowledge-graph-with-machine-learning): This sample-code demonstrates how to build an event-driven knowledge graph with machine-learning using Amazon SageMaker and Amazon Neptune.
+    - [**Fine-tune a Tensorflow 2 BERT model for a custom named entity recognition and build a knowledge graph of extracted entities**](https://github.com/aws-samples/aws-neptune-sagemaker-knowledge-graph-bert): In this repository we present how to build a custom named entity recognition, by fine-tuning BERT on Tensorflow 2 with Keras using the SageMaker Python SDK and then build and populate a knowledge graph of items through these extracted properties using Amazon Neptune.
+    - [**Detecting Social Media Fake News with Amazon Neptune ML**](https://github.com/aws-samples/amazon-neptune-ml-fake-news-detection): How to use Amazon Neptune ML to detect fake news based on the content and social context of the news on social media.  Related blog post: https://aws.amazon.com/blogs/machine-learning/detect-social-media-fake-news-using-graph-machine-learning-with-amazon-neptune-ml/ 
+    - [**Training ML models for anomoly detection in industrial equipment**](https://github.com/aws-samples/aws-neptune-sitewise-industrial-ml-cdk): The solution is targeted at HVAC (Heating, Ventilation, and Air Conditioning) and manufacturing usecases, where pieces of equipment (assets) can be represented in a knowledge graph. Amazon Neptune is the graph database used to store the asset's metadata. AWS IoT SiteWise stores the asset's telemetry data. We will use a simple statistical anomaly detection method to detect analogous temperature values on the provided synthetic data. However, this repository is designed to allow you to include your own custom ML model, taking advantage of the graph relationships within Neptune.
 
-This [GitHub lab](gremlin/visjs-neptune) will take you through hands-on excercise of visualizing graph data in Amazon Neptune using VIS.js library. Amazon Neptune is a fast, reliable, fully-managed graph database service available from AWS. With Amazon Neptune you can use open source and popular graph query languages such as Apache TinkerPop Gremlin for property graph databases or SPARQL for W3C RDF model graph databases.
+- Graph Use Cases:
+    - [**How to implement relationship-based access control with Amazon Verified Permissions and Amazon Neptune**](https://github.com/aws-samples/implementing-relationship-based-access-control-with-amazon-verified-permissions-and-amazon-neptune): This repository provides an AWS CloudFormation template that deploys a sample application demonstrating the implementation of Relationship-based Access Control (ReBAC) using Amazon Verified Permissions and Amazon Neptune, a managed, serverless graph database on AWS. Related blog post: https://aws.amazon.com/blogs/security/how-to-implement-relationship-based-access-control-with-amazon-verified-permissions-and-amazon-neptune/
+    - [**AWS Neptune Mortgage Backed Security data model**](https://github.com/aws-samples/aws-neptune-mortgage-backed-security-data-model): In mortgage-backed securities (MBS), there is a need to provide a holistic view of loan, borrower, property, pool, security, servicer, originator and many such as related entities in a highly-connected manner. By migrating the data to Amazon Neptune, we can dismantle barriers between data sources via a knowledge graph approach which can provide a basis for better risk modeling and data consumption by means of several APIs. Related blog post: https://aws.amazon.com/blogs/database/build-a-mortgage-backed-securities-data-model-using-amazon-neptune/
+    - [**Implementing OpenEMPI patient matching in Amazon Neptune**](https://github.com/aws-samples/neptune-open-empi-migration): How to adopt the Open Enterprise Master Patient Index (OpenEMPI) architecture in Amazon Neptune, a managed graph database service. OpenEMPI is an architecture for a central repository of patients across facilities. It is designed to accommodate incomplete or inaccurate patient data and avoid duplicate records, a common challenge with patient data.
+    - [**Social Graph Based People Recommender Using Amazon Neptune And Textract**](https://github.com/aws-samples/social-graph-based-people-recommender-using-amazon-neptune-and-textract): Implementing a social graph recommenations using Neptune.
+    - [**Generate a knowledge graph of video metadata**](https://github.com/aws-samples/etl-into-amazon-neptune-graph):  Unstructured data such as text and video is rich with information that can deliver valuable insights. Ingesting this data is easy using AWS services, however, studying relationships between features in the data is best handled using graph representations. This repository contains the necessary resources for deploying a Graph ETL stack using AWS Serverless Application Model (SAM).
+    - [**Bringing Media2Cloud Video Analysis into Amazon Neptune Knowledge Graph**](https://github.com/aws-samples/neptune-m2c-kg): Facilitates the migration of your digital assets to the cloud, allowing you to take full advantage of the latest advancements in asset management and prepare content for distribution to media consumers. It sets up serverless ingestion and analysis workflows to move your video assets and associated metadata to the AWS Cloud. Related: https://aws.amazon.com/solutions/guidance/media2cloud-on-aws/
+    - [**Automotive Supply Chain Example Jupyter Notebook**](https://github.com/aws-samples/supply-chain-data-analysis-and-visualization-using-amazon-neptune): Sample notebook showing various supply chain related methods using graphs.
+    - [**Analyze healthcare FHIR data with Amazon Neptune**](https://aws.amazon.com/blogs/database/analyze-healthcare-fhir-data-with-amazon-neptune/): Jow to generate insights from healthcare FHIR (Fast Healthcare Interoperability Resources) data with Amazon Neptune, a fast, reliable, fully managed graph database service. Related blog post: https://aws.amazon.com/blogs/database/analyze-healthcare-fhir-data-with-amazon-neptune/
+    - [**Connected Platform – Integrating Sales and Service with AWS Neptune**](https://github.com/aws-samples/aws-neptune-asset-management): In this workshop, we will build a connected graph that integrates sales and service data using AWS Neptune. Once the graph is built, we will explore how sales analysts can use sale and service data in Neptune to identify additional sales opportunities.
+    - [**Exploring the UniProt protein knowledgebase with AWS Open Data and Amazon Neptune**](https://github.com/aws-samples/explore-uniprotkb-with-amazon-neptune): The step-by-step process to create and use your own protein knowledge base using UniProt RDF data. We will show how to ingest a subset of UniProtKB data into your own Amazon Neptune database directly from the Registry of Open Data on AWS. We will then show how to query the data with SPARQL, create new relationships in the data and visualise the data as a graph. Related blog post: https://aws.amazon.com/blogs/industries/exploring-the-uniprot-protein-knowledgebase-with-aws-open-data-and-amazon-neptune/
 
-#### Property Graph Data Models
+- **Archived**:
+    - [**Serverless Application with AWS AppSync and Amazon Neptune**](https://github.com/aws-samples/aws-appsync-calorie-tracker-workshop): A workshop to build a serverless Calorie tracker application that will allow users to setup a daily calorie target goal, allows them to add, update and track the calories consumed or burned daily, and receive food suggestions based on their food habits.
+    - [**Shop-by-Style Experience using PyTorch and SageMaker**](https://github.com/aws-samples/aws-sagemaker-pytorch-shop-by-style): How easy it is to create a shop-by-style experience. I’ll introduce you to AWS services that can put you on the right path for rapid experimentation and innovation of new customer experiences. Related blog post: https://aws.amazon.com/blogs/machine-learning/a-personalized-shop-by-style-experience-using-pytorch-on-amazon-sagemaker-and-amazon-neptune/
 
-These [examples](gremlin/property-graph-data-modelling) demonstrate a "working backwards" approach to designing and implementing an application graph data model and queries based on a backlog of use cases.
+## Contributing
 
-The design process here is shown in "slow motion", with each use case triggering a revision to the data model, the introduction of new queries, and updates to existing queries. In many real-world design sessions you would compress these activities and address several use cases at once, converging on a model more immediately. The intention here is to unpack the iterative and evolutionary nature of the many modelling processes that often complete in the "blink of an eye".
-
-### RDF & SPARQL
-
-#### PG-Schema for RDF
-
-An [experiment](./pg-schema-for-rdf) to extend the PG-Schema proposal to work with RDF also.
-
-**More coming soon!**
-
-### Related samples
-
-#### Serverless Application with AWS AppSync and Amazon Neptune
-
-You may also be interested in this [example serverless application](https://github.com/aws-samples/aws-appsync-calorie-tracker-workshop) that uses AWS AppSync GraphQL and Amazon Neptune.
+Please see the [CONTRIBUTING.md](https://github.com/aws-samples/amazon-neptune-samples/blob/master/CONTRIBUTING.md) file if you are interested in adding your own example project in this repository.
 
 ## License Summary
 
-This sample code is made available under a modified MIT license. See the LICENSE file.
+This sample code is made available under a modified MIT license. See the [LICENSE](https://github.com/aws-samples/amazon-neptune-samples/blob/master/LICENSE) file.
