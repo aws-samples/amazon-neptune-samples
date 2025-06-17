@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "neptune-gs"
+version = "0.1.0"
+description = "Helps prepare Neptune data for use in GraphStorm"
+authors = ["Theodore Vasiloudis <thvasilo@amazon.com>"]
+license = "MIT-0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pandas = "^2.2.3"
+boto3 = ">=1.36.*"
+pyarrow = "^19.0.0"
+s3fs = ">=2023.12.2"
+urllib3 = ">=1.26,<2"
+joblib = "^1.4.2"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+boto3-stubs = {extras = ["s3"], version = "^1.36.14"}
+pre-commit = "^4.1.0"
+ruff = "^0.9.6"
+pandas-stubs = "2.2.2.240807"
+pytest = "^8.3.4"
+# Run tests with pytest --cov=neptune_gs --cov-report=xml .
+pytest-cov = "^6.0.0"
+pyarrow-stubs = "^17.17"
+moto = "^5.1.0"
+pytest-mock = "^3.14.0"
+mock = "<5.2.0"
+types-mock = "^5.2.0.20250306"
+
+[build-system]
+requires = ["poetry-core<2.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+create-gconstruct = "neptune_gs.create_gconstruct:main"
+attach-gs-data = "neptune_gs.attach_gs_data:main"
