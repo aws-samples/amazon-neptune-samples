@@ -36,7 +36,7 @@ This repository contains the following sample projects:
 
 Amazon Neptune maintains a number of production-ready utilities in the /aws GitHub organization, as well as semi-regular maintained utilities in the /awslabs GitHub organization.  A list of these other repos can be found here:
 
-### Aamzon Neptune Open Source Projects
+### Amazon Neptune Open Source Projects
 Projects fully maintained in the /aws GitHub organization:
 - [**Graph Notebook**](https://github.com/aws/graph-notebook): Integration with Jupyter Notebook and JupyterLab for interacting with graph databases, including Amazon Neptune.
 - [**Graph Explorer**](https://github.com/aws/graph-explorer): A React-based web application that enables users to visualize both property graph and RDF data and explore connections between data without having to write graph queries.
@@ -52,7 +52,7 @@ Projects fully maintained in the /aws GitHub organization:
 - [**AWS SDK Pandas**](https://github.com/aws/aws-sdk-pandas): Pandas integration with various AWS services, include Amazon Neptune. Sample notebook showing Neptune integration is [here](https://github.com/aws/aws-sdk-pandas/blob/main/tutorials/033%20-%20Amazon%20Neptune.ipynb).
 - [**Amazon Athena Query Federation SDK**](https://github.com/awslabs/aws-athena-query-federation): Provides integration between varoius AWS services and Athena to allow query of datasets in other data stores through Athena. Documentation regarding Neptune's integration can be found [here](https://docs.aws.amazon.com/athena/latest/ug/connectors-neptune.html).
 
-### Aamzon Neptune AWSLabs Tools
+### Amazon Neptune AWSLabs Tools
 Projects regularly maintained in the /awslabs GitHub organization:
 - [**Amazon Neptune Tools**]():
     - [**CSV Gremlin**](https://github.com/awslabs/amazon-neptune-tools/tree/master/csv-gremlin): Convert Amazon Neptune format CSV files into Gremlin steps that can be used to load the data.
