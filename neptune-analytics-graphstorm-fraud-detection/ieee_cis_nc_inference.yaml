@@ -1,0 +1,43 @@
+---
+version: 1.0
+gsf:
+  basic:
+    model_encoder_type: rgcn
+    graph_name: ieee-cis-nc
+    backend: gloo
+    verbose: false
+    no_validation: false
+    eval_frequency: 1000
+  gnn:
+    fanout: "10,10"
+    eval_fanout: "10,10"
+    num_layers: 2
+    hidden_size: 128
+    mini_batch_infer: false
+  hyperparam:
+    dropout: 0.05
+    lr: 0.001
+    gnn_warmup_epochs: 0
+    batch_size: 1024
+    eval_batch_size: 1024
+    wd_l2norm: 0.0001
+    loss_weight: true
+    num_epochs: 20
+  rgcn:
+    n_bases: -1
+    use_self_loop: true
+    self_loop_init: false
+    use_node_embeddings: false
+    node_feat_name:
+      - "Transaction:M1,M2,M3,M4,M5,M6,M7,M8,M9,Transaction-numerical_feats"
+  node_classification:
+    num_classes: 2
+    target_ntype: "Transaction"
+    label_field: "isFraud:Int"
+    multilabel: false
+    return_proba: true
+    class_loss_func: focal
+    gamma: 2.0
+    alpha: 0.8
+    infer_all_target_nodes: true
+    no_validation: true

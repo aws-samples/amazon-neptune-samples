@@ -59,15 +59,14 @@ The tool will analyze your exported data and generate a GraphStorm configuration
 - Label configurations for graph machine learning tasks
 
 To facilitate the automated discover of labels you can provide a
-task_name, node/edge type, label column triplet to `--task-info`,
+**task_name, target node/edge type, label column** triplet to `--task-info`,
 separated by spaces:
 
 ```bash
 create-gconstruct \
     --input-path "s3://your-bucket/neptune-export/your-graph/<export-task-id>" \
     --graph-id "g-51rmvXXXXX" \
-    --task-info "classification" "Transaction" "is_fraud" \
-    --verbose
+    --task-info "classification" "Transaction" "is_fraud" # The task is "classification", the target node type is "Transaction", the target column is "is_fraud"
 ```
 
 ### Attach GraphStorm embeddings to Neptune Analytics output
