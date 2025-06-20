@@ -4,6 +4,9 @@ The following repository contains application and code examples using Amazon Nep
 
 For a list of other utilities and open source projects maintained by the Amazon Neptune team, see the list of [Related Works](https://github.com/aws-samples/amazon-neptune-samples#related-works) further below.
 
+## NEW Projects
+- (June 2025) [**NeptuneGS: Neptune Analytics GraphStorm (Fraud Detection Example)**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/neptune-analytics-graphstorm-fraud-detection/neptune-gs): NeptuneGS (neptune-gs) is a Python package that streamlines the preparation and processing of Amazon Neptune data for use with GraphStorm, allowing users of Neptune to easily integrate graph machine learning into their workflow and enrich their graphs with embeddings and predictions from a Graph Neural Network (GNN) model.
+
 ## Sample Projects
 This repository contains the following sample projects:
 - [**1g-playground**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/1g-playground): A command line tool implementing the [OneGraph](https://arxiv.org/abs/2110.13348) data model . Acts as an in-memory data store for both RDF data and labeled property graphs.
