@@ -11,8 +11,6 @@ python = "^3.9"
 pandas = "^2.2.3"
 boto3 = ">=1.36.*"
 pyarrow = "^19.0.0"
-s3fs = ">=2023.12.2"
-urllib3 = ">=1.26,<2"
 joblib = "^1.4.2"
 
 [tool.poetry.group.dev]
