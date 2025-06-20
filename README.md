@@ -38,6 +38,7 @@ Amazon Neptune maintains a number of production-ready utilities in the /aws GitH
 
 ### Amazon Neptune Open Source Projects
 Projects fully maintained in the /aws GitHub organization:
+- [**GraphRAG Toolkit**](https://github.com/awslabs/graphrag-toolkit): The graphrag-toolkit is a collection of Python tools for building graph-enhanced Generative AI applications.
 - [**Graph Notebook**](https://github.com/aws/graph-notebook): Integration with Jupyter Notebook and JupyterLab for interacting with graph databases, including Amazon Neptune.
 - [**Graph Explorer**](https://github.com/aws/graph-explorer): A React-based web application that enables users to visualize both property graph and RDF data and explore connections between data without having to write graph queries.
 - [**Amazon Neptune for GraphQL**](https://github.com/aws/amazon-neptune-for-graphql): The Amazon Neptune utility for GraphQL™ is a Node.js command-line utility to help with the creation and maintenance of a GraphQL API for the Amazon Neptune Database or Neptune Analytics graph.
@@ -75,6 +76,9 @@ Projects regularly maintained in the /awslabs GitHub organization:
 ### Other Example Projects Using Amazon Neptune
 
 Projects hosted in other repositories:
+
+- Reference Architectures:
+    - [**Graph Reference Architectures**](https://github.com/aws-samples/aws-dbs-refarch-graph): A reference guide for various architectures using Amazon Neptune.
 
 - Generative AI Examples:
     - [**Amazon Neptune Generative AI Samples**](https://github.com/aws-samples/amazon-neptune-generative-ai-samples): This repository contains examples and sample code to help customers get started with using Amazon Neptune in Generative AI applications.
