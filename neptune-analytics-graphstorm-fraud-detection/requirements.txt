@@ -93,6 +93,7 @@ rfc3339-validator==0.1.4
 rfc3986-validator==0.1.1
 rpds-py==0.25.1
 s3transfer==0.13.0
+sagemaker==2.247.1
 scikit-learn==1.7.0
 scipy==1.15.3
 Send2Trash==1.8.3
