@@ -33,14 +33,15 @@ Documentation links below provide documentation for Neptune Database and Neptune
    Short 15-minute videos on various topics like Neptune Serverless, Knowledge graphs, security graphs, graph algorithms, vector search and more!
    [Watch playlist](https://www.youtube.com/playlist?list=PLhr1KZpdzukfS8UlzkdZFzn86t90hUT6i)
 
-- [#GraphThat Video Series](https://www.youtube.com/playlist?list=PLhr1KZpdzukcOrIz7_UIgbdy4_H8CJ_bS)
+- [#GraphThat Video Series](https://www.youtube.com/results?search_query=%23GraphThat&sp=QgsSCUdyYXBoVGhhdA%253D%253D)
    The #GraphThat series features Amazon Neptune specialists taking public datasets and converting them to a graph model optimized for Amazon Neptune.
-   [Watch playlist](https://www.youtube.com/playlist?list=PLhr1KZpdzukcOrIz7_UIgbdy4_H8CJ_bS)
+   [Watch playlist](https://www.youtube.com/results?search_query=%23GraphThat&sp=QgsSCUdyYXBoVGhhdA%253D%253D)
 
 ### Featured Videos
 
 #### AWS re:Invent 2024
-
+- **[AWS re:Invent 2024 - Deep dive into Amazon Neptune and its innovations (DAT317)](https://youtu.be/hha8rzO0dA4)**
+- **[AWS re:Invent 2024 - Generative AI–powered graph for network digital twin (TLC202)](https://youtu.be/Pz2IlR3s8ss)**
 
 #### AWS re:Invent 2023
 - **[AWS re:Invent 2023 - Amazon Neptune architectures for scale, availability, and insight (DAT406)](https://youtu.be/xAdWa0Ahiok)**
@@ -48,7 +49,8 @@ Documentation links below provide documentation for Neptune Database and Neptune
 - **[AWS re:Invent 2023 - Amazon Neptune Analytics: New capabilities for graph analytics & gen AI (DAT208)](https://youtu.be/c3TT6NTxqM4)**
 
 #### Other Notable Videos
-- **[Amazon Neptune: Simplifying Graph Queries With LLMs and LangChain](hhttps://youtu.be/B7GtC1IeIUA)**
+- **[How to perform GraphRAG with Amazon Neptune | The Data Dive on AWS OnAir S01](https://youtu.be/4zErG5mlj40)**
+- **[Amazon Neptune: Simplifying Graph Queries With LLMs and LangChain](https://youtu.be/B7GtC1IeIUA)**
 - **[Security graphs with Amazon Neptune](https://youtu.be/soW20sPHPt8)**
 - **[Network Genius: Transforming Operations with Graph ML and generative AI](https://youtu.be/SW51-3Yrg1c)**
 
