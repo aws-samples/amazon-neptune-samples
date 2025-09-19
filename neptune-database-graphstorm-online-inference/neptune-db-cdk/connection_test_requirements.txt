@@ -1,0 +1,4 @@
+requests
+urllib3<2.0.3
+boto3
+botocore
