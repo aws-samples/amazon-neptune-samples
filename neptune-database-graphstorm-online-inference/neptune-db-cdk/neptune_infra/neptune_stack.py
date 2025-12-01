@@ -505,7 +505,8 @@ pip install \
     pandas \
     matplotlib \
     pyarrow==19.0.1 \
-    sentence-transformers
+    sentence-transformers \
+    h5py==3.11.0
 
 # Clone and and install graphstorm from source
 git clone --branch v0.5 https://github.com/awslabs/graphstorm.git /tmp/graphstorm
