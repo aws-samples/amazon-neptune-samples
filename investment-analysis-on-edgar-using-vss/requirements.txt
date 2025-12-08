@@ -16,4 +16,4 @@ sentence-transformers==2.2.2
 sentencepiece==0.1.99
 streamlit==1.37.0
 streamlit-agraph==0.0.45
-transformers==4.52.1
+transformers==4.53.0
