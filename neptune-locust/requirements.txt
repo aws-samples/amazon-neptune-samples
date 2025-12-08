@@ -39,7 +39,7 @@ pyproject_hooks==1.2.0
 python-dateutil==2.9.0.post0
 pytz==2024.2
 pyzmq==26.2.1
-requests==2.32.3
+requests==2.32.4
 s3transfer==0.11.2
 setuptools==75.8.0
 six==1.17.0
