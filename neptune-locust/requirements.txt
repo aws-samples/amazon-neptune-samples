@@ -24,7 +24,7 @@ gremlinpython==3.7.3
 idna==3.10
 isodate==0.7.2
 itsdangerous==2.2.0
-Jinja2==3.1.5
+Jinja2==3.1.6
 jmespath==1.0.1
 locust==2.32.8
 MarkupSafe==3.0.2
