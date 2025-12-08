@@ -9,7 +9,7 @@ langsmith==0.0.43
 numpy==1.24.4
 pandas==2.0.3
 pyarrow==14.0.1
-requests==2.32.2
+requests==2.32.4
 scikit-learn==1.5.0
 scipy==1.10.1
 sentence-transformers==2.2.2
