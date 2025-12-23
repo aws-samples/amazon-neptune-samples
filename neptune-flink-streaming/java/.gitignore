@@ -1,0 +1,5 @@
+target*
+dependency-reduced-pom.xml
+deployment/deploy.sh
+deployment/application_config.json
+deployment/iam_policy.json

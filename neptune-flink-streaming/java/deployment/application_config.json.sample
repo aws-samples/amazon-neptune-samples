@@ -1,0 +1,75 @@
+{
+  "ApplicationName": "flink-neptune-streaming-java",
+  "ApplicationDescription": "Flink application for streaming data to Neptune",
+  "RuntimeEnvironment": "FLINK-1_18",
+  "ServiceExecutionRole": "arn:aws:iam::YOUR_ACCOUNT_ID:role/IAM_ROLE_NAME",
+  "ApplicationConfiguration": {
+    "ApplicationCodeConfiguration": {
+      "CodeContent": {
+        "S3ContentLocation": {
+          "BucketARN": "arn:aws:s3:::your-deployment-bucket",
+          "FileKey": "flink-neptune-streaming-1.0.0.jar"
+        }
+      },
+      "CodeContentType": "ZIPFILE"
+    },
+    "EnvironmentProperties": {
+      "PropertyGroups": [
+        {
+          "PropertyGroupId": "neptune.config",
+          "PropertyMap": {
+            "neptune.endpoint": "your-neptune-cluster.cluster-xyz.us-east-1.neptune.amazonaws.com",
+            "aws.region": "us-east-1",
+            "AWS_ACCOUNT_ID": "YOUR_ACCOUNT_ID"
+          }
+        },
+        {
+          "PropertyGroupId": "kinesis.config", 
+          "PropertyMap": {
+            "vertex.stream.name": "vertex-stream",
+            "edge.stream.name": "edge-stream",
+            "parallelism": "4"
+          }
+        }
+      ]
+    },
+    "FlinkApplicationConfiguration": {
+      "CheckpointConfiguration": {
+        "ConfigurationType": "CUSTOM",
+        "CheckpointingEnabled": true,
+        "CheckpointInterval": 60000,
+        "MinPauseBetweenCheckpoints": 5000
+      },
+      "MonitoringConfiguration": {
+        "ConfigurationType": "CUSTOM",
+        "LogLevel": "INFO",
+        "MetricsLevel": "APPLICATION"
+      },
+      "ParallelismConfiguration": {
+        "ConfigurationType": "CUSTOM",
+        "Parallelism": 4,
+        "ParallelismPerKPU": 1,
+        "AutoScalingEnabled": false
+      }
+    },
+    "ApplicationSnapshotConfiguration": {
+      "SnapshotsEnabled": true
+    },
+    "VpcConfigurations": [
+      {
+        "SubnetIds": [
+          "YOUR_SUBNET_1",
+          "YOUR_SUBNET_2"
+        ],
+        "SecurityGroupIds": [
+          "YOUR_SECURITY_GROUP"
+        ]
+      }
+    ]
+  },
+  "CloudWatchLoggingOptions": [
+    {
+      "LogStreamARN": "arn:aws:logs:us-east-1:YOUR_ACCOUNT_ID:log-group:/aws/kinesis-analytics/flink-neptune-streaming-java:log-stream:kinesis-analytics-log-stream"
+    }
+  ]
+}
