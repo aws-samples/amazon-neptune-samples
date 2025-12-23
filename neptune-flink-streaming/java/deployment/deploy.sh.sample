@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# Configuration - Update these values for your environment
+S3_BUCKET="your-deployment-bucket"
+S3_PREFIX="flink-apps/"  # Optional: prefix path within bucket (include trailing slash)
+IAM_ROLE_NAME="FlinkServiceRoleForNeptune"
+REGION="us-east-1"
+APPLICATION_NAME="flink-neptune-streaming-java"
+NEPTUNE_CLUSTER="your-neptune-cluster-name"
+VPC_SUBNET_1="subnet-12345678"
+VPC_SUBNET_2="subnet-87654321"
+VPC_SECURITY_GROUP="sg-12345678"
+
+# Build the application
+echo "Building Flink application..."
+cd ../
+mvn clean package -DskipTests
+
+# Upload JAR to S3
+echo "Uploading JAR to S3..."
+aws s3 cp "target/flink-neptune-streaming-1.0.0.jar" "s3://${S3_BUCKET}/${S3_PREFIX}flink-neptune-streaming-1.0.0.jar" --region ${REGION}
+ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+
+# Create IAM role if it doesn't exist
+if ! aws iam get-role --role-name ${IAM_ROLE_NAME} --region ${REGION} >/dev/null 2>&1; then
+    echo "IAM role not found.  Creating ${IAM_ROLE_NAME} role..."
+    NEPTUNE_RESOURCE_ID=$(aws neptune describe-db-clusters --db-cluster-identifier ${NEPTUNE_CLUSTER} --region ${REGION} --query DBClusters[0].DbClusterResourceId --output text)
+    cd deployment/
+    sed -e "s|YOUR_ACCOUNT_ID|${ACCOUNT_ID}|g" \
+        -e "s|YOUR_REGION|${REGION}|g" \
+        -e "s|APPLICATION_NAME|${APPLICATION_NAME}|g" \
+        -e "s|CLUSTER_RESOURCE_ID|${NEPTUNE_RESOURCE_ID}|g" \
+        -e "s|S3_BUCKET|${S3_BUCKET}|g" \
+        -e "s|S3_PREFIX|${S3_PREFIX}|g" \
+        iam_policy.json.sample > iam_policy.json
+
+    aws iam create-role --role-name ${IAM_ROLE_NAME} --assume-role-policy-document file://iam_trust_policy.json --region ${REGION}
+    aws iam attach-role-policy --role-name ${IAM_ROLE_NAME} --policy-arn arn:aws:iam::aws:policy/CloudWatchFullAccess --region ${REGION}
+    aws iam put-role-policy --role-name ${IAM_ROLE_NAME} --policy-name FlinkPermissionsStreamToNeptune --policy-document file://iam_policy.json --region ${REGION}
+    echo "Pause 30 seconds to ensure the IAM role and policy propogate"
+    sleep 30
+    cd ..
+fi
+
+# Update application configuration with actual values
+echo "Updating application configuration..."
+cd deployment/
+NEPTUNE_ENDPOINT=$(aws neptune describe-db-clusters --db-cluster-identifier ${NEPTUNE_CLUSTER} --query 'DBClusters[0].Endpoint' --output text --region ${REGION})
+sed -e "s|YOUR_ACCOUNT_ID|${ACCOUNT_ID}|g" \
+    -e "s|your-deployment-bucket|${S3_BUCKET}|g" \
+    -e "s|flink-neptune-streaming-1.0.0.jar|${S3_PREFIX}flink-neptune-streaming-1.0.0.jar|g" \
+    -e "s|flink-neptune-streaming-java|${APPLICATION_NAME}|g" \
+    -e "s|your-neptune-cluster.cluster-xyz.us-east-1.neptune.amazonaws.com|${NEPTUNE_ENDPOINT}|g" \
+    -e "s|YOUR_SUBNET_1|${VPC_SUBNET_1}|g" \
+    -e "s|YOUR_SUBNET_2|${VPC_SUBNET_2}|g" \
+    -e "s|YOUR_SECURITY_GROUP|${VPC_SECURITY_GROUP}|g" \
+    -e "s|IAM_ROLE_NAME|${IAM_ROLE_NAME}|g" \
+    application_config.json.sample > application_config.json
+
+# Delete existing application if it exists
+if aws kinesisanalyticsv2 describe-application --application-name ${APPLICATION_NAME} --region ${REGION} >/dev/null 2>&1; then
+    echo "Application exists, deleting..."
+    # Stop application if running
+    APP_STATUS=$(aws kinesisanalyticsv2 describe-application --application-name ${APPLICATION_NAME} --region ${REGION} --query 'ApplicationDetail.ApplicationStatus' --output text)
+    if [[ "$APP_STATUS" == "RUNNING" ]]; then
+        echo "Stopping application..."
+        aws kinesisanalyticsv2 stop-application --application-name ${APPLICATION_NAME} --region ${REGION} --force
+        echo "Waiting for application to stop..."
+        while true; do
+            STATUS=$(aws kinesisanalyticsv2 describe-application --application-name ${APPLICATION_NAME} --region ${REGION} --query 'ApplicationDetail.ApplicationStatus' --output text 2>/dev/null || echo "DELETED")
+            if [[ "$STATUS" == "READY" ]] || [[ "$STATUS" == "DELETED" ]]; then
+                break
+            fi
+            echo "Current status: $STATUS"
+            sleep 5
+        done
+    fi
+    
+    # Delete application
+    CREATE_TIMESTAMP=$(aws kinesisanalyticsv2 describe-application --application-name ${APPLICATION_NAME} --region ${REGION} --query 'ApplicationDetail.CreateTimestamp' --output text)
+    aws kinesisanalyticsv2 delete-application --application-name ${APPLICATION_NAME} --create-timestamp ${CREATE_TIMESTAMP} --region ${REGION}
+    echo "Waiting for application to be deleted..."
+    sleep 10
+fi
+
+# Create new application
+echo "Creating new application..."
+aws kinesisanalyticsv2 create-application \
+    --cli-input-json file://application_config.json \
+    --region ${REGION}
+
+echo "Deployment complete!"
+echo "To start the application, run:"
+echo "aws kinesisanalyticsv2 start-application --application-name ${APPLICATION_NAME} --run-configuration '{\"ApplicationRestoreConfiguration\":{\"ApplicationRestoreType\":\"SKIP_RESTORE_FROM_SNAPSHOT\"}}' --region ${REGION}"
+echo "To stop the application, run:"
+echo "aws kinesisanalyticsv2 stop-application --application-name ${APPLICATION_NAME} --region ${REGION}"

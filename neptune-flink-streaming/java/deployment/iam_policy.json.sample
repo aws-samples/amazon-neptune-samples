@@ -1,0 +1,64 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "Kinesis",
+            "Effect": "Allow",
+            "Action": [
+                "kinesisanalytics:StopApplication",
+                "kinesis:ListShards",
+                "kinesis:GetShardIterator",
+                "kinesis:DescribeStream",
+                "kinesisanalytics:DescribeApplication",
+                "kinesis:GetRecords",
+                "kinesisanalytics:StartApplication"
+            ],
+            "Resource": [
+                "arn:aws:kinesis:YOUR_REGION:YOUR_ACCOUNT_ID:stream/vertex-stream",
+                "arn:aws:kinesis:YOUR_REGION:YOUR_ACCOUNT_ID:stream/edge-stream",
+                "arn:aws:kinesisanalytics:YOUR_REGION:YOUR_ACCOUNT_ID:application/APPLICATION_NAME"
+            ]
+        },
+        {
+            "Sid": "Neptune",
+            "Effect": "Allow",
+            "Action": [
+                "neptune-db:connect",
+                "neptune-db:ReadDataViaQuery",
+                "neptune-db:WriteDataViaQuery",
+                "neptune-db:DeleteDataViaQuery"
+            ],
+            "Resource": [
+                "arn:aws:rds:YOUR_REGION:YOUR_ACCOUNT_ID:CLUSTER_RESOURCE_ID/*"
+            ]
+        },
+        {
+            "Sid": "S3",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::S3_BUCKET/S3_PREFIX*"
+            ]
+        },
+        {
+            "Sid": "EC2",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeSubnets",
+                "ec2:DescribeVpcs",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:CreateNetworkInterface",
+                "ec2:DeleteNetworkInterface",
+                "ec2:AttachNetworkInterface",
+                "ec2:DescribeDhcpOptions",
+                "ec2:CreateNetworkInterfacePermission"
+            ],
+            "Resource": [
+                "*"
+            ]
+        }
+    ]
+}

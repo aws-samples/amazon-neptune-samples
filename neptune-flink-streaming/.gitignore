@@ -1,0 +1,19 @@
+
+# Common Q Dev Repo Artifacts
+.amazonq/git
+.DS_Store
+**.jar
+.ash/ash_output/
+
+# Sensitive configuration files (use .sample versions)
+java/deployment/application_config.json
+java/deployment/deploy.sh
+java/deployment/iam_policy.json
+
+# Maven
+java/target/
+java/dependency-reduced-pom.xml
+
+# IDE
+.vscode/
+.idea/
