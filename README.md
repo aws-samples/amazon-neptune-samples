@@ -5,6 +5,7 @@ The following repository contains application and code examples using Amazon Nep
 For a list of other utilities and open source projects maintained by the Amazon Neptune team, see the list of [Related Works](https://github.com/aws-samples/amazon-neptune-samples#related-works) further below.
 
 ## NEW Projects
+- (December 2025) [**Amazon Managed Service for Apache Flink and Amazon Kinesis Example**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/neptune-flink-streaming): Explore creating an Apache Flink application that listens to Kinesis streams and writes the data into an Amazon Neptune Database. Deploy the Flink application to Amazon Managed Service for Apache Flink, and use the included Python script to populate Kinesis with data to see it in action.
 - (June 2025) [**NeptuneGS: Neptune Analytics GraphStorm (Fraud Detection Example)**](https://github.com/aws-samples/amazon-neptune-samples/tree/master/neptune-analytics-graphstorm-fraud-detection/neptune-gs): NeptuneGS (neptune-gs) is a Python package that streamlines the preparation and processing of Amazon Neptune data for use with GraphStorm, allowing users of Neptune to easily integrate graph machine learning into their workflow and enrich their graphs with embeddings and predictions from a Graph Neural Network (GNN) model.
 
 ## Sample Projects
