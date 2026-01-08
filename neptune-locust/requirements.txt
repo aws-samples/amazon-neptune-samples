@@ -43,7 +43,7 @@ requests==2.32.4
 s3transfer==0.11.2
 setuptools==78.1.1
 six==1.17.0
-urllib3==2.6.0
+urllib3==2.6.3
 Werkzeug==3.1.4
 yarl==1.18.3
 zope.event==5.0
