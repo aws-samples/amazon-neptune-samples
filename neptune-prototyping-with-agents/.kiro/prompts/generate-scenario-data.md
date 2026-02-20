@@ -1,0 +1,3 @@
+Execute the generate_scenario_data function in `step_workflows.generate_scenario_data.py`.  Use the path to the use case description file as the first input, and the path to the queries file as the second input. 
+After it is updated (or they choose not to), tell them that their graph is ready to use and remind them of the queries you generated to answer their questions.  
+Suggest they can use several options such as Neptune Workbench, the AWS SDK, or the Neptune MCP server to query the data. You can even create code for them to retrieve the data.
