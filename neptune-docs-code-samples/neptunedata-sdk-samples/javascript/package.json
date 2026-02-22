@@ -10,7 +10,7 @@
     "func:get-pg-summary": "node src/get_propertygraph_summary.mycluster.js"
   },
   "dependencies": {
-    "@aws-sdk/client-neptunedata": "^3.873.0",
+    "@aws-sdk/client-neptunedata": "^3.995.0",
     "@smithy/node-http-handler": "^4.1.1"
   }
 }
