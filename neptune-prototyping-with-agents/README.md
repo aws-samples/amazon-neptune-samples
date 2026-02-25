@@ -68,7 +68,7 @@ The following specialized agents are included in this sample:
 
 - AWS account with appropriate permissions
 - Amazon Neptune Database cluster 
-- Python 3.9 or later
+- Python 3.12 or later
 - AWS CLI configured with credentials
 - [uv package manager](https://docs.astral.sh/uv/) installed (for running Neptune MCP Server via `uvx`)
 - Access to Amazon Bedrock with Claude 4.5 Sonnet model enabled
@@ -190,7 +190,7 @@ Store sensitive configuration in a `.env` file (never commit to version control)
 ```bash
 # .env
 NEPTUNE_WRITER_ENDPOINT=your-cluster.cluster-xxxxx.us-east-1.neptune.amazonaws.com
-LLM_MODEL=anthropic.claude-sonnet-4-20250514
+LLM_MODEL=us.anthropic.claude-sonnet-4-5-20250929-v1:0
 AWS_REGION=us-east-1
 ```
 
@@ -206,9 +206,7 @@ AWS_REGION=us-east-1
    chmod 600 .env
    ```
 
-3. **Never commit to version control**: Use `.env.example` with placeholder values for documentation
-
-4. **Avoid sharing**: Don't send .env files via email, Slack, or other communication channels
+3. **Avoid sharing**: Don't send .env files via email, Slack, or other communication channels
 
 **AWS Credentials Management**
 
