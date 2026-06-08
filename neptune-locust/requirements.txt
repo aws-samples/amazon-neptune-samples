@@ -21,7 +21,7 @@ gevent==24.11.1
 geventhttpclient==2.3.3
 greenlet==3.1.1
 gremlinpython==3.7.3
-idna==3.10
+idna==3.15
 isodate==0.7.2
 itsdangerous==2.2.0
 Jinja2==3.1.6
