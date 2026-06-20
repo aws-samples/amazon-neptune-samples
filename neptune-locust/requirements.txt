@@ -28,7 +28,7 @@ Jinja2==3.1.6
 jmespath==1.0.1
 locust==2.32.8
 MarkupSafe==3.0.2
-msgpack==1.1.0
+msgpack==1.2.1
 multidict==6.1.0
 neo4j==5.27.0
 nest-asyncio==1.6.0
