@@ -7,10 +7,14 @@
 **/tmp
 **/out-tsc
 **/*.d.ts
+**/*.js.map
 /lib/*.js
+/bin/*.js
 
 # dependencies
 **/node_modules
+package-lock.json
+yarn.lock
 
 # e2e
 **/e2e/*.js
@@ -19,8 +23,6 @@
 # misc
 **/npm-debug.log
 **/testem.log
-**/package-lock.json
-**/yarn-lock.json
 **/.vscode/settings.json
 
 # System Files

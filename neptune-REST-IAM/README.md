@@ -5,7 +5,7 @@
 This sample project shows how you can interact with a Neptune cluster when the
 IAM db authentication is enabled.
 
-According with the Neptune documentation,
+According to the Neptune documentation,
 the AWS Identity and Access Management (IAM) is an AWS service
 that helps an administrator securely control access to AWS resources.
 IAM administrators control who can be authenticated (signed in) and authorized
@@ -14,70 +14,137 @@ IAM is an AWS service that you can use with no additional charge.
 
 You can use AWS Identity and Access Management (IAM) to authenticate to your Neptune DB instance or DB cluster. When IAM database authentication is enabled, each request must be signed using AWS Signature Version 4.
 
+## Prerequisites
+
+- [Node.js](https://nodejs.org/en/) version 24 or later (matches the Lambda runtime target)
+- [AWS CDK CLI](https://docs.aws.amazon.com/cdk/v2/guide/cli.html) v2
+- AWS credentials configured for your target account/region
+- CDK bootstrapped in the target region (`cdk bootstrap`)
+
 ## How to install it?
 
-This is a typescript [CDK](https://docs.aws.amazon.com/cdk/latest/guide/home.html) based project.
-CDK is a [NodeJS](https://nodejs.org/en/) module, and this is the only perquisite.
+This is a TypeScript [CDK v2](https://docs.aws.amazon.com/cdk/v2/guide/home.html) based project.
 
-This project was tested with NodeJs version 12.16.1.
-
-After you clone this repository, ensure that all the node dependencies are
-installed with the following command:
+After you clone this repository, install the Node.js dependencies:
 
 ```bash
 npm install
 ```
 
-After all the nodeJS dependencies are claimed you can install the CDK stack with
-the the following command:
+### Building
+
+The project has two build steps:
+
+1. **TypeScript compilation** (CDK infrastructure code):
+   ```bash
+   npm run build
+   ```
+
+2. **Webpack bundle** (Lambda handler code bundled into `./build`):
+   ```bash
+   npm run bundle
+   ```
+
+### Deploying
+
+After dependencies are installed, deploy the CDK stack:
 
 ```bash
-./deploy.bash
+./deploy.bash <region>
 ```
 
-This operation will may take around 10 mins. If the deployment is successful
-then you may be able to see an output as the next one:
+For example:
 
 ```bash
-./deploy.bash
-......
-......
+./deploy.bash us-west-2
+```
+
+This operation may take around 10 minutes. If the deployment is successful
+you will see output like:
+
+```
 Synth Complete, deploying Stack
 NeptuneRestIamStack: deploying...
-[0%] start: Publishing ff6804beac5d60d6ec143c1d10f08e10591a5d671f588baf1cabf18e27949177:current
-[100%] success: Published ff6804beac5d60d6ec143c1d10f08e10591a5d671f588baf1cabf18e27949177:current
-NeptuneRestIamStack: creating CloudFormation changeset...
-[██████████████████████████████████████████████████████████] (42/42)
-
-
 
  ✅  NeptuneRestIamStack
 
 Outputs:
-NeptuneRestIamStack.BulkLoaderRoleArn = arn:aws:iam::495161600685:role/NeptuneRestIamStack-NeptuneLoadFromS30422660D-G5ZI9V5C50J7
-NeptuneRestIamStack.NeptuneClusterEndpoint = neptune-test-cluster.cluster-cl9mufznljov.eu-west-1.neptune.amazonaws.com
-NeptuneRestIamStack.NeptuneInstanceEndpoint = neptunedbinstance-wnxhffni670a.cl9mufznljov.eu-west-1.neptune.amazonaws.com
-NeptuneRestIamStack.SecurityGroupId = sg-0ead6abc144196f49
-NeptuneRestIamStack.Subnets = subnet-0f759cdb19d8b13b3,subnet-081f56f0c0c288565
-
+NeptuneRestIamStack.BulkLoaderRoleArn = arn:aws:iam::123456789012:role/NeptuneRestIamStack-NeptuneLoadFromS3-XXXXX
+NeptuneRestIamStack.NeptuneClusterEndpoint = neptune-test-cluster.cluster-xxxxx.us-west-2.neptune.amazonaws.com
+NeptuneRestIamStack.NeptuneInstanceEndpoint = neptunedbinstance-xxxxx.us-west-2.neptune.amazonaws.com
+NeptuneRestIamStack.SecurityGroupId = sg-0xxxxxxxxxx
+NeptuneRestIamStack.Subnets = subnet-xxxxx,subnet-xxxxx
+NeptuneRestIamStack.UploadBucketName = neptunerestiamstack-uploadxxxxx-xxxxx
+NeptuneRestIamStack.ClusterStateFunctionName = NeptuneRestIamStack-clusterStateXXXXX-XXXXX
+NeptuneRestIamStack.BulkUploadFunctionName = NeptuneRestIamStack-bulkUploadXXXXX-XXXXX
+NeptuneRestIamStack.GetAllBulkJobsFunctionName = NeptuneRestIamStack-getAllBulkJobsXXXXX-XXXXX
+NeptuneRestIamStack.CountVerticesFunctionName = NeptuneRestIamStack-countVerticesXXXXX-XXXXX
+NeptuneRestIamStack.AddDataFunctionName = NeptuneRestIamStack-addDataXXXXX-XXXXX
+NeptuneRestIamStack.DropAllFunctionName = NeptuneRestIamStack-dropAllXXXXX-XXXXX
 ```
 
-This CDK stack install an Neptune Cluster with IAM db authentication enabled and adds four six lambda able to interact with the Neptune Cluster.
+This CDK stack installs a Neptune Cluster with IAM db authentication enabled and adds Lambda functions able to interact with the Neptune Cluster.
 
-### Interaction with Neptune Cluster
+## What gets deployed
+
+The stack creates the following resources:
+
+- A VPC with private subnets and an S3 gateway endpoint
+- A Neptune cluster (`db.t3.medium`) with IAM authentication enabled and audit logging
+- An S3 bucket for CSV data uploads
+- Six Lambda functions (deployed into the VPC so they can reach Neptune):
+  - **getClusterStatus** — returns the Neptune cluster status via the REST API
+  - **bulkUploadHandler** — triggered automatically when a `.csv` file is uploaded to the S3 bucket; kicks off a Neptune bulk load job
+  - **getAllBulkJobsHandler** — lists all bulk load jobs via the REST API
+  - **countVerticesHandler** — counts all vertices in the graph using Gremlin
+  - **addDataToNeptuneHandler** — adds sample person vertices using Gremlin
+  - **dropAllHandler** — drops all vertices in the graph using Gremlin
+- IAM roles for Lambda execution and for Neptune to read from S3
+
+## Using the stack
+
+Once deployed, you can interact with the Neptune cluster by invoking the Lambda functions.
+
+**Load data from S3:** Upload a CSV file to the S3 bucket created by the stack. The `bulkUploadHandler` Lambda triggers automatically and starts a Neptune bulk load job. Sample CSV files are in the `payload/gremlin/` directory:
+
+```bash
+aws s3 cp payload/gremlin/vertex.csv s3://<upload-bucket-name>/vertex.csv
+aws s3 cp payload/gremlin/edge.csv s3://<upload-bucket-name>/edge.csv
+```
+
+**Invoke a Lambda directly:** Use the AWS CLI to call any of the functions. For example, to count vertices:
+
+```bash
+aws lambda invoke --function-name <countVertices-function-name> --region <region> output.json
+cat output.json
+```
+
+**Check cluster status:**
+
+```bash
+aws lambda invoke --function-name <clusterState-function-name> --region <region> output.json
+cat output.json
+```
+
+The function names and S3 bucket name can be found in the AWS CloudFormation console under the `NeptuneRestIamStack` stack resources, or via `aws cloudformation describe-stack-resources`.
+
+## Interaction with Neptune Cluster
 
 The interaction with the Neptune cluster can be done in two ways:
 
-1. over the Neptune REST API
-2. over the [Gremlin](https://tinkerpop.apache.org/gremlin.html) client. 
+1. Over the Neptune REST API
+2. Over the [Gremlin](https://tinkerpop.apache.org/gremlin.html) client
 
-In botch cases you need to interact with the cluster you need to sing all the requests using
-[aws sig4](https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html).
+In both cases, all requests must be signed using
+[AWS Signature Version 4](https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html).
 
-#### REST Based interaction
+All signing is performed using official AWS SDK v3 libraries (`@smithy/signature-v4`
+and `@aws-sdk/credential-providers`). No third-party signing utilities are used.
+
+### REST Based interaction
 
 Here is an example for the REST based interaction
-originated from the bulkUploadHandler.ts file:
+originated from the `bulkUploadHandler.ts` file:
 
 ```typescript
     try {
@@ -89,7 +156,7 @@ originated from the bulkUploadHandler.ts file:
         body
       );
       console.log(
-        `File ${key} was processed with response response ${JSON.stringify(
+        `File ${key} was processed with response ${JSON.stringify(
           response,
           null,
           2
@@ -101,19 +168,19 @@ originated from the bulkUploadHandler.ts file:
     }
 ```
 
-The `neptunePost` method can be found in the utils.ts file. 
-The `neptunePost`  uses the [aws4-axios](https://www.npmjs.com/package/aws4-axios) 
-to sign all the requests send to the Neptune Cluster using aws4.
-The aws4 library uses your secretAccessKey, accessKeyId and sessionToken in order to sing the request.
+The `neptunePost` method can be found in `src/handlers/utils.ts`.
+It uses `@smithy/signature-v4` to sign requests directly with AWS Signature
+Version 4 and sends them via the native Node.js `fetch` API.
 
-If you use this code in a AWS Lambda, then the secretAccessKey, accessKeyId and sessionToken are obtained from the environment variables.
+When running in AWS Lambda, credentials are automatically resolved from the
+Lambda execution environment via `@aws-sdk/credential-providers`.
 
-Without a sign request all the attempts to communicate with Neptune cluster will end with HTTP 403 error.
+Without a signed request, all attempts to communicate with the Neptune cluster will result in an HTTP 403 error.
 
-Here is the result bulkUploadHandlerv output after the file `edge.csv` was uploaded.
+Here is example output from the `bulkUploadHandler` after the file `edge.csv` was uploaded:
 
-``
-2021-03-09T16:41:08.692Z	17c6d7a7-c870-42eb-9b36-9585fbfac76b	INFO	File edge.csv was processed with response response {
+```
+2021-03-09T16:41:08.692Z  INFO  File edge.csv was processed with response response {
     "data": {
         "status": "200 OK",
         "payload": {
@@ -123,23 +190,22 @@ Here is the result bulkUploadHandlerv output after the file `edge.csv` was uploa
     "status": 200,
     "statusText": "OK"
 }.
+```
 
-``
+The same pattern applies to the `clusterStateHandler` and `getAllBulkJobsHandler` Lambdas.
 
-Same logic for the clusterStateHandler and getAllBulkJobsHandler lambdas.
+### Gremlin based interaction
 
-#### Gremlin based interaction
-
-For Gremlin based access you need to use use a library able to sign the request.
-The next example uses the [gremlin-aws-sigv4](https://www.npmjs.com/package/gremlin-aws-sigv4) 
+The [Apache TinkerPop Gremlin JavaScript client](https://www.npmjs.com/package/gremlin)
+(v3.8+) is used with a WebSocket connection to Neptune. Request signing is handled
+by computing SigV4 headers via `@smithy/signature-v4` and passing them to the
+WebSocket upgrade request:
 
 ```typescript
 const countVerticesHandler: TaskHandler = async (event: any, context: any) => {
-  const result: CountVerticesResult = await gremlinQuery(
+  const result = await gremlinQuery<number>(
     NEPTUNE_ENDPOINT,
     NEPTUNE_PORT,
-    defaultGremlinOpts,
-    context,
     countVertices,
     getVerticesCount
   );
@@ -147,14 +213,12 @@ const countVerticesHandler: TaskHandler = async (event: any, context: any) => {
   return result;
 };
 
-async function countVertices(
-  g: gremlin.driver.AwsSigV4DriverRemoteConnection
-): Promise<any> {
+async function countVertices(g: GraphTraversalSource): Promise<any> {
   return g.V().count().next();
 }
 ```
 
-The `gremlinQuery` method can be found in the utils.ts file. 
-The `gremlinQuery` uses setup the gremlin client and cares about the signing 
-the request.
-Same logic for: `addDataToNeptuneHandler`, `dropAllHandler` and `countVerticesHandler`.
+The `gremlinQuery` method can be found in `src/handlers/utils.ts`.
+It creates a `DriverRemoteConnection` with SigV4-signed headers computed from
+the AWS credential chain, which Neptune validates on the WebSocket handshake.
+The same pattern applies to `addDataToNeptuneHandler`, `dropAllHandler`, and `countVerticesHandler`.
