@@ -1,68 +1,106 @@
-import gremlin from 'gremlin-aws-sigv4';
-import axios from 'axios';
-import { aws4Interceptor } from 'aws4-axios';
+import gremlin from 'gremlin';
+import { SignatureV4 } from '@smithy/signature-v4';
+import { Hash } from '@smithy/hash-node';
+import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
+import { HttpRequest } from '@smithy/protocol-http';
 
-const defaultGremlinOpts = { secure: true, autoReconnect: true, maxRetry: 3 };
+const { Graph } = gremlin.structure;
+const { DriverRemoteConnection } = gremlin.driver;
+const { traversal } = gremlin.process;
 
-const gremlinQuery = <T>(
+type GraphTraversalSource = InstanceType<typeof gremlin.process.GraphTraversalSource>;
+
+async function getNeptuneSigV4Headers(
+  endpoint: string,
+  port: string,
+  region: string
+): Promise<Record<string, string>> {
+  const credentials = fromNodeProviderChain({ clientConfig: { region } });
+  const signer = new SignatureV4({
+    service: 'neptune-db',
+    region,
+    sha256: Hash.bind(null, 'sha256'),
+    credentials,
+  });
+
+  const request = new HttpRequest({
+    method: 'GET',
+    protocol: 'https:',
+    hostname: endpoint,
+    port: Number(port),
+    path: '/gremlin',
+    headers: {
+      host: `${endpoint}:${port}`,
+    },
+  });
+
+  const signed = await signer.sign(request);
+  return signed.headers as Record<string, string>;
+}
+
+const gremlinQuery = async <T>(
   neptuneEndpoint: string,
   neptunePort: string,
-  neptuneOpts: any,
-  context: any,
-  runInContext: any,
-  transform?: any
+  runInContext: (g: GraphTraversalSource) => Promise<any>,
+  transform?: (result: any) => T
 ): Promise<T> => {
-  return new Promise<T>((success, failure) => {
-    const graph = new gremlin.structure.Graph();
-    let result = null;
-    const connection = new gremlin.driver.AwsSigV4DriverRemoteConnection(
-      neptuneEndpoint,
-      neptunePort,
-      neptuneOpts,
-      // connected callback
-      async () => {
-        const g = graph.traversal().withRemote(connection);
-        result = await runInContext(g);
-        console.log(`Query result: ${JSON.stringify(result, null, 2)}`);
-        // WebSocket is not open: readyState 2 (CLOSING)
-        await connection.close();
-      },
-      // disconnected callback
-      (code: any, message: any) => {
-        console.log(code, message);
-        const transformResult = transform ? transform(result) : result;
-        success(transformResult);
-        context.succeed(transformResult);
-      },
-      // error callback
-      (error: any) => {
-        console.log(error);
-        context.fail(error);
-        failure(error);
-      }
-    );
+  const region = process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || 'us-east-1';
+  const headers = await getNeptuneSigV4Headers(neptuneEndpoint, neptunePort, region);
+  const url = `wss://${neptuneEndpoint}:${neptunePort}/gremlin`;
+
+  const connection = new DriverRemoteConnection(url, {
+    headers,
+    rejectUnauthorized: true,
   });
+
+  try {
+    await connection.open();
+    const g = traversal().with_(connection);
+    const result = await runInContext(g);
+    console.log(`Query result: ${JSON.stringify(result, null, 2)}`);
+    const transformedResult = transform ? transform(result) : result;
+    return transformedResult as T;
+  } finally {
+    await connection.close();
+  }
 };
 
 const buildGremlinResponse = (queryResult: any): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    const results = queryResult.toList();
-    results
-      .then((results: any) => {
-        const resultSet: gremlin.driver.ResultSet = new gremlin.driver.ResultSet(
-          results
-        );
-        const created: gremlin.structure.Vertex = <gremlin.structure.Vertex>(
-          (<unknown>resultSet.first())
-        );
-        resolve(created);
-      })
-      .catch((err: any) => {
-        console.log(err);
-        reject(err);
-      });
-  });
+  return queryResult.next().then((result: any) => result.value);
 };
+
+async function signRequest(
+  method: string,
+  endpoint: string,
+  port: string,
+  region: string,
+  path: string,
+  body?: string
+): Promise<Record<string, string>> {
+  const credentials = fromNodeProviderChain({ clientConfig: { region } });
+  const signer = new SignatureV4({
+    service: 'neptune-db',
+    region,
+    sha256: Hash.bind(null, 'sha256'),
+    credentials,
+  });
+
+  const request = new HttpRequest({
+    method,
+    protocol: 'https:',
+    hostname: endpoint,
+    port: Number(port),
+    path,
+    headers: {
+      host: `${endpoint}:${port}`,
+      'content-type': 'application/json',
+    },
+    body,
+  });
+
+  const signed = await signer.sign(request);
+  return signed.headers as Record<string, string>;
+}
 
 const neptuneGet = async (
   neptuneEndpoint: string,
@@ -70,16 +108,14 @@ const neptuneGet = async (
   neptuneRegion: string,
   path: string
 ) => {
-  const interceptor = aws4Interceptor({
-    region: neptuneRegion,
-    service: 'neptune-db',
-  });
-  axios.interceptors.request.use(interceptor);
-  const response = await axios.get(
-    `https://${neptuneEndpoint}:${neptunePort}${path}`
+  const headers = await signRequest('GET', neptuneEndpoint, neptunePort, neptuneRegion, path);
+  const response = await fetch(
+    `https://${neptuneEndpoint}:${neptunePort}${path}`,
+    { method: 'GET', headers }
   );
+  const data = await response.json();
   return {
-    data: response.data,
+    data,
     status: response.status,
     statusText: response.statusText,
   };
@@ -92,17 +128,15 @@ const neptunePost = async (
   path: string,
   body: any
 ) => {
-  const interceptor = aws4Interceptor({
-    region: neptuneRegion,
-    service: 'neptune-db',
-  });
-  axios.interceptors.request.use(interceptor);
-  const response = await axios.post(
+  const bodyStr = JSON.stringify(body);
+  const headers = await signRequest('POST', neptuneEndpoint, neptunePort, neptuneRegion, path, bodyStr);
+  const response = await fetch(
     `https://${neptuneEndpoint}:${neptunePort}${path}`,
-    body
+    { method: 'POST', headers, body: bodyStr }
   );
+  const data = await response.json();
   return {
-    data: response.data,
+    data,
     status: response.status,
     statusText: response.statusText,
   };
@@ -133,9 +167,9 @@ const buildBulkUploadBody = (
 
 export {
   gremlinQuery,
-  defaultGremlinOpts,
   buildGremlinResponse,
   neptuneGet,
   neptunePost,
   buildBulkUploadBody,
 };
+export type { GraphTraversalSource };

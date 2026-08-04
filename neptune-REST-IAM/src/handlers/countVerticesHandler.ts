@@ -1,21 +1,13 @@
 import { TaskHandler } from '../types/TaskHandler';
-import gremlin from 'gremlin-aws-sigv4';
-import { gremlinQuery, defaultGremlinOpts } from './utils';
+import { gremlinQuery, GraphTraversalSource } from './utils';
 
 const NEPTUNE_ENDPOINT = process.env.NEPTUNE_ENDPOINT;
 const NEPTUNE_PORT = process.env.NEPTUNE_PORT;
 
-interface CountVerticesResult {
-  value: number;
-  done: boolean;
-}
-
 const countVerticesHandler: TaskHandler = async (event: any, context: any) => {
-  const result: CountVerticesResult = await gremlinQuery(
+  const result = await gremlinQuery<number>(
     NEPTUNE_ENDPOINT,
     NEPTUNE_PORT,
-    defaultGremlinOpts,
-    context,
     countVertices,
     getVerticesCount
   );
@@ -23,13 +15,11 @@ const countVerticesHandler: TaskHandler = async (event: any, context: any) => {
   return result;
 };
 
-async function countVertices(
-  g: gremlin.driver.AwsSigV4DriverRemoteConnection
-): Promise<any> {
+async function countVertices(g: GraphTraversalSource): Promise<any> {
   return g.V().count().next();
 }
 
-function getVerticesCount(result: CountVerticesResult) {
+function getVerticesCount(result: any) {
   if (result) {
     return result.value;
   }

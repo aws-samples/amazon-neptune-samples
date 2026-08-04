@@ -7,6 +7,10 @@ const bulkUploadHandler: TaskHandler = async (event: S3Event): Promise<any> => {
     `Tries to process the event: ${JSON.stringify(event, null, 2)}`
   );
 
+  if (!event?.Records?.length) {
+    return { error: 'No S3 records in event. This function is triggered by S3 uploads.' };
+  }
+
   for (const record of event.Records) {
     const s3 = record.s3;
     const bucket = s3.bucket.name;

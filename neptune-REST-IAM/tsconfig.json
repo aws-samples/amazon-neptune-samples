@@ -3,21 +3,25 @@
     "allowSyntheticDefaultImports": true,
     "module": "commonjs",
     "esModuleInterop": true,
-    "noImplicitReturns":true,
-    "target": "es6",
+    "noImplicitReturns": true,
+    "target": "ES2020",
     "noImplicitAny": false,
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "dist",
     "lib": [
-      "es7"
+      "ES2020",
+      "DOM"
     ],
     "baseUrl": ".",
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "skipLibCheck": true
   },
   "include": [
     "./src/**/*",
+    "./lib/**/*",
+    "./bin/**/*",
     "./tests/**/*"
   ],
-   "exclude": ["cdk.out"]
+  "exclude": ["cdk.out"]
 }
