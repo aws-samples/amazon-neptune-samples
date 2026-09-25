@@ -1,4 +1,4 @@
 requests
-urllib3<2.0.3
+urllib3<2.8.1
 boto3
 botocore
