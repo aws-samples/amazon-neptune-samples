@@ -1,5 +1,14 @@
 # Welcome to the Amazon Neptune and AWS CDK for Amundsen project!
 
+> [!WARNING]
+> ## ⚠️ Deprecated
+>
+> **This sample is deprecated and is no longer maintained.** [Amundsen](https://github.com/amundsen-io/amundsen) itself has been deprecated, so this integration is retained for historical reference only.
+>
+> - The code is provided **as-is** and may contain outdated or vulnerable dependencies.
+> - It is **not** recommended for new deployments.
+> - No further updates, dependency patches, or support will be provided.
+
 ## Overview
 
 This project has an [associated blog](https://aws.amazon.com/blogs/database/category/database/amazon-neptune/) which provides extensive detail on Amundsen, as well as greater detail regarding this solution.

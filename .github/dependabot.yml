@@ -1,0 +1,250 @@
+# Dependabot configuration for aws-samples/amazon-neptune-samples
+#
+# This repository contains many independent sample sub-projects across several
+# ecosystems (npm, pip, maven). Each maintained sub-project is registered below
+# so Dependabot opens grouped, weekly version-update PRs scoped to that folder.
+#
+# NOTE: The "amazon-neptune-and-aws-cdk-for-amundsen" sample is intentionally
+# omitted. Amundsen has been deprecated and that sample is no longer maintained
+# (see its README). Do not add it back here.
+#
+# Docs: https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+version: 2
+updates:
+  # ---------------------------------------------------------------------------
+  # npm / JavaScript
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: "npm"
+    directory: "/gremlin/chatbot-full-stack-application/code/web-ui/neptune-chatbot"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "npm"
+    directory: "/gremlin/ogma-neptune"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "npm"
+    directory: "/gremlin/visjs-neptune"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "npm"
+    directory: "/neptune-docs-code-samples/neptunedata-sdk-samples/javascript"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "npm"
+    directory: "/neptune-REST-IAM"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"
+
+  # ---------------------------------------------------------------------------
+  # pip / Python
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: "pip"
+    directory: "/investment-analysis-on-edgar-using-vss"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      pip-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/neptune-analytics-graphstorm-fraud-detection"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      pip-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/neptune-analytics-graphstorm-fraud-detection/neptune-gs"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      pip-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/neptune-database-graphstorm-online-inference"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      pip-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/neptune-database-graphstorm-online-inference/neptune-db-cdk"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      pip-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/neptune-flink-streaming/python/src"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      pip-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/neptune-locust"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      pip-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/neptune-prototyping-with-agents"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      pip-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/neptune-sagemaker/cdk/python/neptune-notebook"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      pip-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/pg-schema-for-rdf"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      pip-dependencies:
+        patterns:
+          - "*"
+
+  # ---------------------------------------------------------------------------
+  # maven / Java
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: "maven"
+    directory: "/1g-playground"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      maven-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "maven"
+    directory: "/gremlin/gremlin-java-client-demo"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      maven-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "maven"
+    directory: "/gremlin/neptune-social-media-utils"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      maven-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "maven"
+    directory: "/gremlin/stream-2-neptune/social-app-driver"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      maven-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "maven"
+    directory: "/gremlin/stream-2-neptune/social-app-neptune-writer"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      maven-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "maven"
+    directory: "/neptune-docs-code-samples/neptunedata-sdk-samples/java"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      maven-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "maven"
+    directory: "/neptune-flink-streaming/java"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      maven-dependencies:
+        patterns:
+          - "*"
+
+  # ---------------------------------------------------------------------------
+  # GitHub Actions (kept current if/when workflows are added)
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
