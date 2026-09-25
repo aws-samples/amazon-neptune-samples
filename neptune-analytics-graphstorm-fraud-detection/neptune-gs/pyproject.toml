@@ -10,7 +10,7 @@ readme = "README.md"
 python = "^3.9"
 pandas = "^2.2.3"
 boto3 = ">=1.36.*"
-pyarrow = "^19.0.0"
+pyarrow = ">=19,<22"
 joblib = "^1.4.2"
 
 [tool.poetry.group.dev]
@@ -19,15 +19,15 @@ optional = true
 [tool.poetry.group.dev.dependencies]
 boto3-stubs = {extras = ["s3"], version = "^1.36.14"}
 pre-commit = "^4.1.0"
-ruff = "^0.9.6"
+ruff = ">=0.9.6,<0.17.0"
 pandas-stubs = "2.2.2.240807"
 pytest = "^8.3.4"
 # Run tests with pytest --cov=neptune_gs --cov-report=xml .
-pytest-cov = "^6.0.0"
-pyarrow-stubs = "^17.17"
+pytest-cov = ">=6,<8"
+pyarrow-stubs = ">=17.17,<21.0"
 moto = "^5.1.0"
 pytest-mock = "^3.14.0"
-mock = "<5.2.0"
+mock = "<5.3.0"
 types-mock = "^5.2.0.20250306"
 
 [build-system]
