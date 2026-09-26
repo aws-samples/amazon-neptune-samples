@@ -1,1 +1,4 @@
 .DS_Store
+
+# CodeQL local scan artifacts (scripts/run-codeql.sh)
+.codeql/
