@@ -7,7 +7,7 @@ import software.amazon.neptune.onegraph.playground.client.api.DataFormat;
 import software.amazon.neptune.onegraph.playground.client.service.DataService;
 import software.amazon.neptune.onegraph.playground.client.service.ScenarioService;
 import org.jline.reader.LineReader;
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import software.amazon.neptune.onegraph.playground.client.service.ServiceException;
 
 import java.io.File;
