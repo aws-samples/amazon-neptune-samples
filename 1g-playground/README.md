@@ -8,11 +8,33 @@ The Amazon Neptune 1G Playground is a Java command line program used as an intro
 
 ### Building from source
 
-The Amazon Neptune 1G Playground is a Java Maven project and requires JDK 8 and Maven 3 to build from source. 
+The Amazon Neptune 1G Playground is a Java Maven project and requires JDK 11 and Maven 3 to build from source. 
 
-First, change into the `1g-playground-cli` folder and run `mvn clean package`, this will generate an executable `.jar` in the directory `\target`. Next, change into the `1g-playground-server` folder and run `mvn clean package` again, an executable `.jar` will again be generated in the `\target` directory.
+First, change into the `1g-playground-cli` folder and run `mvn clean package`, this will generate an executable `.jar` in the directory `target`. Next, change into the `1g-playground-server` folder and run `mvn clean package` again, an executable `.jar` will again be generated in the `target` directory.
 
-Now we have generated two `.jar` files, one for both client and server. Next, open two different command prompts. Run `java -jar <path_to_generated_jar>` in each of them, passing the path to the generated `.jar` files. The server process should now be running in the one prompt, and the CLI in the other.
+### Running the tool
+
+The tool has two components — a **server** and a **CLI client** — that must both be running at the same time, each in its own terminal. **Start the server first**, then the CLI.
+
+The CLI talks to the server at `http://localhost:8080` (configurable in `1g-playground-cli/src/main/resources/endpoints.properties`), and the server binds to `127.0.0.1:8080`, so both components must run on the same machine.
+
+1. In the first terminal, start the **server** (from the repository root):
+
+   ```
+   java -jar 1g-playground-server/target/Neptune1GPlaygroundServer-0.0.1-SNAPSHOT.jar
+   ```
+
+   Wait until it logs `Started Neptune1GPlaygroundServerApplication`.
+
+2. In a second terminal, start the **CLI client**:
+
+   ```
+   java -jar 1g-playground-cli/target/Neptune1GPlaygroundCLI-0.0.1-SNAPSHOT.jar
+   ```
+
+   You should see the Spring Boot banner followed by a `shell:>` prompt. Type `help` to list commands, and `exit` to quit.
+
+> **Note:** If you start the CLI before the server is up, commands that talk to the server (such as `load`, `export`, and `view`) will fail to connect until the server is running.
 
 ### Using commands
 

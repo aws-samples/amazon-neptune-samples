@@ -8,7 +8,7 @@ import software.amazon.neptune.onegraph.playground.server.mapping.LPGMappingConf
 import software.amazon.neptune.onegraph.playground.server.state.State;
 import lombok.NonNull;
 
-import java.nio.file.Paths;
+import software.amazon.neptune.onegraph.playground.server.io.PathValidator;
 
 /**
  * Service that handles the config command.
@@ -47,7 +47,7 @@ public class SettingsService extends Service {
      */
     public void loadConfiguration(@NonNull String pathConfig, @NonNull StringBuilder statusBuilder) throws SettingsException {
         try {
-            ConfigurationParser.parseConfiguration(Paths.get(pathConfig), state.getLpgMappingConfiguration());
+            ConfigurationParser.parseConfiguration(PathValidator.normalizeUserPath(pathConfig), state.getLpgMappingConfiguration());
             state.setConfigType(ConfigType.CUSTOM);
             state.setPathConfigurationLoadedFrom(pathConfig);
             state.reloadDerivativeData(statusBuilder);
