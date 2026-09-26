@@ -1,0 +1,7 @@
+target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Spring Shell writes a command-history log to the working directory at runtime.
+spring-shell.log
+**/spring-shell.log

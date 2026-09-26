@@ -21,12 +21,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.HtmlUtils;
 import software.amazon.neptune.onegraph.playground.server.servicespring.ClearServiceSpring;
 import software.amazon.neptune.onegraph.playground.server.servicespring.ExportServiceSpring;
 import software.amazon.neptune.onegraph.playground.server.servicespring.LoadServiceSpring;
 import software.amazon.neptune.onegraph.playground.server.servicespring.ViewServiceSpring;
 import software.amazon.neptune.onegraph.playground.server.api.request.DataFormat;
 import software.amazon.neptune.onegraph.playground.server.api.request.LoadRequest;
+import software.amazon.neptune.onegraph.playground.server.io.PathValidator;
 import software.amazon.neptune.onegraph.playground.server.service.ExportService.ExportException;
 import software.amazon.neptune.onegraph.playground.server.service.LoadService.LoadException;
 import software.amazon.neptune.onegraph.playground.server.service.ViewService.ViewException;
@@ -88,19 +90,41 @@ public class DataController {
                          @RequestParam(name="path2", required = false) String path2) throws IllegalArgumentException {
         validateExportParameters(dataFormat, (path2 != null));
 
-        Path p1 = Paths.get(path1);
+        Path p1 = PathValidator.normalizeUserPath(path1);
         Path p2 = null;
         if (path2 != null && !path2.isEmpty()) {
-            p2 = Paths.get(path2);
+            p2 = PathValidator.normalizeUserPath(path2);
         }
         exportService.exportData(dataFormat, p1, p2);
 
-        String resultString = "Export successful, written to " + p1;
+        // Reflect only the normalized path, HTML-escaped, to avoid reflected XSS (java/xss).
+        String resultString = "Export successful, written to " + HtmlUtils.htmlEscape(p1.toString());
         if (p2 != null) {
-            resultString += " and " + p2;
+            resultString += " and " + HtmlUtils.htmlEscape(p2.toString());
         }
 
         return resultString;
+    }
+
+    /**
+     * Normalizes a user-supplied file path and rejects path-traversal sequences.
+     * <p>
+     * The 1G Playground is a local developer tool, so users legitimately supply the location of
+     * their own data files. This still normalizes the path and refuses any input containing a
+     * {@code ..} traversal segment, which mitigates path-injection (java/path-injection) without
+     * changing the intended "read/write the file I named" behavior.
+     * @param userPath The raw path provided by the user.
+     * @return The normalized {@link Path}.
+     * @throws IllegalArgumentException If the path contains a traversal ({@code ..}) segment.
+     */
+    private Path normalizeUserPath(String userPath) throws IllegalArgumentException {
+        Path normalized = Paths.get(userPath).normalize();
+        for (Path segment : normalized) {
+            if (segment.toString().equals("..")) {
+                throw new IllegalArgumentException("Path must not contain '..' traversal segments");
+            }
+        }
+        return normalized;
     }
 
     /**

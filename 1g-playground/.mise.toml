@@ -1,0 +1,6 @@
+# Pin the toolchain for the 1G Playground.
+# This project builds with JDK 11 (Lombok 1.18.20 and the Spring Boot 2.5.x stack are
+# incompatible with very new JDKs). Contributors using mise will get the right JDK
+# automatically; others should build with a JDK 11 distribution.
+[tools]
+java = "corretto-11"
