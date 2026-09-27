@@ -46,7 +46,7 @@ Once the proxy is exposed, we can access the APIs from Javascript code being exe
 2. [Load sample data into Amazon Neptune](#2-load-sample-data-into-amazon-neptune)
 3. [Create and Configure AWS Lambda Function](#3-create-and-configure-aws-lambda-function)
 4. [Create and Configure Amazon API Gateway - Proxy API](#4-create-and-configure-amazon-api-gateway---proxy-api)
-5. [Configure Amazon S3 bucket for hosting a static website](#5-configure-amazon-s3-bucket-for-hosting-a-static-website)
+5. [Configure Amazon S3 bucket and a CloudFront Distribution to host the site](#5-configure-amazon-s3-bucket-and-a-cloudfront-distribution-to-host-the-site)
 
 
 
@@ -106,7 +106,7 @@ aws iam create-role --path /service-role/ --role-name lambda-vpc-access-role --a
 Below is the command to attach the policy provided by AWS to the above role.
 
 ```
-aws iam attach-role-policy --role-name lambda-vpc-access-role --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaENIManagementAccess
+aws iam attach-role-policy --role-name lambda-vpc-access-role --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
 ```
 
 We will now create the AWS Lambda function using the deployment package and IAM role created in previous steps.<BR>
@@ -116,7 +116,7 @@ NOTE: Use `subnet-ids` from the VPC in which Amazon Neptune cluster is provision
 ```
 aws lambda create-function --function-name <lambda-function-name> \
 --role "arn:aws:iam::<aws-account-number>:role/service-role/lambda-vpc-access-role" \
---runtime nodejs14.x --handler indexLambda.handler \
+--runtime nodejs22.x --handler indexLambda.handler \
 --description "Lambda function to make gremlin calls to Amazon Neptune" \
 --timeout 120 --memory-size 256 --publish \
 --vpc-config SubnetIds=<subnet-ids>,SecurityGroupIds=<sec-group-id> \
@@ -287,11 +287,11 @@ e.g.
 find . -type f -name visualize-graph.html | xargs sed -i '' 's/API_GATEWAY_ENDPOINT/https:\/\/7brms4lx43.execute-api.us-east-2.amazonaws.com\/test/g'
 ```
 
-Once you have replace the value of placeholder `API_GATEWAY_ENDPOINT` in visualize-graph.html file, upload the file to S3 using below command.
+Once you have replaced the value of placeholder `API_GATEWAY_ENDPOINT` in the visualize-graph.html file, upload the file to S3 using the command below. The Vis Network library is now loaded from a CDN, so only the HTML file needs to be uploaded.
 
 ```
 --upload the html document with public read access
-aws s3 cp ./  s3://<bucket-name> --recursive --exclude "*" --include "vis*"
+aws s3 cp ./visualize-graph.html s3://<bucket-name>/visualize-graph.html
 ```
 
 And, you are all set!
