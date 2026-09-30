@@ -1,11 +1,11 @@
 aws==0.2.5
 awscli>=1.46.1,<2.0.0
 boto==2.49.0
-boto3>=1.43.99,<1.44.0
+boto3>=1.43.103,<1.44.0
 graphviz==0.21
-huggingface-hub==1.32.0
+huggingface-hub==2.0.0
 langchain==1.4.2
-langsmith==0.14.0
+langsmith==0.14.1
 numpy==2.5.3
 pandas==3.0.6
 pyarrow==25.0.1
