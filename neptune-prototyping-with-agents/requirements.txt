@@ -1,5 +1,5 @@
 strands-agents
 strands-agents-tools
-boto3>=1.43.99
+boto3>=1.43.103
 pytest>=9.1.1
 jsonschema>=4.26.0
