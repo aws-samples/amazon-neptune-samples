@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.59",
-    "@types/node": "26.6.2",
+    "@types/node": "26.6.3",
     "aws-cdk": "^2.150.0",
     "copy-webpack-plugin": "^14.0.0",
     "ts-loader": "^9.5.1",
