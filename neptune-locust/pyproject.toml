@@ -17,8 +17,8 @@ classifiers = [
 license = "Apache 2"
 license-files = ["LICEN[CS]E*"]
 dependencies = [
-  "locust>=2.46.6",
-  "boto3>=1.43.103",
+  "locust>=2.46.7",
+  "boto3>=1.43.108",
   "gremlinpython>=3.8.2",
   "neo4j>=6.3.1"
 ]
