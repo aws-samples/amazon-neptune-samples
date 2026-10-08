@@ -17,7 +17,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <aws.java.sdk.version>2.55.6</aws.java.sdk.version>
+        <aws.java.sdk.version>2.55.11</aws.java.sdk.version>
     </properties>
 
     <dependencies>
