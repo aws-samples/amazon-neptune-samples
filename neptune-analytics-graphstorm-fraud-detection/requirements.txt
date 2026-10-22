@@ -58,7 +58,7 @@ matplotlib==3.10.9
 matplotlib-inline==0.2.2
 mistune==3.3.4
 nbclient==0.11.0
-nbconvert==7.17.1
+nbconvert==7.17.2
 nbformat==5.11.1
 -e ./neptune-gs
 nest-asyncio==1.6.0
