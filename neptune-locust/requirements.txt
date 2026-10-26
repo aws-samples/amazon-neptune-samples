@@ -41,7 +41,7 @@ pytz==2026.5
 pyzmq==27.2.0
 requests==2.34.2
 s3transfer==0.19.2
-setuptools==84.0.0
+setuptools==84.1.0
 six==1.17.0
 urllib3==2.8.0
 Werkzeug==3.1.9
