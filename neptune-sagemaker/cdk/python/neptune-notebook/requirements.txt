@@ -1,3 +1,3 @@
-aws-cdk-lib==2.273.0
+aws-cdk-lib==2.274.0
 constructs>=10.8.1,<11.0.0
-aws-cdk.aws-neptune-alpha==2.273.0a0
+aws-cdk.aws-neptune-alpha==2.274.0a0
