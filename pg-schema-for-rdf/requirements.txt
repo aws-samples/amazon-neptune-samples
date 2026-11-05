@@ -1,4 +1,4 @@
 pyparsing >= 3.3.3
 rdflib ~=7.6.0
 rdfhelpers >=0.7.8
-pyshacl >= 0.40.1
+pyshacl >= 0.40.2
