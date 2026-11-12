@@ -8,7 +8,7 @@ We use the IEEE CIS dataset for payment fraud detection.
 
 Before running the notebooks, ensure you have:
 
-1. Python >= 3.9 installed
+1. Python >= 3.11 installed
 2. Required Python packages (installed via `pip install -r requirements.txt`):
    - Core dependencies for graph processing
    - Visualization libraries (matplotlib)
