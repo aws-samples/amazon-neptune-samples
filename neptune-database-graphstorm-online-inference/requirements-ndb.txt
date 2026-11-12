@@ -9,6 +9,6 @@ boto3
 joblib
 graphstorm
 pandas
-pyarrow==26.0.0
+pyarrow==26.0.1
 scikit-learn
 sentence-transformers
