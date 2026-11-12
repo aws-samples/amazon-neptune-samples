@@ -1,7 +1,7 @@
 --index-url https://download.pytorch.org/whl/cpu
 --extra-index-url https://pypi.org/simple
 
-torch==2.14.1+cpu
+torch==2.15.0+cpu
 
 -f https://data.dgl.ai/wheels-internal/repo.html
 dgl==2.2.1
@@ -9,6 +9,6 @@ boto3
 joblib
 graphstorm
 pandas
-pyarrow==25.0.1
+pyarrow==26.0.1
 scikit-learn
 sentence-transformers
