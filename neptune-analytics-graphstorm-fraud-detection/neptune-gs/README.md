@@ -31,7 +31,7 @@ neptune-gs/
 ## Usage Instructions
 
 ### Prerequisites
-- Python 3.9 or higher
+- Python 3.11 or higher
 - AWS role with access to:
   - Amazon Neptune Analytics
   - Amazon S3

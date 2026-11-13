@@ -7,7 +7,7 @@ license = "MIT-0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.11"
 pandas = "^2.2.3"
 boto3 = ">=1.36.*"
 pyarrow = ">=23.0.1,<26"
