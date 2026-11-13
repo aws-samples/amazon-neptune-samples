@@ -140,6 +140,13 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    # Flat pin file: Dependabot bumps these past what their dependents allow
+    # (botocore needs python-dateutil<3; gremlinpython needs async-timeout<5).
+    ignore:
+      - dependency-name: "python-dateutil"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "async-timeout"
+        update-types: ["version-update:semver-major"]
     groups:
       pip-dependencies:
         patterns:
