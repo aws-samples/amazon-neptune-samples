@@ -17,7 +17,12 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <javac.target>1.8</javac.target>
+        <!--
+            amazon-neptune-sigv4-signer 5.0.0 is compiled for Java 17 (class file major
+            version 61) and pulls in AWS SDK for Java v2, so 17 is the real minimum JDK
+            for this module.
+        -->
+        <maven.compiler.release>17</maven.compiler.release>
         <uberjar.name>gremlin-java-client-demo</uberjar.name>
     </properties>
 
@@ -29,16 +34,19 @@
             <version>3.8.2</version>
         </dependency>
 
+        <!--
+            SigV4 signing uses amazon-neptune-sigv4-signer directly together with
+            TinkerPop's built-in Cluster.Builder.requestInterceptor(...) (available since
+            TinkerPop 3.6.6). The amazon-neptune-gremlin-java-sigv4 library that this demo
+            previously depended on has been deprecated/archived — TinkerPop now provides a
+            first-class handshake/request interception extension point, so the custom
+            Channelizer/Handshaker it supplied is no longer needed.
+            See https://github.com/aws/amazon-neptune-gremlin-java-sigv4/pull/54
+        -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>amazon-neptune-sigv4-signer</artifactId>
             <version>5.0.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>amazon-neptune-gremlin-java-sigv4</artifactId>
-            <version>3.1.0</version>
         </dependency>
 
         <dependency>
@@ -75,9 +83,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.16.0</version>
                 <configuration>
-                    <compilerVersion>${javac.target}</compilerVersion>
-                    <source>${javac.target}</source>
-                    <target>${javac.target}</target>
+                    <release>${maven.compiler.release}</release>
                 </configuration>
             </plugin>
             <plugin>

@@ -42,20 +42,16 @@ public class GremlinClientDemo implements Runnable {
     @Once
     private int neptunePort = 8182;
 
-    @Option(name = {"--enable-iam-auth"}, description = "Use IAM database authentication to authenticate to Neptune (remember to set SERVICE_REGION environment variable, and, if using a load balancer, set the --host-header option as well)")
+    @Option(name = {"--enable-iam-auth"}, description = "Use IAM database authentication to authenticate to Neptune (remember to set SERVICE_REGION environment variable, and, if using a load balancer, supply the Neptune instance endpoint(s) with --neptune-endpoint so the signed Host header matches Neptune)")
     @Once
     private boolean enableIamAuth = false;
-
-    @Option(name = {"--enable-ssl"}, description = "Enables connectivity over SSL (optional, default false)")
-    @Once
-    private boolean enableSsl = false;
 
     @Option(name = {"--nlb-endpoint"}, description = "Network load balancer endpoint (optional: use only if connecting to an IAM DB enabled Neptune cluster through a network load balancer (NLB) – see https://github.com/aws-samples/aws-dbs-refarch-graph/tree/master/src/connecting-using-a-load-balancer#connecting-to-amazon-neptune-from-clients-outside-the-neptune-vpc-using-aws-network-load-balancer)")
     @Once
     @MutuallyExclusiveWith(tag = "load-balancer")
     private String networkLoadBalancerEndpoint;
 
-    @Option(name = {"--alb-endpoint"}, description = "Application load balancer endpoint (optional: use only if connecting to an IAM DB enabled Neptune cluster through an application load balancer (ALB) – see https://github.com/aws-samples/aws-dbs-refarch-graph/tree/master/src/connecting-using-a-load-balancer#connecting-to-amazon-neptune-from-clients-outside-the-neptune-vpc-using-aws-application-load-balancer)")
+    @Option(name = {"--alb-endpoint"}, description = "Application load balancer endpoint (optional: use only if connecting to Neptune through an application load balancer (ALB) with an HTTPS listener and its own certificate; no HAProxy is needed - see the readme for ALB limitations)")
     @Once
     @MutuallyExclusiveWith(tag = "load-balancer")
     private String applicationLoadBalancerEndpoint;
@@ -74,7 +70,6 @@ public class GremlinClientDemo implements Runnable {
         try {
 
             Cluster cluster = NeptuneClusterBuilder.build()
-                    .enableSsl(enableSsl)
                     .enableIamAuth(enableIamAuth)
                     .addContactPoints(neptuneEndpoints)
                     .port(neptunePort)
