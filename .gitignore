@@ -2,3 +2,6 @@
 
 # CodeQL local scan artifacts (scripts/run-codeql.sh)
 .codeql/
+# Maven build output (applies to all Java modules in this repo)
+target/
+dependency-reduced-pom.xml
