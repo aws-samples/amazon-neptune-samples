@@ -5,3 +5,6 @@
 # Maven build output (applies to all Java modules in this repo)
 target/
 dependency-reduced-pom.xml
+# .NET intermediate output (also created by local CodeQL C# scans). bin/ is not ignored
+# because the CDK samples keep source in bin/.
+obj/

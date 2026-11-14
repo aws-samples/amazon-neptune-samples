@@ -1,0 +1,19 @@
+# CodeQL configuration for amazon-neptune-samples.
+#
+# Used by the advanced-setup workflow (.github/workflows/codeql.yml) and by the
+# local runner (scripts/run-codeql.sh), so CI and local analysis stay in sync.
+#
+# Query suite: security-extended (broader than the default suite).
+queries:
+  - uses: security-extended
+
+# Exclude installed dependencies and generated output. This code isn't maintained in
+# this repo, so findings in it are noise and can't be fixed here.
+paths-ignore:
+  # Installed dependencies
+  - "**/node_modules"
+  # Generated CDK and build output (any sub-project's build/dist/cdk.out/target, not just one)
+  - "**/cdk.out"
+  - "**/build"
+  - "**/dist"
+  - "**/target"
