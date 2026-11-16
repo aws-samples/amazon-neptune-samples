@@ -1,6 +1,5 @@
 package software.amazon.neptune.onegraph.playground.server.io.parsing;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONMapper;
 import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONVersion;
 import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONXModuleV3d0;
@@ -21,10 +20,10 @@ import software.amazon.neptune.csv2rdf.PropertyGraph2RdfMapper;
 import software.amazon.neptune.csv2rdf.PropertyGraph2RdfMapping;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 
 /**
@@ -62,22 +61,26 @@ public class LPGParser {
         mapper.setMapping(mapping);
 
         try {
-            // The NeptuneCSVInputParser needs a file input, create a temp file from the input stream.
-            File tempFile = File.createTempFile("tempFile", ".tmp");
-            OutputStream outputStream = Files.newOutputStream(tempFile.toPath());
-            IOUtils.copy(stream, outputStream);
-            outputStream.close();
-            try (NeptuneCsvInputParser inputParser = new NeptuneCsvInputParser(tempFile)) {
-                while (inputParser.hasNext()) {
-                    NeptunePropertyGraphElement e = inputParser.next();
+            // The NeptuneCSVInputParser needs a file input, so copy the input stream to a temp file.
+            // Files.createTempFile creates it readable only by the owner (on POSIX file systems),
+            // and the file is deleted once parsing finishes.
+            Path tempFile = Files.createTempFile("neptune-csv-", ".tmp");
+            try {
+                Files.copy(stream, tempFile, StandardCopyOption.REPLACE_EXISTING);
+                try (NeptuneCsvInputParser inputParser = new NeptuneCsvInputParser(tempFile.toFile())) {
+                    while (inputParser.hasNext()) {
+                        NeptunePropertyGraphElement e = inputParser.next();
 
-                    if (e instanceof NeptunePropertyGraphElement.NeptunePropertyGraphEdge) {
-                        model.addAll(mapper.mapToStatements((NeptunePropertyGraphElement.NeptunePropertyGraphEdge) e));
-                    }
-                    if (e instanceof NeptunePropertyGraphElement.NeptunePropertyGraphVertex) {
-                        model.addAll(mapper.mapToStatements((NeptunePropertyGraphElement.NeptunePropertyGraphVertex) e));
+                        if (e instanceof NeptunePropertyGraphElement.NeptunePropertyGraphEdge) {
+                            model.addAll(mapper.mapToStatements((NeptunePropertyGraphElement.NeptunePropertyGraphEdge) e));
+                        }
+                        if (e instanceof NeptunePropertyGraphElement.NeptunePropertyGraphVertex) {
+                            model.addAll(mapper.mapToStatements((NeptunePropertyGraphElement.NeptunePropertyGraphVertex) e));
+                        }
                     }
                 }
+            } finally {
+                Files.deleteIfExists(tempFile);
             }
         } catch (Exception e) {
             throw new ParserException("Parsing NeptuneCSV file failed", e);
