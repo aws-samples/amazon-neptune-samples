@@ -3,10 +3,11 @@ package com.amazonaws.samples;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.OpenContext;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.connector.kinesis.source.KinesisStreamsSource;
-import org.apache.flink.connector.kinesis.source.config.KinesisStreamsSourceConfigConstants;
+import org.apache.flink.connector.kinesis.source.config.KinesisSourceConfigOptions;
 import org.apache.flink.streaming.api.datastream.ConnectedStreams;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -77,8 +78,8 @@ public class FlinkNeptuneStreamingJob {
         
         // Create configuration for Kinesis source
         Configuration sourceConfig = new Configuration();
-        sourceConfig.set(KinesisStreamsSourceConfigConstants.STREAM_INITIAL_POSITION, 
-                        KinesisStreamsSourceConfigConstants.InitialPosition.LATEST);
+        sourceConfig.set(KinesisSourceConfigOptions.STREAM_INITIAL_POSITION,
+                        KinesisSourceConfigOptions.InitialPosition.LATEST);
         sourceConfig.setString("aws.region", region);
         
         // Build stream ARNs
@@ -153,8 +154,8 @@ public class FlinkNeptuneStreamingJob {
         }
         
         @Override
-        public void open(Configuration parameters) throws Exception {
-            super.open(parameters);
+        public void open(OpenContext openContext) throws Exception {
+            super.open(openContext);
             this.neptuneWriter = new NeptuneWriter(region, neptuneEndpoint);
         }
         

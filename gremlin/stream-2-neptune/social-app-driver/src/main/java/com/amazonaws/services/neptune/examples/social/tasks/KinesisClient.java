@@ -24,7 +24,6 @@ import com.amazonaws.services.kinesis.AmazonKinesisClientBuilder;
 import com.amazonaws.services.kinesis.model.PutRecordsRequest;
 import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry;
 import com.amazonaws.services.kinesis.model.PutRecordsResult;
-import groovy.transform.Synchronized;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -83,8 +82,8 @@ public class KinesisClient implements AutoCloseable {
         }
     }
 
-    @Synchronized
-    private void addError(Exception e) {
+    // Called from multiple worker threads (AddEdgesTaskMulithreaded), so guard the HashMap.
+    private synchronized void addError(Exception e) {
         if (!errors.containsKey(e.getClass())) {
             errors.put(e.getClass(), e.getMessage());
         }

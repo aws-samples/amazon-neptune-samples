@@ -20,9 +20,9 @@ package com.amazonaws.services.neptune.examples.utils;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
-import org.apache.tinkerpop.gremlin.driver.ser.Serializers;
 import org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.util.ser.Serializers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +86,7 @@ public class ConnectionConfig implements RetryCondition {
                 .maxConnectionPoolSize(1)
                 .maxSimultaneousUsagePerConnection(16)
                 .maxInProcessPerConnection(16)
-                .serializer(Serializers.GRAPHBINARY_V1D0)
+                .serializer(Serializers.GRAPHBINARY_V1)
                 .create();
         System.out.println(String.format(
                 "minInProcessPerConnection: %s, " +
