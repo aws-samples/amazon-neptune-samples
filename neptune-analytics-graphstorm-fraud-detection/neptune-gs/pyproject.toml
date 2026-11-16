@@ -8,9 +8,9 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-pandas = "^2.2.3"
+pandas = ">=2.2.3,<4.0.0"
 boto3 = ">=1.36.*"
-pyarrow = ">=23.0.1,<26"
+pyarrow = ">=23.0.1,<27"
 joblib = "^1.4.2"
 
 [tool.poetry.group.dev]
@@ -20,7 +20,7 @@ optional = true
 boto3-stubs = {extras = ["s3"], version = "^1.36.14"}
 pre-commit = "^4.1.0"
 ruff = ">=0.9.6,<0.18.0"
-pandas-stubs = "2.3.3.260113"
+pandas-stubs = "3.1.0.261029"
 pytest = "^9.0.3"
 # Run tests with pytest --cov=neptune_gs --cov-report=xml .
 pytest-cov = ">=6,<8"
