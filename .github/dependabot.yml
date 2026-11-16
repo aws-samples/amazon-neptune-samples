@@ -250,6 +250,14 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    # flink.version must match the Managed Service for Apache Flink runtime
+    # (RuntimeEnvironment in deployment/application_config.json.sample) and the Kinesis
+    # connector's Flink line (6.x-2.0). Bumping Flink alone broke this sample (#328).
+    ignore:
+      - dependency-name: "org.apache.flink:flink-streaming-java"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "org.apache.flink:flink-connector-base"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
     groups:
       maven-dependencies:
         patterns:

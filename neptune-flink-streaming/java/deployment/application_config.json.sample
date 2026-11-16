@@ -1,7 +1,7 @@
 {
   "ApplicationName": "flink-neptune-streaming-java",
   "ApplicationDescription": "Flink application for streaming data to Neptune",
-  "RuntimeEnvironment": "FLINK-1_18",
+  "RuntimeEnvironment": "FLINK-2_3",
   "ServiceExecutionRole": "arn:aws:iam::YOUR_ACCOUNT_ID:role/IAM_ROLE_NAME",
   "ApplicationConfiguration": {
     "ApplicationCodeConfiguration": {

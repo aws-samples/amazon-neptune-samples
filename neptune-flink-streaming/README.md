@@ -77,6 +77,9 @@ Example:
 4. **VPC Configuration** - Subnets and security groups
 5. **CloudWatch Log Group** - You must have a CloudWatch log group created called `/aws/kinesis-analytics/flink-neptune-streaming-java`.  Within that log group, you need a log stream called `kinesis-analytics-log-stream`. See [Working with log groups and log streams](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html) for more information. The logging configuration in this example is not optimized for production. For best practices with logging in a production environment, please review [Logging in Managed Service for Apache Flink](https://docs.aws.amazon.com/managed-flink/latest/java/logging.html).
 
+### Build Tools
+- **Java 17** and **Maven** to build the application JAR. The application targets the Managed Service for Apache Flink 2.3 runtime (`FLINK-2_3`), which runs Java 17.
+
 ### IAM Permissions
 The deployment script will create an IAM role with required permissions for the Flink application. 
 The account running `deploy.sh` must have permissions to create a new IAM role and attach policies to it. 

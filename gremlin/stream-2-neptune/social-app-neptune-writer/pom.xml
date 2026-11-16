@@ -17,6 +17,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- gremlin-driver 3.8.x requires Java 11 or later. -->
+        <maven.compiler.release>11</maven.compiler.release>
     </properties>
 
     <dependencies>
@@ -96,8 +98,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.16.0</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <release>${maven.compiler.release}</release>
                 </configuration>
             </plugin>
         </plugins>

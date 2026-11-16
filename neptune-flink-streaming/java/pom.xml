@@ -10,8 +10,9 @@
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <!-- Managed Service for Apache Flink 2.x runs on Java 17 (Java 11 is not supported). -->
+        <maven.compiler.release>17</maven.compiler.release>
+        <!-- Must match the application's RuntimeEnvironment (FLINK-2_3 in deployment/application_config.json.sample). -->
         <flink.version>2.3.0</flink.version>
         <aws.sdk.version>2.57.12</aws.sdk.version>
         <jackson.version>2.23.0</jackson.version>
@@ -26,16 +27,19 @@
             <scope>provided</scope>
         </dependency>
         
+        <!-- Kinesis Data Streams source for Flink 2.x (the -1.20 flink-connector-kinesis is Flink 1.x only). -->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-kinesis</artifactId>
-            <version>5.1.0-1.20</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-lang</groupId>
-                    <artifactId>commons-lang</artifactId>
-                </exclusion>
-            </exclusions>
+            <artifactId>flink-connector-aws-kinesis-streams</artifactId>
+            <version>6.0.1-2.0</version>
+        </dependency>
+
+        <!-- Required by the Kinesis source; provided by the Managed Service for Apache Flink runtime. -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-base</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- AWS SDK -->

@@ -10,7 +10,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <javac.target>1.8</javac.target>
+        <!-- gremlin-driver 3.8.x requires Java 11 or later. -->
+        <maven.compiler.release>11</maven.compiler.release>
         <uberjar.name>social-app-driver</uberjar.name>
     </properties>
     
@@ -44,9 +45,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.16.0</version>
                 <configuration>
-                    <compilerVersion>${javac.target}</compilerVersion>
-                    <source>${javac.target}</source>
-                    <target>${javac.target}</target>
+                    <release>${maven.compiler.release}</release>
                 </configuration>
             </plugin>
             <plugin>
