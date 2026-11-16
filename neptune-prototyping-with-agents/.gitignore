@@ -73,7 +73,9 @@ outputs/
 .ipynb_checkpoints
 
 # pyenv
-.python-version
+# .python-version is committed on purpose: Dependabot reads it to choose the Python
+# version it resolves updates against.
+# .python-version
 
 # mypy
 .mypy_cache/

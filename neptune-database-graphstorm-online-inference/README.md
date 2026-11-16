@@ -20,7 +20,7 @@ This project demonstrates how to set up and use Amazon Neptune with GraphStorm f
    aws configure
    ```
 
-3. Python 3.9+ installed
+3. Python 3.11+ installed
 
 4. Configured [AWS Quotas](https://docs.aws.amazon.com/general/latest/gr/aws_service_limits.html) for your AWS account to deploy:
 * One `ml.m5.4xlarge` SageMaker Notebook Instance (Quota code: `L-862C1E14`)
