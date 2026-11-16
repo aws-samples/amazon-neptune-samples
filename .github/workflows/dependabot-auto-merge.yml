@@ -1,0 +1,49 @@
+# Enable GitHub auto-merge on Dependabot PRs that only contain patch-level updates.
+#
+# GitHub merges the PR (squash) once the required checks in the "master: require CodeQL"
+# ruleset pass. Minor and major updates are left for manual review: for grouped PRs,
+# fetch-metadata reports the highest update type in the group, so one minor bump keeps
+# the whole group manual.
+#
+# Requires the repository setting "Allow auto-merge" (allow_auto_merge) to be enabled.
+#
+# Uses pull_request_target because workflows triggered by Dependabot on pull_request get a
+# read-only GITHUB_TOKEN. This job never checks out or runs code from the PR; it only reads
+# Dependabot's metadata and calls `gh pr merge`, so the elevated token isn't exposed to it.
+name: Dependabot auto-merge
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.actor == 'dependabot[bot]' &&
+      github.repository == 'aws-samples/amazon-neptune-samples'
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v3
+
+      - name: Enable auto-merge for patch updates
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Leave minor and major updates for review
+        if: steps.metadata.outputs.update-type != 'version-update:semver-patch'
+        run: >-
+          echo "::notice::Not auto-merging: update type is
+          '${UPDATE_TYPE:-unknown}' (${DEPS}). Only patch updates are auto-merged."
+        env:
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+          DEPS: ${{ steps.metadata.outputs.dependency-names }}
