@@ -15,7 +15,7 @@ The stack creates:
 
 1. npm installed (required to install AWS CDK CLI)
 2. AWS CDK CLI installed (`npm install -g aws-cdk`)
-3. Python 3.9+
+3. Python 3.11+
 4. AWS credentials configured
 
 ## Deployment

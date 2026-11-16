@@ -6,7 +6,7 @@ Once presented, material from [Ora Lassila](https://www.lassila.org/)'s talk at 
 
 ## Installation
 
-To play with _PG-Schema for RDF_, you need Python 3.10 (or newer), clone or fork the [amazon-neptune-samples](https://github.com/aws-samples/amazon-neptune-samples) repository, and then:
+To play with _PG-Schema for RDF_, you need Python 3.11 (or newer), clone or fork the [amazon-neptune-samples](https://github.com/aws-samples/amazon-neptune-samples) repository, and then:
 ```shell
 cd pg-schema-for-rdf
 python3 -m venv venv
