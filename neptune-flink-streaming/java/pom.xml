@@ -14,7 +14,7 @@
         <maven.compiler.release>17</maven.compiler.release>
         <!-- Must match the application's RuntimeEnvironment (FLINK-2_3 in deployment/application_config.json.sample). -->
         <flink.version>2.3.0</flink.version>
-        <aws.sdk.version>2.59.1</aws.sdk.version>
+        <aws.sdk.version>2.59.7</aws.sdk.version>
         <jackson.version>2.23.0</jackson.version>
     </properties>
 
